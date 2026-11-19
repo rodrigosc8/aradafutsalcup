@@ -1,43 +1,70 @@
 ---
 import Base from '../layouts/Base.astro';
+import NavFlutuante from '../components/NavFlutuante.astro';
+import Botao from '../components/Botao.astro';
+import Icone from '../components/Icone.astro';
+import Rodape from '../components/Rodape.astro';
 ---
 
-<Base title="Página não encontrada · Abílio Pinto Futsal Cup">
+<Base title="Página não encontrada · Abílio Pinto Futsal Cup" noindex>
+  <NavFlutuante />
   <main class="erro">
-    <p class="codigo">404</p>
-    <h1>Fora de jogo!</h1>
-    <p>Esta página não existe.</p>
-    <a href="/">Voltar ao início</a>
+    <div class="cartao">
+      <p class="codigo"><Icone nome="estrela" tamanho={28} />404</p>
+      <h1>Fora de jogo!</h1>
+      <p class="texto">Esta página não existe ou mudou de sítio.</p>
+      <Botao variante="branco" href="/">Voltar ao início</Botao>
+    </div>
   </main>
+  <Rodape />
 </Base>
 
 <style>
   .erro {
-    min-height: 100svh;
-    display: grid;
-    place-content: center;
+    padding: 24px 20px 0;
+  }
+  .cartao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    border-radius: var(--raio-cartao);
+    background: var(--bordo);
+    color: var(--branco);
     text-align: center;
-    padding: 2rem;
-    background: var(--verde);
-    color: var(--creme);
   }
   .codigo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin: 0;
     font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 6rem;
+    font-weight: 800;
+    font-size: 72px;
     line-height: 1;
-    color: var(--mostarda);
+    color: var(--dourado-claro);
   }
   h1 {
-    margin: 0.5rem 0;
+    margin: 8px 0 0;
     font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 2.5rem;
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
     text-transform: uppercase;
   }
-  a {
-    margin-top: 1rem;
-    font-weight: 700;
+  .texto {
+    margin: 12px 0 24px;
+    color: var(--bordo-claro);
+  }
+  @media (min-width: 960px) {
+    .erro {
+      padding-top: 48px;
+    }
+    .cartao {
+      padding: 56px 48px;
+      border-radius: var(--raio-cartao-grande);
+    }
   }
 </style>
