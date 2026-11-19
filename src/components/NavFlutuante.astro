@@ -1,6 +1,6 @@
 ---
 // Navegação flutuante.
-// - Computador (≥ 960px): cápsula branca sticky no topo com logótipo, itens e seletor de equipa.
+// - Computador (≥ 1024px): cápsula branca sticky no topo com logótipo, itens e seletor de equipa.
 // - Telemóvel: cabeçalho com logótipo e seletor; cápsula com os 4 itens fixa em baixo.
 import Logo from './Logo.astro';
 import SeletorEquipa from './SeletorEquipa.astro';
@@ -102,7 +102,7 @@ const itens: { id: ItemNav; texto: string; href: string }[] = [
     min-height: 48px;
     font-size: 14px;
   }
-  @media (max-width: 959.98px) {
+  @media (max-width: 1023.98px) {
     /* Espaço para a cápsula não tapar o fim da página. */
     :global(body) {
       padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
@@ -110,7 +110,7 @@ const itens: { id: ItemNav; texto: string; href: string }[] = [
   }
 
   /* Computador: cápsula sticky no topo */
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     .topo {
       position: sticky;
       top: 0;

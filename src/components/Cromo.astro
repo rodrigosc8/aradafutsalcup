@@ -10,7 +10,7 @@ interface Props {
   cor: string;
   /** Largura em px (68–240). */
   largura?: number;
-  /** Largura no computador (≥ 960px), se for diferente. */
+  /** Largura no computador (≥ 1024px), se for diferente. */
   larguraComputador?: number;
   /** Só com autorização de imagem. Sem foto, mostra a silhueta. */
   foto?: string;
@@ -68,7 +68,7 @@ const estilo = `--cor: ${cor}; --w: ${largura}px;${larguraPc ? ` --w-pc: ${largu
     border-radius: max(8px, calc(var(--wa) * 0.067));
     box-shadow: var(--sombra-cromo);
   }
-  @media (min-width: 960px) {
+  @media (min-width: 1024px) {
     .cromo {
       --wa: var(--w-pc, var(--w));
     }

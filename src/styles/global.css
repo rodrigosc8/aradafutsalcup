@@ -35,7 +35,9 @@
   --sombra-cromo: 0 1px 2px rgb(0 0 0 / 0.08), 0 6px 16px rgb(0 0 0 / 0.08);
 
   /* Layout */
-  --max: 1160px;
+  --max: 1160px; /* navegação flutuante */
+  --max-largo: 1320px; /* contentor do computador */
+  --margem-largo: 40px;
   --toque: 44px; /* área de toque mínima */
 }
 
@@ -86,19 +88,26 @@ svg {
   text-transform: uppercase;
 }
 
-@media (min-width: 960px) {
+@media (min-width: 1024px) {
   .titulo-seccao {
     font-size: 1.5rem;
   }
 }
 
+/* Contentor do computador: 1320px com 40px de margem lateral. */
+.contentor {
+  max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
+  margin-inline: auto;
+  padding-inline: var(--margem-largo);
+}
+
 /* Visível só no telemóvel / só no computador (mesmo ponto de quebra da navegação). */
-@media (min-width: 960px) {
+@media (min-width: 1024px) {
   .so-telemovel {
     display: none !important;
   }
 }
-@media (max-width: 959.98px) {
+@media (max-width: 1023.98px) {
   .so-computador {
     display: none !important;
   }
