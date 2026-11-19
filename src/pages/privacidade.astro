@@ -1,0 +1,103 @@
+---
+import Base from '../layouts/Base.astro';
+import NavFlutuante from '../components/NavFlutuante.astro';
+import Rodape from '../components/Rodape.astro';
+import PilulaLink from '../components/PilulaLink.astro';
+import { torneio } from '../data/torneio';
+---
+
+<Base
+  title={`Privacidade · ${torneio.nome}`}
+  description="Este site não tem contas nem cookies de rastreio. A equipa que segues fica guardada só no teu dispositivo."
+>
+  <NavFlutuante />
+  <main class="texto-legal">
+    <h1>Privacidade</h1>
+    <p class="resumo">
+      Em resumo: este site não tem contas, não pede dados pessoais e não usa cookies de rastreio nem ferramentas de
+      publicidade.
+    </p>
+
+    <h2>Sem contas nem registos</h2>
+    <p>
+      Não há login nem formulários que guardem dados no site. Não sabemos quem visita o site nem o que faz em cada
+      página.
+    </p>
+
+    <h2>A equipa que segues</h2>
+    <p>
+      Quando escolhes uma equipa em “Seguir equipa”, essa escolha fica guardada apenas no teu dispositivo, no
+      armazenamento local do browser (<code>localStorage</code>, com a chave <code>apfc-equipa</code>). Não é enviada
+      para nenhum servidor e serve só para o Início mostrar primeiro o jogo dessa equipa.
+    </p>
+    <p>
+      Para a apagar, escolhe “Não seguir nenhuma equipa” no mesmo menu, ou limpa os dados deste site nas definições do
+      browser.
+    </p>
+
+    <h2>Cookies</h2>
+    <p>O site não cria cookies de rastreio, de estatística nem de publicidade.</p>
+
+    <h2>Calendário e fontes</h2>
+    <p>
+      O ficheiro “Adicionar ao calendário” (.ics) é criado no teu próprio browser. As fontes de letra são servidas pelo
+      próprio site, sem pedidos a serviços externos.
+    </p>
+
+    <h2>Alojamento e ligações externas</h2>
+    <p>
+      O site está alojado na Cloudflare, que, como qualquer serviço de alojamento, pode tratar dados técnicos (por
+      exemplo, o endereço IP) para entregar as páginas e proteger o site. Os links “Como chegar” e “Abrir no mapa”
+      abrem o Google Maps, que tem a sua própria política de privacidade.
+    </p>
+
+    <h2>Contacto</h2>
+    <p>O site é da responsabilidade da {torneio.organizacao}. Para qualquer questão, contacta a Junta.</p>
+    <p class="acao"><PilulaLink href={torneio.links.contactos}>Contactos</PilulaLink></p>
+  </main>
+  <Rodape />
+</Base>
+
+<style>
+  .texto-legal {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 20px 0;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .resumo {
+    margin: 16px 0 0;
+    padding: 16px 18px;
+    border-radius: var(--raio-linha);
+    background: var(--branco);
+    font-weight: 600;
+  }
+  h2 {
+    margin: 32px 0 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  p {
+    margin: 8px 0 0;
+  }
+  .acao {
+    margin-top: 12px;
+  }
+  code {
+    font-size: 0.9em;
+  }
+  @media (min-width: 1024px) {
+    .texto-legal {
+      padding-top: 56px;
+    }
+  }
+</style>
