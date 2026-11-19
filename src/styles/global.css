@@ -1,0 +1,55 @@
+/* Tokens de marca: cores da Junta de Freguesia de Arada + Abílio Pinto */
+:root {
+  --verde: #0f472e;
+  --verde-escuro: #0a311f;
+  --mostarda: #cd8c19;
+  --mostarda-claro: #e3ae45; /* para texto pequeno sobre verde (contraste AA) */
+  --castanho: #643f25;
+  --azul-arada: #147fa9;
+  --azul-ap: #1f2a55;
+  --creme: #f7f2e8;
+  --branco: #ffffff;
+  --texto: #2c1714;
+
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --font-body: 'Inter Variable', system-ui, sans-serif;
+
+  --raio: 12px;
+  --max: 1080px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--texto);
+  background: var(--creme);
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--mostarda);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

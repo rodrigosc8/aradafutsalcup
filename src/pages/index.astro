@@ -1,0 +1,247 @@
+---
+import Base from '../layouts/Base.astro';
+import { torneio } from '../data/torneio';
+
+const diasAteInicio = Math.max(
+  0,
+  Math.ceil((Date.parse(torneio.inicio) - Date.now()) / 86_400_000),
+);
+---
+
+<Base>
+  <main class="hero">
+    <div class="wrap">
+      <p class="eyebrow">{torneio.edicao} · {torneio.subtitulo}</p>
+
+      <h1 class="titulo">
+        <span class="linha-1">Abílio Pinto</span>
+        <span class="linha-2">Futsal Cup</span>
+      </h1>
+
+      <p class="quando">
+        <strong>{torneio.diasTexto}</strong><br />
+        {torneio.local}
+      </p>
+
+      <div class="contagem" aria-live="polite">
+        <span class="contagem-num" id="contagem-num">{diasAteInicio}</span>
+        <span class="contagem-rotulo" id="contagem-rotulo">
+          {diasAteInicio === 1 ? 'dia para o apito inicial' : 'dias para o apito inicial'}
+        </span>
+      </div>
+
+      <ul class="numeros">
+        {
+          torneio.numeros.map((n) => (
+            <li>
+              <span class="num">{n.valor}</span>
+              <span class="rot">{n.rotulo}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="em-breve">
+        O site oficial está a chegar: calendário, grupos, resultados ao vivo e classificações.
+      </p>
+
+      <div class="acoes">
+        {
+          torneio.linkInscricao ? (
+            <a class="botao botao-principal" href={torneio.linkInscricao}>
+              Inscrever equipa
+            </a>
+          ) : (
+            <p class="nota">
+              Inscrições na {torneio.organizacao} até {torneio.fimInscricoes}.
+            </p>
+          )
+        }
+        {
+          torneio.contactoEmail && (
+            <a class="botao botao-secundario" href={`mailto:${torneio.contactoEmail}`}>
+              Quero patrocinar
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </main>
+
+  <footer class="rodape">
+    <div class="wrap rodape-wrap">
+      <p>
+        Patrocinador principal: <strong>{torneio.patrocinadorPrincipal}</strong>
+      </p>
+      <p>Organização: {torneio.organizacao}</p>
+    </div>
+  </footer>
+</Base>
+
+<script define:vars={{ inicio: torneio.inicio }}>
+  // Atualiza a contagem no browser (a versão estática já vem certa do build).
+  const num = document.getElementById('contagem-num');
+  const rot = document.getElementById('contagem-rotulo');
+  const atualizar = () => {
+    const dias = Math.max(0, Math.ceil((Date.parse(inicio) - Date.now()) / 86400000));
+    if (num) num.textContent = String(dias);
+    if (rot) rot.textContent = dias === 1 ? 'dia para o apito inicial' : 'dias para o apito inicial';
+  };
+  atualizar();
+</script>
+
+<style>
+  .wrap {
+    width: min(100% - 2.5rem, var(--max));
+    margin-inline: auto;
+  }
+
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding-block: 4rem 3rem;
+    background:
+      radial-gradient(circle at 85% 15%, rgb(205 140 25 / 0.18), transparent 40%),
+      var(--verde);
+    color: var(--creme);
+  }
+
+  .eyebrow {
+    margin: 0 0 1.75rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mostarda-claro);
+  }
+
+  .titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    line-height: 0.88;
+    text-transform: uppercase;
+    font-size: clamp(3.5rem, 13vw, 9rem);
+  }
+
+  .linha-1,
+  .linha-2 {
+    display: block;
+  }
+
+  .linha-2 {
+    color: var(--mostarda);
+  }
+
+  .quando {
+    margin: 1.75rem 0 0;
+    font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+  }
+
+  .contagem {
+    margin-top: 2rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .contagem-num {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(3rem, 9vw, 5.5rem);
+    line-height: 1;
+    color: var(--branco);
+  }
+
+  .contagem-rotulo {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .numeros {
+    list-style: none;
+    margin: 2.5rem 0 0;
+    padding: 1.5rem 0 0;
+    border-top: 1px solid rgb(247 242 232 / 0.25);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 3rem;
+  }
+
+  .numeros li {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+
+  .rot {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  .em-breve {
+    margin: 2.5rem 0 0;
+    max-width: 38ch;
+    font-size: 1.05rem;
+  }
+
+  .acoes {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .nota {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.9;
+  }
+
+  .botao {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 1.4rem;
+    border-radius: 999px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .botao-principal {
+    background: var(--mostarda);
+    color: var(--texto);
+  }
+
+  .botao-secundario {
+    border: 2px solid var(--creme);
+    color: var(--creme);
+  }
+
+  .rodape {
+    background: var(--azul-ap);
+    color: var(--creme);
+    font-size: 0.95rem;
+  }
+
+  .rodape-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 2rem;
+    padding-block: 1.25rem;
+  }
+
+  .rodape p {
+    margin: 0;
+  }
+</style>

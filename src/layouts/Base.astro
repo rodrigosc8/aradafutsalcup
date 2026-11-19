@@ -1,0 +1,42 @@
+---
+import '@fontsource/big-shoulders-display/800';
+import '@fontsource/big-shoulders-display/900';
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import { torneio } from '../data/torneio';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = `${torneio.nome} · ${torneio.subtitulo}`,
+  description = `${torneio.edicao} do ${torneio.subtitulo}: ${torneio.diasTexto}, no ${torneio.local}.`,
+} = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#0f472e" />
+
+    <!-- Partilha nas redes (Open Graph). A imagem entra quando houver logótipo. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_PT" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
