@@ -1,0 +1,79 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import PilulaLink from '../components/PilulaLink.astro';
+import { torneio } from '../data/torneio';
+---
+
+<Pagina
+  titulo="Acessibilidade"
+  frase="Queremos que toda a gente consiga acompanhar o torneio, em qualquer dispositivo."
+  largura="texto"
+>
+  <div class="texto-legal">
+    <h2>Objetivo</h2>
+    <p>
+      O site {torneio.nome} tem como objetivo cumprir as Diretrizes de Acessibilidade para Conteúdo Web (WCAG) 2.1,
+      nível AA.
+    </p>
+
+    <h2>O que foi feito</h2>
+    <ul>
+      <li>Contraste de cor de nível AA em todo o texto, verificado para as combinações de cores usadas no site.</li>
+      <li>Botões e links verdadeiros, utilizáveis com o teclado; fora do rodapé, as áreas de toque têm pelo menos 44 píxeis.</li>
+      <li>Indicador de foco visível em todos os elementos interativos.</li>
+      <li>Página em português de Portugal (<code>lang="pt-PT"</code>), títulos organizados e tabelas com cabeçalhos.</li>
+      <li>Descrições para leitores de ecrã nos elementos que só têm ícone; ilustrações decorativas ignoradas.</li>
+      <li>A barra de patrocinadores para quando o rato passa por cima e fica parada para quem pede menos movimento no sistema.</li>
+      <li>O regulamento está disponível como página HTML, além do PDF.</li>
+      <li>O site funciona do telemóvel ao computador, sem deslocamento horizontal.</li>
+    </ul>
+
+    <h2>Limitações conhecidas</h2>
+    <ul>
+      <li>O PDF do regulamento pode não ser totalmente acessível; a página do regulamento tem o mesmo conteúdo.</li>
+      <li>Os logótipos de patrocinadores são imagens; cada um tem o nome da marca como texto alternativo.</li>
+    </ul>
+
+    <h2>Reportar um problema</h2>
+    <p>
+      Se encontrar alguma barreira, diga-nos a página, o que tentava fazer e o dispositivo ou browser que usa. A
+      {torneio.organizacao} responde e corrige o mais depressa possível.
+    </p>
+    <p class="acao"><PilulaLink href={torneio.links.contactos}>Contactos</PilulaLink></p>
+
+    <p class="data">Declaração preparada a 19 de novembro de 2026.</p>
+  </div>
+</Pagina>
+
+<style>
+  .texto-legal {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  h2 {
+    margin: 32px 0 0;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  p,
+  ul {
+    margin: 8px 0 0;
+  }
+  ul {
+    padding-left: 22px;
+  }
+  li + li {
+    margin-top: 4px;
+  }
+  .acao {
+    margin-top: 12px;
+  }
+  .data {
+    margin-top: 32px;
+    font-size: 14px;
+    color: var(--texto-2);
+  }
+  code {
+    font-size: 0.9em;
+  }
+</style>
