@@ -104,6 +104,7 @@ const emblema = (lado: Jogo['casa']) => {
 
 <script>
   import { diaLisboa } from '../scripts/datas';
+  import { agora } from '../scripts/agora';
 
   document.querySelectorAll<HTMLElement>('[data-jogos-dia]').forEach((raiz) => {
     const botoes = [...raiz.querySelectorAll<HTMLButtonElement>('[data-separador]')];
@@ -114,7 +115,7 @@ const emblema = (lado: Jogo['casa']) => {
     };
     botoes.forEach((b) => b.addEventListener('click', () => escolher(b.dataset.separador!)));
     // Durante o torneio, abre no dia de hoje.
-    const hoje = diaLisboa(new Date());
+    const hoje = diaLisboa(agora());
     if (botoes.some((b) => b.dataset.separador === hoje)) escolher(hoje);
     // Link para um jogo (/jogos#id): abre o dia desse jogo e mostra-o.
     const abrirHash = () => {

@@ -4,9 +4,11 @@ import JogosPorDia from '../components/JogosPorDia.astro';
 import { haSorteio, idJogoEmDestaque, jogos } from '../data/fonte';
 import { torneio } from '../data/torneio';
 import { diaLisboa } from '../scripts/datas';
+import { agora } from '../scripts/agora';
 
 // Dia mostrado por omissão: o primeiro dia do torneio (o script troca para hoje durante o torneio).
-const diaPredefinido = torneio.dias.includes(diaLisboa(new Date())) ? diaLisboa(new Date()) : torneio.dias[0];
+const hoje = diaLisboa(agora());
+const diaPredefinido = torneio.dias.includes(hoje) ? hoje : torneio.dias[0];
 ---
 
 <Pagina

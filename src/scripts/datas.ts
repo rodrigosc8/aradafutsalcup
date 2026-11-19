@@ -1,6 +1,7 @@
 // Datas e contagens, iguais no build (texto estático) e no browser (atualização).
 // Tudo na hora de Lisboa.
 import { torneio } from '../data/torneio';
+import { agora as agoraSite } from './agora';
 
 const FUSO = 'Europe/Lisbon';
 const DIAS_SEMANA = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
@@ -32,7 +33,7 @@ const DIAS_LONGOS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta'
 const MESES_LONGOS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 
 /** "Segunda, 21 de dezembro"; no próprio dia, "Hoje, 21 de dezembro". */
-export function dataLonga(iso: string, agora = new Date()): string {
+export function dataLonga(iso: string, agora = agoraSite()): string {
   const [a, m, d] = diaLisboa(new Date(iso)).split('-').map(Number);
   const semana = new Date(Date.UTC(a, m - 1, d)).getUTCDay();
   const dia = diaLisboa(new Date(iso)) === diaLisboa(agora) ? 'Hoje' : DIAS_LONGOS[semana];
@@ -45,7 +46,7 @@ export type PartesContagem =
   | { estado: 'fim' };
 
 /** Dias, horas e minutos até ao apito do jogo (para os mosaicos do cartaz). */
-export function partesContagem(iso: string, agora = new Date()): PartesContagem {
+export function partesContagem(iso: string, agora = agoraSite()): PartesContagem {
   const inicio = Date.parse(iso);
   const t = agora.getTime();
   if (t >= inicio + torneio.duracaoJogoMinutos * 60_000) return { estado: 'fim' };
@@ -60,7 +61,7 @@ export function partesContagem(iso: string, agora = new Date()): PartesContagem 
 }
 
 /** "hoje" no próprio dia; senão "seg, 21 dez". */
-export function textoDia(iso: string, agora = new Date()): string {
+export function textoDia(iso: string, agora = agoraSite()): string {
   return diaLisboa(new Date(iso)) === diaLisboa(agora) ? 'hoje' : dataCurta(iso);
 }
 
@@ -71,7 +72,7 @@ export function textoDia(iso: string, agora = new Date()): string {
  * - Menos de 1 dia: "faltam 7 h 12 min".
  * - Durante o jogo: "a decorrer". Depois: vazio.
  */
-export function textoContagem(iso: string, formato: 'curto' | 'longo', agora = new Date()): string {
+export function textoContagem(iso: string, formato: 'curto' | 'longo', agora = agoraSite()): string {
   const p = partesContagem(iso, agora);
   if (p.estado === 'decorrer') return 'a decorrer';
   if (p.estado === 'fim') return '';
@@ -83,7 +84,7 @@ export function textoContagem(iso: string, formato: 'curto' | 'longo', agora = n
 
 /** Atualiza no browser todos os elementos [data-quando]. */
 export function atualizarQuando(raiz: ParentNode = document): void {
-  const agora = new Date();
+  const agora = agoraSite();
   raiz.querySelectorAll<HTMLElement>('[data-quando]').forEach((el) => {
     const iso = el.dataset.inicio;
     if (!iso) return;
