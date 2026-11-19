@@ -12,8 +12,10 @@ export type ItemNav = 'inicio' | 'jogos' | 'grupos' | 'cromos';
 interface Props {
   /** Item ativo. Sem valor (ex.: página 404), nenhum fica ativo. */
   atual?: ItemNav;
+  /** Telemóvel: cabeçalho sobre a faixa bordô do destaque (texto claro). Usado no Início. */
+  sobreDestaque?: boolean;
 }
-const { atual } = Astro.props;
+const { atual, sobreDestaque = false } = Astro.props;
 
 const itens: { id: ItemNav; texto: string; href: string }[] = [
   { id: 'inicio', texto: 'Início', href: '/' },
@@ -23,7 +25,7 @@ const itens: { id: ItemNav; texto: string; href: string }[] = [
 ];
 ---
 
-<div class="topo">
+<div class:list={['topo', { 'sobre-destaque': sobreDestaque }]}>
   <header class="cabecalho">
     <Logo />
     <nav class="nav-topo so-computador" aria-label="Navegação principal">
@@ -106,6 +108,24 @@ const itens: { id: ItemNav; texto: string; href: string }[] = [
     /* Espaço para a cápsula não tapar o fim da página (com rodapé, é o rodapé que o reserva). */
     :global(body:not(:has(footer.rodape))) {
       padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Telemóvel: cabeçalho dentro da faixa bordô do destaque (Início). */
+  @media (max-width: 1023.98px) {
+    .sobre-destaque {
+      background: var(--bordo);
+      --logo-cor: var(--branco);
+      --logo-cup: var(--bordo-claro);
+      --seletor-fundo: transparent;
+      --seletor-texto: var(--branco);
+      --seletor-contorno: rgb(255 255 255 / 0.5);
+      --seletor-contorno-hover: var(--branco);
+      --seletor-seta: var(--bordo-claro);
+    }
+    /* O painel do seletor continua branco, com texto escuro. */
+    .sobre-destaque :global(.painel) {
+      color: var(--texto);
     }
   }
 

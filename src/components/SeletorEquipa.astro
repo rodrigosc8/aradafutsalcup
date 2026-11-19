@@ -105,26 +105,27 @@ const { equipas } = Astro.props;
   .seletor {
     position: relative;
   }
+  /* Cores ajustáveis por quem contém o seletor (ex.: cabeçalho sobre o bordô). */
   .gatilho {
     display: flex;
     align-items: center;
     gap: 8px;
     min-height: var(--toque);
     padding: 0 12px;
-    border: 1.5px solid var(--linha);
+    border: 1.5px solid var(--seletor-contorno, var(--linha));
     border-radius: 10px;
-    background: var(--branco);
-    color: var(--texto);
+    background: var(--seletor-fundo, var(--branco));
+    color: var(--seletor-texto, var(--texto));
     font-size: 13px;
     font-weight: 700;
     white-space: nowrap;
     cursor: pointer;
   }
   .gatilho:hover {
-    border-color: var(--texto-2);
+    border-color: var(--seletor-contorno-hover, var(--texto-2));
   }
   .gatilho :global(.seta) {
-    color: var(--texto-2);
+    color: var(--seletor-seta, var(--texto-2));
   }
   .gatilho[aria-expanded='true'] :global(.seta) {
     transform: scaleY(-1);

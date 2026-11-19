@@ -23,10 +23,11 @@ const { linhas = 'auto', tamanho = 21, claro = false } = Astro.props;
     font-size: var(--tamanho);
     line-height: 0.95;
     text-transform: uppercase;
-    color: var(--texto);
+    /* Cores ajustáveis por quem contém o logótipo (ex.: cabeçalho sobre o bordô). */
+    color: var(--logo-cor, var(--texto));
   }
   .cup {
-    color: var(--destaque);
+    color: var(--logo-cup, var(--destaque));
   }
   .claro {
     color: var(--branco);
