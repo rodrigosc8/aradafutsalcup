@@ -1,0 +1,217 @@
+---
+// Patrocinar: os 5 patamares de torneio.ts e a visibilidade no site.
+// Os benefícios de cada patamar vêm de torneio.patamares[].beneficios (TODO em torneio.ts).
+import Pagina from '../layouts/Pagina.astro';
+import Botao from '../components/Botao.astro';
+import { torneio } from '../data/torneio';
+
+const euros = (n: number) => `${n.toLocaleString('pt-PT')} €`;
+const email = torneio.contactoEmail;
+const assunto = encodeURIComponent(`Patrocínio · ${torneio.nome} ${torneio.dias[0].slice(0, 4)}`);
+---
+
+<Pagina
+  titulo="Patrocinar"
+  frase={`Associe a sua marca à ${torneio.edicao} do ${torneio.subtitulo}: ${torneio.diasTexto}, no ${torneio.local}.`}
+>
+  <section class="principal" aria-labelledby="titulo-principal">
+    <p class="marca">{torneio.patrocinadorPrincipal}</p>
+    <div>
+      <h2 id="titulo-principal" class="etiqueta">Patrocinador principal</h2>
+      <p class="frase">O torneio tem o nome de quem o torna possível.</p>
+    </div>
+  </section>
+
+  <section class="bloco" aria-labelledby="titulo-patamares">
+    <h2 id="titulo-patamares" class="titulo">Patamares</h2>
+    <p class="apoio">Cinco formas de apoiar a {torneio.edicao}.</p>
+    <ul class="patamares">
+      {
+        torneio.patamares.map((p) => (
+          <li class="patamar">
+            <p class="nome">{p.nome}</p>
+            <p class="valor">{euros(p.valor)}</p>
+            {p.beneficios.length > 0 ? (
+              <ul class="beneficios">
+                {p.beneficios.map((b) => (
+                  <li>{b}</li>
+                ))}
+              </ul>
+            ) : (
+              <p class="a-confirmar">Benefícios a confirmar com a Junta.</p>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="bloco duas" aria-labelledby="titulo-site">
+    <div>
+      <h2 id="titulo-site" class="titulo">Visibilidade no site</h2>
+      <ul class="lista">
+        <li>
+          O logótipo entra na barra “Quem apoia”, logo a seguir ao jogo em destaque no Início, no telemóvel e no
+          computador.
+        </li>
+        <li>
+          A barra tem {torneio.espacosPatrocinio} espaços, além do patrocinador principal. Cada logótipo ocupa um espaço
+          que hoje diz “O seu logótipo aqui”.
+        </li>
+        <li>O site acompanha o torneio: jogos, grupos, resultados e cromos dos jogadores.</li>
+      </ul>
+    </div>
+    <section class="contacto" aria-labelledby="titulo-contacto">
+      <h2 id="titulo-contacto" class="titulo">Fale connosco</h2>
+      {
+        email ? (
+          <>
+            <p class="apoio">Envie-nos o patamar que lhe interessa e a sua marca.</p>
+            <Botao href={`mailto:${email}?subject=${assunto}`}>Contactar a Junta</Botao>
+          </>
+        ) : (
+          <p class="sem-link">Contacte a {torneio.organizacao}.</p>
+        )
+      }
+    </section>
+  </section>
+</Pagina>
+
+<style>
+  p {
+    margin: 0;
+  }
+  .principal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 22px;
+    margin-top: 28px;
+    padding: 20px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-cartao);
+    background: var(--branco);
+  }
+  .marca {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: 72px;
+    padding: 0 26px;
+    border-radius: 16px;
+    background: var(--azul-ap);
+    color: var(--branco);
+    font-family: var(--font-marcador);
+    font-style: italic;
+    font-weight: 800;
+    font-size: 26px;
+  }
+  .etiqueta {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--texto-2);
+  }
+  .frase {
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+  .bloco {
+    margin-top: 40px;
+  }
+  .titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .apoio {
+    margin-top: 6px;
+    color: var(--texto-2);
+  }
+  .patamares {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .patamar {
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+    border: 1px solid var(--linha);
+    border-radius: 18px;
+    background: var(--branco);
+  }
+  .nome {
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .valor {
+    margin-top: 4px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--bordo);
+  }
+  .beneficios {
+    margin: 14px 0 0;
+    padding-left: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .a-confirmar {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1.5px dashed var(--linha);
+    border-radius: var(--raio-botao);
+    font-size: 13px;
+    color: var(--texto-2);
+  }
+  .duas {
+    display: grid;
+    gap: 28px;
+  }
+  .lista {
+    margin: 14px 0 0;
+    padding-left: 20px;
+    line-height: 1.6;
+  }
+  .lista li + li {
+    margin-top: 6px;
+  }
+  .contacto {
+    padding: 22px;
+    border-radius: var(--raio-cartao);
+    background: var(--bordo);
+    color: var(--branco);
+  }
+  .contacto .apoio {
+    color: var(--bordo-claro);
+  }
+  .contacto :global(.botao) {
+    margin-top: 16px;
+    background: var(--branco);
+    color: var(--bordo);
+  }
+  .sem-link {
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  @media (min-width: 1024px) {
+    .patamares {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    .duas {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+</style>
