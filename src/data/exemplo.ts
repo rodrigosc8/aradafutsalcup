@@ -1,9 +1,10 @@
 // ============================================================================
 //  DADOS DE EXEMPLO. NÃO SÃO REAIS.
-//  Equipas, cores, jogadores, horários e resultados inventados para o design.
-//  Trocar pelos dados reais depois do sorteio (as cores das equipas ainda vão
-//  ser definidas com a comissão). Os dados reais do torneio (datas, local,
-//  números) estão em ./torneio.ts.
+//  Equipas, cores, jogadores, horários e resultados inventados para o design e
+//  para o modo de revisão (torneio.modoRevisao). Trocar pelos dados reais depois
+//  do sorteio. Os dados reais do torneio (datas, local, números) estão em ./torneio.ts.
+//  As páginas não importam este ficheiro: usam ./fonte.ts (exceto a /componentes).
+//  Classificações, marcadores e estado dos jogos calculam-se em ./estado.ts.
 // ============================================================================
 
 export interface Equipa {
@@ -37,7 +38,12 @@ export interface Jogo {
   fora: Lado;
   grupo?: Equipa['grupo'];
   fase: 'grupos' | 'quartos' | 'meias' | 'terceiro' | 'final';
-  resultado?: [number, number];
+}
+
+/** Resultado de um jogo: golos [casa, fora] e quem marcou (ids de jogadores, um por golo). */
+export interface Resultado {
+  golos: [number, number];
+  marcadores: [string[], string[]];
 }
 
 export const equipas: Equipa[] = [
@@ -59,34 +65,47 @@ export const equipas: Equipa[] = [
   { id: 'areal', nome: 'Areal', sigla: 'AR', cor: '#355E3B', grupo: 'D' },
 ];
 
-// Dois jogadores por equipa chegam para o design ("Jogadores a seguir").
+// 12 jogadores por equipa (o máximo do regulamento): 16 × 12 = 192 cromos.
+// Os dois primeiros de cada equipa são os do design (Rui n.º 7 e Tiago n.º 10 nos Javalis…).
 const nomes = [
   'Rui', 'Tiago', 'Gonçalo', 'Vasco', 'Marco', 'André', 'Pedro', 'Nuno',
   'Diogo', 'Hugo', 'Bruno', 'Filipe', 'João', 'Miguel', 'Ricardo', 'Sérgio',
   'Luís', 'Carlos', 'Daniel', 'Fábio', 'Hélder', 'Ivo', 'Jorge', 'Paulo',
   'Rafael', 'Samuel', 'Simão', 'Tomás', 'Vítor', 'Xavier', 'Duarte', 'Martim',
 ];
+const nomesPlantel = [
+  'Afonso', 'Alexandre', 'António', 'Artur', 'Bernardo', 'Caetano', 'David', 'Dinis',
+  'Eduardo', 'Emanuel', 'Fernando', 'Francisco', 'Gabriel', 'Gil', 'Guilherme', 'Henrique',
+  'Igor', 'Jaime', 'José', 'Leandro', 'Lourenço', 'Manuel', 'Mário', 'Mateus',
+  'Mauro', 'Nélson', 'Óscar', 'Patrício', 'Renato', 'Rúben', 'Salvador', 'Sandro',
+  'Telmo', 'Valter', 'Vicente', 'Wilson', 'Bráulio', 'Cláudio', 'Domingos', 'Edgar',
+  'Flávio', 'Gustavo', 'Hélio', 'Joel', 'Lucas', 'Marcelo', 'Norberto', 'Orlando',
+];
 const numeros = [7, 10, 9, 4, 11, 8, 5, 3];
 const posicoes = ['Ala', 'Pivô', 'Fixo', 'Guarda-redes'];
-// Golos de exemplo (os restantes jogadores têm 0).
-const golos: Record<string, number> = {
-  'javalis-1': 3,
-  'bairro-fc-1': 2,
-  'leoes-1': 2,
-  'javalis-2': 1,
-  'ponte-1': 1,
-};
+const posicoesPlantel = ['Fixo', 'Ala', 'Pivô', 'Ala'];
 
-export const jogadores: Jogador[] = equipas.flatMap((equipa, i) =>
-  [0, 1].map((j) => ({
+export const jogadores: Jogador[] = equipas.flatMap((equipa, i) => {
+  const base = [0, 1].map((j) => ({
     id: `${equipa.id}-${j + 1}`,
     nome: nomes[(i * 2 + j) % nomes.length],
     numero: numeros[(i * 2 + j) % numeros.length],
     equipa: equipa.id,
     posicao: posicoes[(i + j) % posicoes.length],
-    golos: golos[`${equipa.id}-${j + 1}`] ?? 0,
-  })),
-);
+    golos: 0,
+  }));
+  const usados = new Set(base.map((b) => b.numero));
+  const livres = Array.from({ length: 12 }, (_, k) => k + 1).filter((n) => !usados.has(n));
+  const plantel = livres.slice(0, 10).map((numero, k) => ({
+    id: `${equipa.id}-${k + 3}`,
+    nome: nomesPlantel[(i * 10 + k) % nomesPlantel.length],
+    numero,
+    equipa: equipa.id,
+    posicao: numero === 1 || numero === 12 ? 'Guarda-redes' : posicoesPlantel[k % posicoesPlantel.length],
+    golos: 0,
+  }));
+  return [...base, ...plantel];
+});
 
 // Calendário de exemplo: 32 jogos.
 // Fase de grupos: 4 grupos de 4, todos contra todos, 8 jogos por dia (21, 22 e 23).
@@ -136,46 +155,39 @@ const jogosFinais: Jogo[] = [
 
 export const jogos: Jogo[] = [...jogosGrupos, ...jogosFinais];
 
-/** Jogo mostrado no Início quando o visitante não segue nenhuma equipa (Javalis × Bairro FC, 21/12 20:10). */
-export const idJogoEmDestaque = 'd1-a1';
+// Resultados de exemplo, coerentes com torneio.dataSimulada (22/12, 19:00): o dia 21 completo,
+// os 2 primeiros jogos de 22 e o jogo das 18:50 de 22 (a decorrer às 19:00, resultado parcial).
+// O estado de cada jogo (por jogar, a decorrer, terminado) depende do "agora" e calcula-se em estado.ts.
+const placar: Record<string, [number, number]> = {
+  'd1-c1': [2, 2],
+  'd1-d1': [1, 3],
+  'd1-c2': [2, 0],
+  'd1-a2': [1, 2],
+  'd1-a1': [3, 1],
+  'd1-b1': [4, 0],
+  'd1-b2': [2, 1],
+  'd1-d2': [1, 1],
+  'd2-c1': [1, 2],
+  'd2-d1': [0, 0],
+  'd2-c2': [1, 1],
+};
 
-/** Classificação de exemplo do Grupo A (Início no telemóvel). */
-export const classificacaoGrupoA = [
-  { equipa: 'javalis', dg: 2, pontos: 4 },
-  { equipa: 'bairro-fc', dg: 1, pontos: 3 },
-  { equipa: 'ponte', dg: -1, pontos: 1 },
-  { equipa: 'leoes', dg: -2, pontos: 0 },
-];
-
-export interface LinhaClassificacao {
-  equipa: string;
-  jogos: number;
-  vitorias: number;
-  empates: number;
-  derrotas: number;
-  golosMarcados: number;
-  golosSofridos: number;
-  pontos: number;
+// Quem marcou: golos repartidos pelos jogadores de campo, sempre da mesma forma.
+const PADRAO = [0, 1, 0, 2, 1, 3, 0, 4];
+function marcadoresDe(idEquipa: string, golos: number, semente: number): string[] {
+  const campo = jogadores.filter((j) => j.equipa === idEquipa && j.posicao !== 'Guarda-redes');
+  return Array.from({ length: golos }, (_, k) => campo[PADRAO[(semente + k) % PADRAO.length] % campo.length].id);
 }
 
-const linha = (equipa: string, v: number, e: number, d: number, gm: number, gs: number): LinhaClassificacao => ({
-  equipa,
-  jogos: v + e + d,
-  vitorias: v,
-  empates: e,
-  derrotas: d,
-  golosMarcados: gm,
-  golosSofridos: gs,
-  pontos: v * 3 + e,
-});
-
-/** Classificações de exemplo dos 4 grupos (Início no computador e /grupos). */
-export const classificacoes: { grupo: Equipa['grupo']; linhas: LinhaClassificacao[] }[] = [
-  { grupo: 'A', linhas: [linha('javalis', 1, 1, 0, 5, 3), linha('bairro-fc', 1, 0, 1, 4, 3), linha('ponte', 0, 1, 1, 3, 4), linha('leoes', 0, 0, 2, 2, 4)] },
-  { grupo: 'B', linhas: [linha('unidos', 2, 0, 0, 6, 1), linha('mar', 1, 0, 1, 3, 3), linha('vila', 0, 1, 1, 2, 4), linha('serra', 0, 1, 1, 1, 4)] },
-  { grupo: 'C', linhas: [linha('castelo', 1, 1, 0, 4, 2), linha('moinho', 1, 1, 0, 3, 2), linha('rio', 1, 0, 1, 3, 3), linha('lagoa', 0, 0, 2, 1, 4)] },
-  { grupo: 'D', linhas: [linha('praia', 2, 0, 0, 7, 2), linha('quinta', 0, 2, 0, 3, 3), linha('pinhal', 0, 2, 0, 2, 2), linha('areal', 0, 1, 1, 1, 6)] },
-];
+export const resultados: Record<string, Resultado> = Object.fromEntries(
+  Object.entries(placar).map(([id, [c, f]], k) => {
+    const jogo = jogos.find((j) => j.id === id)!;
+    return [
+      id,
+      { golos: [c, f], marcadores: [marcadoresDe(jogo.casa as string, c, k), marcadoresDe(jogo.fora as string, f, k + 3)] },
+    ];
+  }),
+);
 
 /** Resultados de exemplo dos Javalis (mosaicos de resultado). */
 export const resultadosJavalis = [
@@ -183,8 +195,6 @@ export const resultadosJavalis = [
   { adversario: 'leoes', resultado: '2–2', href: '/jogos' },
 ];
 
-/** "Figuras de ontem": jogadores de exemplo com golos. */
-export const figuras = ['leoes-1', 'ponte-1', 'javalis-1'];
 
 // ---- Ajudas ---------------------------------------------------------------
 
@@ -211,12 +221,4 @@ export function equipaDoLado(lado: Lado): Equipa | undefined {
 
 export function nomeDoLado(lado: Lado): string {
   return typeof lado === 'string' ? equipa(lado).nome : lado.texto;
-}
-
-/** Os 5 melhores marcadores (por golos e depois por nome). */
-export function melhoresMarcadores(n = 5): Jogador[] {
-  return jogadores
-    .filter((j) => j.golos > 0)
-    .sort((a, b) => b.golos - a.golos || a.nome.localeCompare(b.nome, 'pt'))
-    .slice(0, n);
 }
