@@ -1,6 +1,7 @@
 ---
-// Início. Telemóvel: design-ref/bordo-Inicio.html. Computador (≥ 1024px): design-ref/bordo-Inicio-PC-v2.html.
-// Usa DADOS DE EXEMPLO (src/data/exemplo.ts) até haver sorteio e horários.
+// Início. Telemóvel: docs/design/bordo-Inicio.html. Computador (≥ 1024px): docs/design/bordo-Inicio-PC-v2.html.
+// Equipas, jogadores e jogos vêm de ../data/fonte. Em torneio.fase === 'pre-sorteio' essas listas
+// estão vazias e cada secção mostra o seu estado vazio (sem dados inventados).
 import Base from '../layouts/Base.astro';
 import NavFlutuante from '../components/NavFlutuante.astro';
 import CartaoJogoDestaque from '../components/CartaoJogoDestaque.astro';
@@ -17,6 +18,7 @@ import CartaoGrupo from '../components/CartaoGrupo.astro';
 import ListaMarcadores from '../components/ListaMarcadores.astro';
 import CartaoPrimeiraEdicao from '../components/CartaoPrimeiraEdicao.astro';
 import SeccaoPatamares from '../components/SeccaoPatamares.astro';
+import EstadoVazio from '../components/EstadoVazio.astro';
 import { torneio } from '../data/torneio';
 import {
   classificacaoGrupoA,
@@ -28,15 +30,17 @@ import {
   jogador,
   jogadoresDe,
   jogos,
-} from '../data/exemplo';
+  haSorteio,
+  GRUPOS,
+} from '../data/fonte';
 import { horaLisboa } from '../scripts/datas';
 
-const destaque = jogos.find((j) => j.id === idJogoEmDestaque)!;
-const diaDestaque = destaque.inicio.slice(0, 10);
+const destaque = jogos.find((j) => j.id === idJogoEmDestaque);
+const diaDestaque = destaque ? destaque.inicio.slice(0, 10) : torneio.dias[0];
 // Telemóvel, "No mesmo dia": os 3 jogos mais próximos do jogo em destaque.
-const t0 = Date.parse(destaque.inicio);
+const t0 = destaque ? Date.parse(destaque.inicio) : 0;
 const outrosDoDia = jogos
-  .filter((j) => j.id !== destaque.id && j.inicio.startsWith(diaDestaque))
+  .filter((j) => j.id !== destaque?.id && j.inicio.startsWith(diaDestaque))
   .sort((a, b) => Math.abs(Date.parse(a.inicio) - t0) - Math.abs(Date.parse(b.inicio) - t0))
   .slice(0, 3)
   .sort((a, b) => a.inicio.localeCompare(b.inicio));
@@ -48,6 +52,17 @@ const marcadores = melhoresMarcadores(5).map((j) => {
   const e = equipa(j.equipa);
   return { id: j.id, nome: j.nome, numero: j.numero, golos: j.golos, equipa: e.nome, cor: e.cor };
 });
+
+// Antes do sorteio: os 4 grupos com 4 lugares "Por sortear".
+const gruposClassificacao = haSorteio
+  ? classificacoes.map((c) => ({
+      grupo: c.grupo,
+      linhas: c.linhas.map((l) => {
+        const e = equipa(l.equipa);
+        return { nome: e.nome, sigla: e.sigla, cor: e.cor, jogos: l.jogos, pontos: l.pontos };
+      }),
+    }))
+  : GRUPOS.map((g) => ({ grupo: g, linhas: [{}, {}, {}, {}] }));
 
 const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const cincoDias = torneio.dias.map((d, i) => ({
@@ -70,8 +85,9 @@ const cincoDias = torneio.dias.map((d, i) => ({
       com equipa seguida, o primeiro jogo dessa equipa (o script troca no browser).
     -->
     <div class="faixa-destaque">
+      {!destaque && <CartaoJogoDestaque />}
       {
-        jogosCartao.map((j) => (
+        destaque && jogosCartao.map((j) => (
           <div
             class="cartao"
             data-cartao-jogo={j.id}
@@ -93,7 +109,8 @@ const cincoDias = torneio.dias.map((d, i) => ({
 
     <BarraPatrocinadores />
 
-    <!-- Telemóvel: Figuras de ontem -->
+    <!-- Telemóvel: Figuras de ontem (só depois do sorteio) -->
+    {figuras.length > 0 && (
     <section class="figuras so-telemovel" aria-labelledby="titulo-figuras">
       <div class="cabeca">
         <h2 class="titulo-seccao" id="titulo-figuras">Figuras de ontem</h2>
@@ -117,17 +134,29 @@ const cincoDias = torneio.dias.map((d, i) => ({
         }
       </div>
     </section>
+    )}
 
     <!-- Telemóvel -->
     <div class="grelha so-telemovel">
       <section aria-labelledby="titulo-hoje">
         <div class="cabeca">
-          <h2 class="titulo-seccao" id="titulo-hoje" data-titulo-dia data-inicio={destaque.inicio}>
-            <span data-hoje="Também hoje">No mesmo dia</span>
-          </h2>
+          {
+            destaque ? (
+              <h2 class="titulo-seccao" id="titulo-hoje" data-titulo-dia data-inicio={destaque.inicio}>
+                <span data-hoje="Também hoje">No mesmo dia</span>
+              </h2>
+            ) : (
+              <h2 class="titulo-seccao" id="titulo-hoje">Jogos</h2>
+            )
+          }
           <PilulaLink href="/jogos" aria-label="Ver o calendário de jogos">Calendário</PilulaLink>
         </div>
-        <ul class="lista-jogos">
+        {!destaque && (
+          <div class="vazio-movel">
+            <EstadoVazio texto="Calendário publicado depois do sorteio" detalhe={`${torneio.diasTexto}`} compacto />
+          </div>
+        )}
+        <ul class="lista-jogos" hidden={!destaque}>
           {
             outrosDoDia.map((j) => (
               <li>
@@ -146,7 +175,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
       <section class="cartao-grupo" aria-labelledby="titulo-grupo">
         <h2 class="titulo-seccao" id="titulo-grupo">Grupo A</h2>
         <table class="tabela">
-          <caption class="visually-hidden">Classificação do Grupo A (exemplo)</caption>
+          <caption class="visually-hidden">Classificação do Grupo A</caption>
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -165,6 +194,17 @@ const cincoDias = torneio.dias.map((d, i) => ({
                   <td class="num pts">{l.pontos}</td>
                 </tr>
               ))
+            }
+            {
+              !haSorteio &&
+                [1, 2, 3, 4].map((n) => (
+                  <tr class="vago">
+                    <td class="pos">{n}</td>
+                    <td class="nome">Por sortear</td>
+                    <td class="num dg">–</td>
+                    <td class="num pts">–</td>
+                  </tr>
+                ))
             }
           </tbody>
         </table>
@@ -191,35 +231,36 @@ const cincoDias = torneio.dias.map((d, i) => ({
     <section class="em-numeros so-telemovel" aria-label="O torneio em números">
       <FaixaNumeros />
       <p class="nota-exemplo">
-        Equipas, nomes e resultados de exemplo. Os espaços de patrocinador ficam por preencher até os patrocínios estarem fechados.
+        {haSorteio ? 'Equipas, nomes e resultados de exemplo. ' : ''}Os espaços de patrocinador ficam por preencher até os
+        patrocínios estarem fechados.
       </p>
     </section>
 
     <!-- Computador -->
     <div class="pc so-computador">
       <div class="contentor bloco">
-        <JogosPorDia jogos={jogos} diaPredefinido={diaDestaque} idDestaque={destaque.id} />
+        <JogosPorDia
+          jogos={jogos}
+          diaPredefinido={diaDestaque}
+          idDestaque={destaque?.id}
+          frase={haSorteio ? undefined : 'Cinco dias de jogos em dezembro. Escolhe o dia.'}
+        />
       </div>
 
       <section class="contentor bloco" aria-labelledby="titulo-classificacao">
         <CabecalhoSeccao
           titulo="Classificação"
-          frase="Os 2 primeiros de cada grupo seguem para os quartos-de-final, a 26 de dezembro."
+          frase={haSorteio
+            ? 'Os 2 primeiros de cada grupo seguem para os quartos-de-final, a 26 de dezembro.'
+            : '4 grupos de 4 equipas. Os 2 primeiros seguem para os quartos-de-final, a 26 de dezembro.'}
           id="titulo-classificacao"
         >
           <PilulaLink slot="acao" href="/grupos#finais">Ver o quadro das finais</PilulaLink>
         </CabecalhoSeccao>
         <div class="grupos">
           {
-            classificacoes.map((c) => (
-              <CartaoGrupo
-                grupo={c.grupo}
-                href={`/grupos#grupo-${c.grupo.toLowerCase()}`}
-                linhas={c.linhas.map((l) => {
-                  const e = equipa(l.equipa);
-                  return { nome: e.nome, sigla: e.sigla, cor: e.cor, jogos: l.jogos, pontos: l.pontos };
-                })}
-              />
+            gruposClassificacao.map((c) => (
+              <CartaoGrupo grupo={c.grupo} href={`/grupos#grupo-${c.grupo.toLowerCase()}`} linhas={c.linhas} />
             ))
           }
         </div>
@@ -230,7 +271,8 @@ const cincoDias = torneio.dias.map((d, i) => ({
         <CartaoPrimeiraEdicao />
       </div>
       <p class="contentor nota-pc">
-        Equipas, jogadores, horários e classificações de exemplo. Os números da 1.ª edição são reais (carta da Junta).
+        {haSorteio ? 'Equipas, jogadores, horários e classificações de exemplo. ' : ''}Os números da 1.ª edição são
+        reais (carta da Junta).
       </p>
 
       <SeccaoPatamares />
@@ -365,6 +407,22 @@ const cincoDias = torneio.dias.map((d, i) => ({
   }
   .dg {
     color: var(--texto-2);
+  }
+  .vago .pos,
+  .vago .nome,
+  .tabela .vago .pts {
+    color: var(--texto-2);
+    font-weight: 500;
+  }
+  .tabela .vago .pts {
+    font-family: var(--font-body);
+    font-size: 15px;
+  }
+  .vazio-movel {
+    margin-top: 10px;
+  }
+  .lista-jogos[hidden] {
+    display: none;
   }
   .tabela .pts {
     padding-left: 12px;
