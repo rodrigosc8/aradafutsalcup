@@ -1,0 +1,43 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Página não encontrada · Abílio Pinto Futsal Cup">
+  <main class="erro">
+    <p class="codigo">404</p>
+    <h1>Fora de jogo!</h1>
+    <p>Esta página não existe.</p>
+    <a href="/">Voltar ao início</a>
+  </main>
+</Base>
+
+<style>
+  .erro {
+    min-height: 100svh;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    padding: 2rem;
+    background: var(--verde);
+    color: var(--creme);
+  }
+  .codigo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 6rem;
+    line-height: 1;
+    color: var(--mostarda);
+  }
+  h1 {
+    margin: 0.5rem 0;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+  }
+  a {
+    margin-top: 1rem;
+    font-weight: 700;
+  }
+</style>
