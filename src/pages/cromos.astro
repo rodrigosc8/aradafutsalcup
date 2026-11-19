@@ -1,0 +1,85 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import Cromo from '../components/Cromo.astro';
+import EmblemaEquipa from '../components/EmblemaEquipa.astro';
+import EstadoVazio from '../components/EstadoVazio.astro';
+import { equipas, haSorteio, jogadoresDe } from '../data/fonte';
+
+const porEquipa = equipas.map((e) => ({ equipa: e, jogadores: jogadoresDe(e.id) }));
+---
+
+<Pagina
+  titulo="Cromos"
+  frase={haSorteio
+    ? 'Um cromo por jogador, organizados por equipa. A fotografia só aparece com autorização de imagem.'
+    : 'Cada jogador inscrito terá o seu cromo, organizado por equipa.'}
+  atual="cromos"
+>
+  {
+    !haSorteio && (
+      <div class="bloco">
+        <EstadoVazio texto="Os cromos aparecem depois do sorteio">
+          {Array.from({ length: 6 }).map(() => (
+            <Cromo vazio largura={84} larguraComputador={116} />
+          ))}
+        </EstadoVazio>
+      </div>
+    )
+  }
+  {
+    porEquipa.map(({ equipa, jogadores }) => (
+      <section class="equipa" id={equipa.id} aria-labelledby={`titulo-${equipa.id}`}>
+        <h2 id={`titulo-${equipa.id}`}>
+          <EmblemaEquipa sigla={equipa.sigla} cor={equipa.cor} tamanho={36} anel={0} />
+          {equipa.nome}
+          <span class="grupo">Grupo {equipa.grupo}</span>
+        </h2>
+        <ul class="grelha">
+          {jogadores.map((j) => (
+            <li id={j.id}>
+              <Cromo nome={j.nome} numero={j.numero} subtitulo={j.posicao} cor={equipa.cor} largura={104} larguraComputador={150} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Pagina>
+
+<style>
+  .bloco {
+    margin-top: 32px;
+  }
+  .equipa {
+    margin-top: 40px;
+    scroll-margin-top: 110px;
+  }
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 28px;
+    text-transform: uppercase;
+  }
+  .grupo {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: none;
+    color: var(--texto-2);
+  }
+  .grelha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .grelha li {
+    scroll-margin-top: 110px;
+  }
+</style>
