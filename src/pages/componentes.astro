@@ -1,0 +1,272 @@
+---
+// Página interna para rever os componentes. noindex e fora da navegação.
+import Base from '../layouts/Base.astro';
+import NavFlutuante from '../components/NavFlutuante.astro';
+import Logo from '../components/Logo.astro';
+import EmblemaEquipa from '../components/EmblemaEquipa.astro';
+import Cromo from '../components/Cromo.astro';
+import CartaoJogoDestaque from '../components/CartaoJogoDestaque.astro';
+import LinhaJogo from '../components/LinhaJogo.astro';
+import Botao from '../components/Botao.astro';
+import PilulaLink from '../components/PilulaLink.astro';
+import MosaicoResultado from '../components/MosaicoResultado.astro';
+import BarraPatrocinadores from '../components/BarraPatrocinadores.astro';
+import FaixaNumeros from '../components/FaixaNumeros.astro';
+import Rodape from '../components/Rodape.astro';
+import { equipa, equipas, idJogoEmDestaque, jogador, jogadoresDe, jogos, resultadosJavalis } from '../data/exemplo';
+
+const destaque = jogos.find((j) => j.id === idJogoEmDestaque)!;
+const rui = jogador('javalis-1');
+const javalis = equipa('javalis');
+const larguras = [68, 84, 104, 116, 150, 200, 240];
+const cores = [
+  ['--bordo', '#7A1E2C'],
+  ['--bordo-claro', '#E7B9BF'],
+  ['--papel', '#F7F1EA'],
+  ['--branco', '#FFFFFF'],
+  ['--dourado', '#C98E2B'],
+  ['--dourado-claro', '#F3D9A6'],
+  ['--destaque', '#B0412E'],
+  ['--texto', '#2A1418'],
+  ['--texto-2', '#7A6A62'],
+  ['--linha', '#E8DDD2'],
+  ['--azul-ap', '#1F2A55'],
+];
+---
+
+<Base title="Componentes · Abílio Pinto Futsal Cup" noindex>
+  <NavFlutuante />
+  <main class="montra">
+    <h1 class="titulo-seccao grande">Componentes</h1>
+    <p class="intro">Página interna para revisão (não aparece na navegação nem nos motores de pesquisa). Dados de exemplo.</p>
+
+    <section>
+      <h2 class="titulo-seccao">Cores</h2>
+      <ul class="cores">
+        {
+          cores.map(([nome, hex]) => (
+            <li>
+              <span class="amostra" style={`background: var(${nome})`} />
+              <code>{nome}</code>
+              <span>{hex}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Tipografia</h2>
+      <p class="tipo-display">Barlow Condensed 800 · Javalis × Bairro FC · 20:10</p>
+      <p class="tipo-display p700">Barlow Condensed 700 · 3–1</p>
+      <p>Inter 400: texto corrido do site. <strong>Inter 700</strong> e <strong class="i800">Inter 800</strong>.</p>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Logótipo</h2>
+      <div class="fila">
+        <Logo linhas={2} />
+        <Logo linhas={1} />
+      </div>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Cromo: larguras de 68 a 240px</h2>
+      <div class="fila base">
+        {
+          larguras.map((w) => (
+            <div class="com-legenda">
+              <Cromo nome={rui.nome} numero={rui.numero} subtitulo={`${rui.posicao} · ${javalis.nome}`} cor={javalis.cor} largura={w} />
+              <span>{w}px</span>
+            </div>
+          ))
+        }
+      </div>
+      <h3>Cores de equipa (silhueta por omissão)</h3>
+      <div class="fila">
+        {
+          equipas.map((e) => {
+            const j = jogadoresDe(e.id)[0];
+            return <Cromo nome={j.nome} numero={j.numero} subtitulo={e.nome} cor={e.cor} largura={104} />;
+          })
+        }
+      </div>
+      <h3>Nome comprido e número de dois dígitos</h3>
+      <div class="fila base">
+        <Cromo nome="Maximiliano" numero={99} subtitulo="Guarda-redes · Bairro FC" cor="#2F5D50" largura={68} />
+        <Cromo nome="Maximiliano" numero={99} subtitulo="Guarda-redes · Bairro FC" cor="#2F5D50" largura={116} />
+        <div class="com-legenda">
+          <Cromo nome="Rui" numero={7} subtitulo="68px no telemóvel, 150px no computador" cor={javalis.cor} largura={68} larguraComputador={150} />
+          <span>larguraComputador</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Emblema de equipa</h2>
+      <div class="fila centro">
+        <EmblemaEquipa sigla="JV" cor="#7A1E2C" rotulo="Javalis" />
+        <EmblemaEquipa sigla="BF" cor="#2F5D50" tamanho={26} anel={2} rotulo="Bairro FC" />
+        <EmblemaEquipa sigla="JV" cor="#7A1E2C" tamanho={72} dourado rotulo="Javalis" />
+      </div>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Cartão "Jogo em destaque"</h2>
+      <p class="intro">Muda de disposição a partir de 960px de largura.</p>
+      <CartaoJogoDestaque
+        jogo={destaque}
+        casa={equipa(destaque.casa)}
+        fora={equipa(destaque.fora)}
+        jogadoresCasa={jogadoresDe(destaque.casa)}
+        jogadoresFora={jogadoresDe(destaque.fora)}
+      />
+    </section>
+
+    <section class="estreita">
+      <h2 class="titulo-seccao">Linha de jogo</h2>
+      <ul class="lista">
+        <li><LinhaJogo hora="19:30" casa="Leões" fora="Ponte" href="#" /></li>
+        <li><LinhaJogo hora="20:10" casa="Javalis" fora="Bairro FC" href="#" destaque /></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Botões e links</h2>
+      <div class="fila centro">
+        <Botao>Primário (botão)</Botao>
+        <Botao href="#">Primário (link)</Botao>
+        <Botao variante="secundario">Secundário</Botao>
+        <Botao variante="secundario" href="#">Secundário (link)</Botao>
+        <Botao icone="partilhar">Partilhar nos stories</Botao>
+        <Botao variante="secundario" icone="transferir">Guardar imagem</Botao>
+        <PilulaLink href="#">Ver todas</PilulaLink>
+        <PilulaLink href="#">Calendário</PilulaLink>
+      </div>
+      <div class="fila centro fundo-bordo">
+        <Botao variante="branco" icone="calendario">Adicionar ao calendário</Botao>
+        <Botao variante="claro" href="#">Ver as duas equipas</Botao>
+      </div>
+    </section>
+
+    <section class="estreita">
+      <h2 class="titulo-seccao">Mosaico de resultado</h2>
+      <div class="mosaicos">
+        {
+          resultadosJavalis.map((r) => (
+            <MosaicoResultado resultado={r.resultado} adversario={equipa(r.adversario).nome} href={r.href} />
+          ))
+        }
+        <MosaicoResultado resultado="20:10" adversario="Bairro FC" legenda="hoje" href="#" />
+      </div>
+    </section>
+  </main>
+
+  <BarraPatrocinadores />
+
+  <div class="montra">
+    <section>
+      <h2 class="titulo-seccao">Faixa de números</h2>
+      <FaixaNumeros />
+    </section>
+  </div>
+
+  <Rodape />
+</Base>
+
+<style>
+  .montra {
+    max-width: calc(var(--max) + 40px);
+    margin: 0 auto;
+    padding: 24px 20px 0;
+  }
+  .grande {
+    font-size: 40px;
+  }
+  .intro {
+    margin: 6px 0 0;
+    color: var(--texto-2);
+  }
+  section {
+    margin-top: 40px;
+  }
+  h3 {
+    margin: 24px 0 0;
+    font-size: 14px;
+    color: var(--texto-2);
+  }
+  .fila {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .base {
+    align-items: flex-end;
+  }
+  .centro {
+    align-items: center;
+  }
+  .com-legenda {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--texto-2);
+  }
+  .fundo-bordo {
+    padding: 20px;
+    border-radius: var(--raio-cartao);
+    background: var(--bordo);
+  }
+  .estreita {
+    max-width: 520px;
+  }
+  .lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mosaicos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .cores {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 13px;
+  }
+  .cores li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .amostra {
+    height: 56px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-botao);
+  }
+  .tipo-display {
+    margin: 10px 0 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 32px;
+    text-transform: uppercase;
+  }
+  .p700 {
+    font-weight: 700;
+  }
+  .i800 {
+    font-weight: 800;
+  }
+</style>
