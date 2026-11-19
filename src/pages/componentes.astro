@@ -13,6 +13,11 @@ import MosaicoResultado from '../components/MosaicoResultado.astro';
 import BarraPatrocinadores from '../components/BarraPatrocinadores.astro';
 import FaixaNumeros from '../components/FaixaNumeros.astro';
 import Rodape from '../components/Rodape.astro';
+import EstadoVazio from '../components/EstadoVazio.astro';
+import JogosPorDia from '../components/JogosPorDia.astro';
+import CartaoGrupo from '../components/CartaoGrupo.astro';
+import ListaMarcadores from '../components/ListaMarcadores.astro';
+import SeletorEquipa from '../components/SeletorEquipa.astro';
 import { equipa, equipas, idJogoEmDestaque, jogador, jogadoresDe, jogos, resultadosJavalis } from '../data/exemplo';
 
 const destaque = jogos.find((j) => j.id === idJogoEmDestaque)!;
@@ -38,6 +43,7 @@ const cores = [
   <NavFlutuante />
   <main class="montra">
     <h1 class="titulo-seccao grande">Componentes</h1>
+    <!-- Esta página usa sempre os dados de exemplo (src/data/exemplo.ts), em qualquer fase do torneio. -->
     <p class="intro">Página interna para revisão (não aparece na navegação nem nos motores de pesquisa). Dados de exemplo.</p>
 
     <section>
@@ -103,8 +109,15 @@ const cores = [
     </section>
 
     <section>
+      <h2 class="titulo-seccao">Seletor de equipa</h2>
+      <p class="intro">Na navegação só aparece depois do sorteio. Aqui com as equipas de exemplo.</p>
+      <div class="fila"><SeletorEquipa equipas={equipas} /></div>
+    </section>
+
+    <section>
       <h2 class="titulo-seccao">Emblema de equipa</h2>
       <div class="fila centro">
+        <EmblemaEquipa sigla="?" neutro tamanho={52} />
         <EmblemaEquipa sigla="JV" cor="#7A1E2C" rotulo="Javalis" />
         <EmblemaEquipa sigla="BF" cor="#2F5D50" tamanho={26} anel={2} rotulo="Bairro FC" />
         <EmblemaEquipa sigla="JV" cor="#7A1E2C" tamanho={72} dourado rotulo="Javalis" />
@@ -158,6 +171,33 @@ const cores = [
           ))
         }
         <MosaicoResultado resultado="20:10" adversario="Bairro FC" legenda="hoje" href="#" />
+      </div>
+    </section>
+
+    <section>
+      <h2 class="titulo-seccao">Estados vazios (antes do sorteio)</h2>
+      <p class="intro">O que o Início mostra com <code>torneio.fase = 'pre-sorteio'</code>.</p>
+
+      <h3>Cartão "Jogo de abertura"</h3>
+      <div class="bloco-vazio"><CartaoJogoDestaque /></div>
+
+      <h3>Estado vazio genérico e cromos em silhueta</h3>
+      <div class="grelha-2">
+        <EstadoVazio texto="Calendário publicado depois do sorteio" detalhe="Fase de grupos" />
+        <EstadoVazio texto="Os marcadores aparecem a partir do primeiro jogo">
+          <Cromo vazio largura={68} />
+          <Cromo vazio largura={68} />
+          <Cromo vazio largura={68} />
+        </EstadoVazio>
+      </div>
+
+      <h3>Jogos por dia sem calendário</h3>
+      <div class="bloco-vazio"><JogosPorDia jogos={[]} diaPredefinido="2026-12-26" frase="Cinco dias de jogos em dezembro. Escolhe o dia." /></div>
+
+      <h3>Grupo por sortear e marcadores vazios</h3>
+      <div class="grelha-2">
+        <CartaoGrupo grupo="A" href="#" linhas={[{}, {}, {}, {}]} />
+        <ListaMarcadores marcadores={[]} />
       </div>
     </section>
   </main>
@@ -219,6 +259,20 @@ const cores = [
     padding: 20px;
     border-radius: var(--raio-cartao);
     background: var(--bordo);
+  }
+  /* Aqui o cartaz não fica por baixo da navegação. */
+  .montra :global(.cartaz) {
+    margin-top: 0;
+    padding-top: 48px;
+  }
+  .grelha-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+  }
+  .bloco-vazio {
+    margin-top: 14px;
   }
   .estreita {
     max-width: 520px;
