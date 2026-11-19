@@ -16,8 +16,10 @@ interface Props {
 const {
   title = `${torneio.nome} · ${torneio.subtitulo}`,
   description = `${torneio.edicao} do ${torneio.subtitulo}: ${torneio.diasTexto}, no ${torneio.local}.`,
-  noindex = false,
+  noindex: noindexPagina = false,
 } = Astro.props;
+// No modo de revisão, nenhuma página é indexada (e o robots.txt bloqueia tudo: ver astro.config.mjs).
+const noindex = noindexPagina || torneio.modoRevisao;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
