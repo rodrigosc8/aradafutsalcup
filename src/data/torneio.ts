@@ -18,9 +18,17 @@ export const torneio = {
 
   numeros: [
     { valor: '16', rotulo: 'equipas' },
-    { valor: '224', rotulo: 'atletas' },
-    { valor: '5', rotulo: 'dias de jogo' },
+    { valor: '224', rotulo: 'cromos para colecionar' },
+    { valor: '32', rotulo: 'jogos' },
+    { valor: '5', rotulo: 'dias de dezembro' },
   ],
+
+  // Fase de cada dia de jogo (mesma ordem de `dias`).
+  fases: ['grupos', 'grupos', 'grupos', 'quartos', 'finais'],
+  pausaNatal: '24 e 25: pausa de Natal.',
+
+  // Duração usada no evento de calendário (.ics). Estimativa: confirmar com a organização.
+  duracaoJogoMinutos: 50,
 
   // Preencher quando houver: link do formulário de inscrição e contacto da Junta.
   linkInscricao: '',

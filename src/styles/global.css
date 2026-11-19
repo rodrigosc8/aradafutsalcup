@@ -1,21 +1,42 @@
-/* Tokens de marca: cores da Junta de Freguesia de Arada + Abílio Pinto */
+/*
+ * Tokens do design aprovado (design-ref/DESIGN.md, 19/11/2026).
+ * O DESIGN.md é a fonte de verdade: se mudar lá, muda aqui.
+ */
 :root {
-  --verde: #0f472e;
-  --verde-escuro: #0a311f;
-  --mostarda: #cd8c19;
-  --mostarda-claro: #e3ae45; /* para texto pequeno sobre verde (contraste AA) */
-  --castanho: #643f25;
-  --azul-arada: #147fa9;
-  --azul-ap: #1f2a55;
-  --creme: #f7f2e8;
-  --branco: #ffffff;
-  --texto: #2c1714;
+  /* Cores */
+  --bordo: #7a1e2c; /* cor principal, botões primários, item ativo, faixa de destaque */
+  --bordo-claro: #e7b9bf; /* texto secundário sobre bordô */
+  --papel: #f7f1ea; /* fundo das páginas */
+  --branco: #ffffff; /* superfícies: cartões, navegação, moldura do cromo */
+  --dourado: #c98e2b; /* estrela de Natal, fio interior do cromo (nunca como texto) */
+  --dourado-claro: #f3d9a6; /* etiquetas pequenas sobre bordô */
+  --destaque: #b0412e; /* "Futsal Cup" no logótipo de texto */
+  --texto: #2a1418; /* texto principal */
+  --texto-2: #7a6a62; /* texto secundário */
+  --linha: #e8ddd2; /* contornos e separadores */
+  --azul-ap: #1f2a55; /* faixa do patrocinador principal (Abílio Pinto) */
+  --azul-ap-claro: #c9cfe3; /* texto pequeno sobre azul-ap */
 
-  --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  /* Tipografia */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   --font-body: 'Inter Variable', system-ui, sans-serif;
+  /* Marcador do patrocinador principal até chegar o logótipo oficial. */
+  --font-marcador: 'Inter Variable', system-ui, sans-serif;
 
-  --raio: 12px;
-  --max: 1080px;
+  /* Raios */
+  --raio-capsula: 999px;
+  --raio-cartao: 20px;
+  --raio-cartao-grande: 28px;
+  --raio-botao: 12px;
+  --raio-linha: 14px;
+
+  /* Sombras (só navegação flutuante e cromos) */
+  --sombra-nav: 0 10px 30px rgb(42 20 24 / 0.12);
+  --sombra-cromo: 0 1px 2px rgb(0 0 0 / 0.08), 0 6px 16px rgb(0 0 0 / 0.08);
+
+  /* Layout */
+  --max: 1160px;
+  --toque: 44px; /* área de toque mínima */
 }
 
 *,
@@ -26,13 +47,14 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--font-body);
   color: var(--texto);
-  background: var(--creme);
+  background: var(--papel);
   line-height: 1.5;
 }
 
@@ -40,9 +62,46 @@ a {
   color: inherit;
 }
 
+button {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+}
+
 :focus-visible {
-  outline: 3px solid var(--mostarda);
+  outline: 3px solid var(--dourado);
   outline-offset: 3px;
+}
+
+.titulo-seccao {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+@media (min-width: 960px) {
+  .titulo-seccao {
+    font-size: 1.5rem;
+  }
+}
+
+/* Visível só no telemóvel / só no computador (mesmo ponto de quebra da navegação). */
+@media (min-width: 960px) {
+  .so-telemovel {
+    display: none !important;
+  }
+}
+@media (max-width: 959.98px) {
+  .so-computador {
+    display: none !important;
+  }
 }
 
 .visually-hidden {
@@ -51,5 +110,6 @@ a {
   height: 1px;
   overflow: hidden;
   clip: rect(0 0 0 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
