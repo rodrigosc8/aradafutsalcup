@@ -20,6 +20,7 @@ export const torneio = {
   subtitulo: 'Torneio de Futsal de Natal de Arada',
   organizacao: 'Junta de Freguesia de Arada',
   local: 'Pavilhão Gimnodesportivo de Arada',
+  localCurto: 'Pavilhão de Arada',
   // TODO: morada do pavilhão (rua, código postal, localidade). Enquanto vazia, não aparece no rodapé.
   morada: '',
   patrocinadorPrincipal: 'Abílio Pinto',

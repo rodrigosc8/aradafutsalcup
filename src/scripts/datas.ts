@@ -40,24 +40,56 @@ export function dataLonga(iso: string, agora = agoraSite()): string {
   return `${dia}, ${d} de ${MESES_LONGOS[m - 1]}`;
 }
 
+/** "Segunda, 21 dez"; no próprio dia, "Hoje, 22 dez" (linha curta do destaque no telemóvel). */
+export function dataMedia(iso: string, agora = agoraSite()): string {
+  const [a, m, d] = diaLisboa(new Date(iso)).split('-').map(Number);
+  const semana = new Date(Date.UTC(a, m - 1, d)).getUTCDay();
+  const dia = diaLisboa(new Date(iso)) === diaLisboa(agora) ? 'Hoje' : DIAS_LONGOS[semana];
+  return `${dia}, ${d} ${MESES[m - 1]}`;
+}
+
 export type PartesContagem =
-  | { estado: 'antes'; dias: number; horas: number; minutos: number }
+  | { estado: 'antes'; dias: number; horas: number; minutos: number; segundos: number }
   | { estado: 'decorrer' }
   | { estado: 'fim' };
 
-/** Dias, horas e minutos até ao apito do jogo (para os mosaicos do cartaz). */
+/** Dias, horas, minutos e segundos até ao apito do jogo. */
 export function partesContagem(iso: string, agora = agoraSite()): PartesContagem {
   const inicio = Date.parse(iso);
   const t = agora.getTime();
   if (t >= inicio + torneio.duracaoJogoMinutos * 60_000) return { estado: 'fim' };
   if (t >= inicio) return { estado: 'decorrer' };
-  const totalMin = Math.ceil((inicio - t) / 60_000);
+  const total = Math.ceil((inicio - t) / 1000);
   return {
     estado: 'antes',
-    dias: Math.floor(totalMin / 1440),
-    horas: Math.floor((totalMin % 1440) / 60),
-    minutos: totalMin % 60,
+    dias: Math.floor(total / 86_400),
+    horas: Math.floor((total % 86_400) / 3600),
+    minutos: Math.floor((total % 3600) / 60),
+    segundos: total % 60,
   };
+}
+
+/**
+ * Os mosaicos da contagem (telemóvel e computador):
+ * - a partir de 1 dia: dias · horas · min;
+ * - a menos de 1 dia: horas · min · seg (só horas · min com menos movimento pedido).
+ * Horas, minutos e segundos com 2 dígitos; dias sem zero à esquerda.
+ */
+export function mosaicosContagem(p: PartesContagem, menosMovimento = false): { valor: string; rotulo: string }[] {
+  if (p.estado !== 'antes') return [];
+  const dois = (n: number) => String(n).padStart(2, '0');
+  if (p.dias >= 1) {
+    return [
+      { valor: String(p.dias), rotulo: p.dias === 1 ? 'dia' : 'dias' },
+      { valor: dois(p.horas), rotulo: 'horas' },
+      { valor: dois(p.minutos), rotulo: 'min' },
+    ];
+  }
+  const hm = [
+    { valor: dois(p.horas), rotulo: 'horas' },
+    { valor: dois(p.minutos), rotulo: 'min' },
+  ];
+  return menosMovimento ? hm : [...hm, { valor: dois(p.segundos), rotulo: 'seg' }];
 }
 
 /** "hoje" no próprio dia; senão "seg, 21 dez". */
@@ -92,18 +124,22 @@ export function atualizarQuando(raiz: ParentNode = document): void {
       el.textContent = textoDia(iso, agora);
     } else if (el.dataset.quando === 'dia-longo') {
       el.textContent = dataLonga(iso, agora);
+    } else if (el.dataset.quando === 'dia-medio') {
+      el.textContent = dataMedia(iso, agora);
     } else if (el.dataset.quando === 'partes') {
       const p = partesContagem(iso, agora);
+      const menosMovimento = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const valores = mosaicosContagem(p, menosMovimento);
       const mosaicos = el.querySelector<HTMLElement>('[data-mosaicos]');
       const legenda = el.querySelector<HTMLElement>('[data-legenda]');
-      if (mosaicos) mosaicos.hidden = p.estado !== 'antes';
-      if (p.estado === 'antes') {
-        const pares = { dias: p.dias, horas: p.horas, minutos: p.minutos };
-        for (const [k, v] of Object.entries(pares)) {
-          const n = el.querySelector<HTMLElement>(`[data-parte="${k}"]`);
-          if (n) n.textContent = String(v).padStart(k === 'dias' ? 1 : 2, '0');
-        }
-      }
+      if (mosaicos) mosaicos.hidden = valores.length === 0;
+      el.querySelectorAll<HTMLElement>('[data-mosaico]').forEach((li, i) => {
+        const v = valores[i];
+        li.hidden = !v;
+        if (!v) return;
+        li.querySelector<HTMLElement>('[data-valor]')!.textContent = v.valor;
+        li.querySelector<HTMLElement>('[data-rotulo]')!.textContent = v.rotulo;
+      });
       if (legenda) legenda.textContent = p.estado === 'antes' ? 'para o apito inicial' : p.estado === 'decorrer' ? 'A decorrer' : 'Jogo terminado';
     } else {
       const texto = textoContagem(iso, el.dataset.formato === 'longo' ? 'longo' : 'curto', agora);
