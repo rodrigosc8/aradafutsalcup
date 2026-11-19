@@ -1,96 +1,128 @@
 ---
 // Cartão "Jogo em destaque": fundo bordô, as duas equipas, a hora, a contagem e
 // "Jogadores a seguir" (2 cromos de cada equipa: os jogadores nunca representam a equipa sozinhos).
-// Telemóvel e computador têm disposições diferentes (ver design-ref/).
+// Telemóvel e computador têm disposições diferentes (ver docs/design/).
+//
+// Sem `jogo` (antes do sorteio): "Jogo de abertura", emblemas neutros "?", contagem para
+// torneio.inicio, .ics do torneio inteiro e "Ver o regulamento ›". Nenhum dado inventado.
 import Botao from './Botao.astro';
 import Cromo from './Cromo.astro';
 import EmblemaEquipa from './EmblemaEquipa.astro';
 import Icone from './Icone.astro';
-import type { Equipa, Jogador, Jogo } from '../data/exemplo';
+import type { Equipa, Jogador, Jogo } from '../data/fonte';
 import { torneio } from '../data/torneio';
 import { dataLonga, horaLisboa, partesContagem, textoContagem, textoDia } from '../scripts/datas';
 
 interface Props {
-  jogo: Jogo;
-  casa: Equipa;
-  fora: Equipa;
+  jogo?: Jogo;
+  casa?: Equipa;
+  fora?: Equipa;
   /** 2 jogadores de cada equipa. */
-  jogadoresCasa: Jogador[];
-  jogadoresFora: Jogador[];
+  jogadoresCasa?: Jogador[];
+  jogadoresFora?: Jogador[];
   rotulo?: string;
   /** Destino de "Ver as duas equipas". */
   hrefEquipas?: string;
 }
 
-const {
-  jogo,
-  casa,
-  fora,
-  jogadoresCasa,
-  jogadoresFora,
-  rotulo = 'Jogo em destaque',
-  hrefEquipas = `/jogos#${jogo.id}`,
-} = Astro.props;
+const { jogo, casa, fora, jogadoresCasa = [], jogadoresFora = [] } = Astro.props;
+const porSortear = !jogo || !casa || !fora;
 
-const hora = horaLisboa(jogo.inicio);
+const inicio = porSortear ? torneio.inicio : jogo.inicio;
+const diaNum = Number(torneio.dias[0].slice(8, 10));
+const rotulo = Astro.props.rotulo ?? (porSortear ? 'Jogo de abertura' : 'Jogo em destaque');
+const etiqueta = porSortear ? `${diaNum} de dezembro` : jogo.grupo ? `Grupo ${jogo.grupo}` : jogo.fase;
+// No lugar da hora: a hora do jogo ou, antes do sorteio, a data.
+const hora = porSortear ? `${diaNum} dez` : horaLisboa(jogo.inicio);
+const titulo = porSortear ? `${rotulo}, ${etiqueta}` : `${casa.nome} × ${fora.nome}`;
+const nota = porSortear ? 'As equipas e os horários são conhecidos depois do sorteio.' : undefined;
+
 // Texto do build; o script atualiza no browser.
 const agora = new Date();
-const dia = textoDia(jogo.inicio, agora);
-const contagemCurta = textoContagem(jogo.inicio, 'curto', agora);
-const diaLongo = dataLonga(jogo.inicio, agora);
-const partes = partesContagem(jogo.inicio, agora);
-const etiqueta = [jogo.grupo ? `Grupo ${jogo.grupo}` : jogo.fase].join(' · ');
-const titulo = `${casa.nome} × ${fora.nome}`;
+const dia = textoDia(inicio, agora);
+const contagemCurta = textoContagem(inicio, 'curto', agora);
+const diaLongo = dataLonga(inicio, agora);
+const partes = partesContagem(inicio, agora);
 
-const ics = {
-  'data-ics': '',
-  'data-ics-uid': `${jogo.id}-${jogo.inicio.slice(0, 10)}`,
-  'data-ics-inicio': jogo.inicio,
-  'data-ics-titulo': `${titulo} · ${torneio.nome}`,
-  'data-ics-ficheiro': `${casa.id}-${fora.id}.ics`,
-};
-const equipasCromos = [
-  { equipa: casa, jogadores: jogadoresCasa.slice(0, 2) },
-  { equipa: fora, jogadores: jogadoresFora.slice(0, 2) },
-];
+const ics = porSortear
+  ? {
+      'data-ics': '',
+      'data-ics-uid': `torneio-${torneio.dias[0].slice(0, 4)}`,
+      'data-ics-dias': torneio.dias.join(','),
+      'data-ics-titulo': torneio.nome,
+      'data-ics-ficheiro': `abilio-pinto-futsal-cup-${torneio.dias[0].slice(0, 4)}.ics`,
+    }
+  : {
+      'data-ics': '',
+      'data-ics-uid': `${jogo.id}-${jogo.inicio.slice(0, 10)}`,
+      'data-ics-inicio': jogo.inicio,
+      'data-ics-titulo': `${titulo} · ${torneio.nome}`,
+      'data-ics-ficheiro': `${casa.id}-${fora.id}.ics`,
+    };
+const acao = porSortear
+  ? { texto: 'Ver o regulamento', href: torneio.links.regulamento }
+  : { texto: 'Ver as duas equipas', href: Astro.props.hrefEquipas ?? `/jogos#${jogo.id}` };
+
+type LadoCartaz = { nome?: string; sigla: string; cor?: string; jogadores: Jogador[] };
+const lados: LadoCartaz[] = porSortear
+  ? [
+      { sigla: '?', jogadores: [] },
+      { sigla: '?', jogadores: [] },
+    ]
+  : [
+      { nome: casa.nome, sigla: casa.sigla, cor: casa.cor, jogadores: jogadoresCasa.slice(0, 2) },
+      { nome: fora.nome, sigla: fora.sigla, cor: fora.cor, jogadores: jogadoresFora.slice(0, 2) },
+    ];
+const comJogadores = lados.some((l) => l.jogadores.length > 0);
 ---
 
-<section class="destaque" aria-label={`${rotulo}: ${titulo}`}>
+<section class:list={['destaque', { 'por-sortear': porSortear }]} aria-label={`${rotulo}: ${porSortear ? etiqueta : titulo}`}>
   <!-- Telemóvel -->
   <div class="movel so-telemovel">
     <p class="etiqueta centro">
       <Icone nome="estrela" tamanho={12} /><span><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</span>
     </p>
     <div class="confronto">
-      <div class="lado">
-        <EmblemaEquipa sigla={casa.sigla} cor={casa.cor} />
-        <span class="nome-equipa">{casa.nome}</span>
-      </div>
-      <div class="quando">
-        <span class="hora">{hora}</span>
-        <span class="dia" data-quando="dia" data-inicio={jogo.inicio}>{dia}</span>
-        <span class="contagem" data-quando="contagem" data-inicio={jogo.inicio} hidden={!contagemCurta}
-          >{contagemCurta}</span
-        >
-      </div>
-      <div class="lado">
-        <EmblemaEquipa sigla={fora.sigla} cor={fora.cor} />
-        <span class="nome-equipa">{fora.nome}</span>
-      </div>
+      {
+        [lados[0], null, lados[1]].map((l) =>
+          l ? (
+            <div class="lado">
+              <EmblemaEquipa sigla={l.sigla} cor={l.cor} neutro={!l.cor} />
+              <span class:list={['nome-equipa', { vago: !l.nome }]}>{l.nome ?? 'Por sortear'}</span>
+            </div>
+          ) : (
+            <div class="quando">
+              <span class="hora">{hora}</span>
+              {!porSortear && (
+                <span class="dia" data-quando="dia" data-inicio={inicio}>
+                  {dia}
+                </span>
+              )}
+              <span class="contagem" data-quando="contagem" data-inicio={inicio} hidden={!contagemCurta}>
+                {contagemCurta}
+              </span>
+            </div>
+          ),
+        )
+      }
     </div>
-    <div class="seguir">
-      <p class="etiqueta">Jogadores a seguir</p>
-      <div class="cromos-movel">
-        {
-          equipasCromos.flatMap(({ equipa, jogadores }) =>
-            jogadores.map((j) => (
-              <Cromo nome={j.nome} numero={j.numero} subtitulo={equipa.nome} cor={equipa.cor} largura={68} />
-            )),
-          )
-        }
-      </div>
-    </div>
+    {
+      comJogadores && (
+        <div class="seguir">
+          <p class="etiqueta">Jogadores a seguir</p>
+          <div class="cromos-movel">
+            {lados.flatMap((l) =>
+              l.jogadores.map((j) => (
+                <Cromo nome={j.nome} numero={j.numero} subtitulo={l.nome} cor={l.cor!} largura={68} />
+              )),
+            )}
+          </div>
+        </div>
+      )
+    }
+    {nota && <p class="nota">{nota}</p>}
     <Botao variante="branco" icone="calendario" largo class="botao-cal" {...ics}>Adicionar ao calendário</Botao>
+    {porSortear && <Botao variante="claro" href={acao.href} largo class="botao-sec">{acao.texto}</Botao>}
   </div>
 
   <!-- Computador: cartaz de jogo em largura total -->
@@ -99,29 +131,33 @@ const equipasCromos = [
       <div class="cartaz-topo">
         <p class="cartaz-rotulo"><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</p>
         <p class="cartaz-data">
-          <span data-quando="dia-longo" data-inicio={jogo.inicio}>{diaLongo}</span> · {torneio.local}
+          <span data-quando="dia-longo" data-inicio={inicio}>{diaLongo}</span> · {torneio.local}
         </p>
       </div>
       <div class="cartaz-grelha">
         {
-          equipasCromos.map(({ equipa, jogadores }, lado) => (
-            <div class:list={['cartaz-lado', lado === 0 ? 'esquerda' : 'direita']}>
+          lados.map((l, i) => (
+            <div class:list={['cartaz-lado', i === 0 ? 'esquerda' : 'direita']}>
               <div class="cartaz-equipa">
-                <EmblemaEquipa sigla={equipa.sigla} cor={equipa.cor} tamanho={96} />
-                <p class="cartaz-nome">{equipa.nome}</p>
+                <EmblemaEquipa sigla={l.sigla} cor={l.cor} neutro={!l.cor} tamanho={96} />
+                <p class:list={['cartaz-nome', { vago: !l.nome }]}>{l.nome ?? 'Por sortear'}</p>
               </div>
-              <div class="par">
-                {jogadores.map((j) => (
-                  <Cromo nome={j.nome} numero={j.numero} subtitulo={j.posicao} cor={equipa.cor} largura={132} />
-                ))}
-              </div>
-              <p class="cartaz-legenda">Jogadores a seguir</p>
+              {l.jogadores.length > 0 && (
+                <>
+                  <div class="par">
+                    {l.jogadores.map((j) => (
+                      <Cromo nome={j.nome} numero={j.numero} subtitulo={j.posicao} cor={l.cor!} largura={132} />
+                    ))}
+                  </div>
+                  <p class="cartaz-legenda">Jogadores a seguir</p>
+                </>
+              )}
             </div>
           ))
         }
         <div class="cartaz-centro">
-          <p class="cartaz-hora"><span class="visually-hidden">{titulo}, às </span>{hora}</p>
-          <div class="contagem-partes" data-quando="partes" data-inicio={jogo.inicio}>
+          <p class="cartaz-hora"><span class="visually-hidden">{porSortear ? 'Começa a ' : `${titulo}, às `}</span>{hora}</p>
+          <div class="contagem-partes" data-quando="partes" data-inicio={inicio}>
             <ul class="mosaicos" data-mosaicos hidden={partes.estado !== 'antes'} aria-label="Tempo até ao apito inicial">
               {
                 (
@@ -144,9 +180,10 @@ const equipasCromos = [
               {partes.estado === 'antes' ? 'para o apito inicial' : partes.estado === 'decorrer' ? 'A decorrer' : 'Jogo terminado'}
             </p>
           </div>
+          {nota && <p class="cartaz-nota">{nota}</p>}
           <div class="cartaz-acoes">
             <Botao variante="branco" icone="calendario" {...ics}>Adicionar ao calendário</Botao>
-            <Botao variante="claro" href={hrefEquipas}>Ver as duas equipas</Botao>
+            <Botao variante="claro" href={acao.href}>{acao.texto}</Botao>
           </div>
         </div>
       </div>
@@ -251,6 +288,41 @@ const equipasCromos = [
     margin-top: 14px;
     min-height: 46px;
     font-size: 14px;
+  }
+
+  /* Antes do sorteio */
+  .vago {
+    color: var(--bordo-claro);
+  }
+  .movel .nome-equipa.vago {
+    font-size: 16px;
+  }
+  .por-sortear .hora,
+  .por-sortear .cartaz-hora {
+    text-transform: uppercase;
+  }
+  .nota {
+    margin: 14px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--bordo-claro);
+  }
+  .movel :global(.botao-sec) {
+    margin-top: 10px;
+    min-height: 46px;
+    font-size: 14px;
+  }
+  .por-sortear .cartaz-nome.vago {
+    font-size: 28px;
+  }
+  .cartaz-nota {
+    max-width: 30ch;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--bordo-claro);
   }
 
   /* Computador: cartaz em largura total, por baixo da navegação flutuante */

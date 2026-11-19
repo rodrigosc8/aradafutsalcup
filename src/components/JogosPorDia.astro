@@ -3,8 +3,9 @@
 // em duas colunas. Sem JavaScript, fica visível o dia predefinido.
 import CabecalhoSeccao from './CabecalhoSeccao.astro';
 import LinhaJogo from './LinhaJogo.astro';
-import type { Jogo } from '../data/exemplo';
-import { equipaDoLado, nomeDoLado } from '../data/exemplo';
+import EstadoVazio from './EstadoVazio.astro';
+import type { Jogo } from '../data/fonte';
+import { equipaDoLado, nomeDoLado } from '../data/fonte';
 import { torneio } from '../data/torneio';
 import { horaLisboa } from '../scripts/datas';
 
@@ -26,6 +27,12 @@ const dias = torneio.dias.map((iso, i) => ({
   fase: torneio.fases[i],
   jogos: jogos.filter((j) => j.inicio.startsWith(iso)),
 }));
+// Fase de cada dia (torneio.fases), para os dias ainda sem calendário.
+const FASES_DIA: Record<string, string> = {
+  grupos: 'Fase de grupos',
+  quartos: 'Quartos-de-final',
+  finais: 'Meias-finais, 3.º lugar e final',
+};
 const FASES: Record<Jogo['fase'], string> = {
   grupos: 'Grupos',
   quartos: 'Quartos',
@@ -61,7 +68,12 @@ const emblema = (lado: Jogo['casa']) => {
   </CabecalhoSeccao>
 
   {
-    dias.map((d) => (
+    dias.map((d) =>
+      d.jogos.length === 0 ? (
+        <div class="painel-vazio" id={`jogos-${d.iso}`} data-painel={d.iso} hidden={d.iso !== diaPredefinido}>
+          <EstadoVazio texto="Calendário publicado depois do sorteio" detalhe={FASES_DIA[d.fase] ?? d.fase} />
+        </div>
+      ) : (
       <ul class="lista" id={`jogos-${d.iso}`} data-painel={d.iso} hidden={d.iso !== diaPredefinido}>
         {d.jogos.map((j) => (
           <li>
@@ -78,7 +90,8 @@ const emblema = (lado: Jogo['casa']) => {
           </li>
         ))}
       </ul>
-    ))
+      ),
+    )
   }
 </section>
 
@@ -140,5 +153,8 @@ const emblema = (lado: Jogo['casa']) => {
   }
   .lista[hidden] {
     display: none;
+  }
+  .painel-vazio {
+    margin-top: 22px;
   }
 </style>

@@ -38,6 +38,39 @@ export interface EventoJogo {
   descricao?: string;
 }
 
+/** Torneio inteiro: um evento de dia inteiro por dia de jogo (antes de haver horários). */
+export function criarIcsTorneio(uid: string, titulo: string, dias: string[]): string {
+  const data = (iso: string) => iso.replace(/-/g, '');
+  const diaSeguinte = (iso: string) => {
+    const d = new Date(`${iso}T12:00:00Z`);
+    d.setUTCDate(d.getUTCDate() + 1);
+    return d.toISOString().slice(0, 10);
+  };
+  const eventos = dias.flatMap((dia, i) => [
+    'BEGIN:VEVENT',
+    `UID:${uid}-${data(dia)}@aradafutsalcup.pt`,
+    `DTSTAMP:${utc(new Date())}`,
+    `DTSTART;VALUE=DATE:${data(dia)}`,
+    `DTEND;VALUE=DATE:${data(diaSeguinte(dia))}`,
+    `SUMMARY:${escapar(`${titulo} · dia ${i + 1} de ${dias.length}`)}`,
+    `LOCATION:${escapar(torneio.local)}`,
+    `DESCRIPTION:${escapar(`${torneio.edicao} do ${torneio.subtitulo}. Horários publicados depois do sorteio.`)}`,
+    'URL:https://aradafutsalcup.pt/',
+    'TRANSP:TRANSPARENT',
+    'END:VEVENT',
+  ]);
+  const linhas = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//aradafutsalcup.pt//Abilio Pinto Futsal Cup//PT',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    ...eventos,
+    'END:VCALENDAR',
+  ];
+  return linhas.map(dobrar).join('\r\n') + '\r\n';
+}
+
 export function criarIcs(e: EventoJogo): string {
   const inicio = new Date(e.inicio);
   const fim = new Date(inicio.getTime() + torneio.duracaoJogoMinutos * 60_000);
@@ -83,8 +116,12 @@ export function ligarBotoesCalendario(): void {
   document.addEventListener('click', (ev) => {
     const botao = (ev.target as Element | null)?.closest<HTMLButtonElement>('button[data-ics]');
     if (!botao) return;
-    const { icsUid, icsInicio, icsTitulo, icsFicheiro } = botao.dataset;
-    if (!icsUid || !icsInicio || !icsTitulo) return;
-    descarregar(icsFicheiro || 'jogo.ics', criarIcs({ uid: icsUid, inicio: icsInicio, titulo: icsTitulo }));
+    const { icsUid, icsInicio, icsTitulo, icsFicheiro, icsDias } = botao.dataset;
+    if (!icsUid || !icsTitulo) return;
+    if (icsDias) {
+      descarregar(icsFicheiro || 'torneio.ics', criarIcsTorneio(icsUid, icsTitulo, icsDias.split(',')));
+    } else if (icsInicio) {
+      descarregar(icsFicheiro || 'jogo.ics', criarIcs({ uid: icsUid, inicio: icsInicio, titulo: icsTitulo }));
+    }
   });
 }

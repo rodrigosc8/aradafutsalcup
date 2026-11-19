@@ -4,8 +4,8 @@
 // - Telemóvel: cabeçalho com logótipo e seletor; cápsula com os 4 itens fixa em baixo.
 import Logo from './Logo.astro';
 import SeletorEquipa from './SeletorEquipa.astro';
-// TODO: trocar pela lista real de equipas depois do sorteio.
-import { equipas } from '../data/exemplo';
+// Antes do sorteio não há equipas: o seletor "Sigo: equipa" fica escondido.
+import { equipas, haSorteio } from '../data/fonte';
 
 export type ItemNav = 'inicio' | 'jogos' | 'grupos' | 'cromos';
 
@@ -35,7 +35,7 @@ const itens: { id: ItemNav; texto: string; href: string }[] = [
         ))
       }
     </nav>
-    <SeletorEquipa equipas={equipas} />
+    {haSorteio && <SeletorEquipa equipas={equipas} />}
   </header>
 </div>
 

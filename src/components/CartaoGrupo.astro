@@ -4,12 +4,13 @@
 import EmblemaEquipa from './EmblemaEquipa.astro';
 import Icone from './Icone.astro';
 
+/** Sem `nome`, a linha é "Por sortear" (antes do sorteio). */
 interface Linha {
-  nome: string;
-  sigla: string;
-  cor: string;
-  jogos: number;
-  pontos: number;
+  nome?: string;
+  sigla?: string;
+  cor?: string;
+  jogos?: number;
+  pontos?: number;
 }
 interface Props {
   grupo: string;
@@ -39,16 +40,16 @@ const { grupo, linhas, href, apurados = 2 } = Astro.props;
     <tbody>
       {
         linhas.map((l, i) => (
-          <tr class:list={{ apurado: i < apurados }}>
+          <tr class:list={{ apurado: i < apurados && l.nome, vago: !l.nome }}>
             <td class="pos">{i + 1}</td>
             <td>
               <span class="equipa">
-                <EmblemaEquipa sigla={l.sigla} cor={l.cor} tamanho={22} anel={0} />
-                {l.nome}
+                <EmblemaEquipa sigla={l.nome ? l.sigla! : ''} cor={l.cor} neutro={!l.nome} tamanho={22} anel={0} />
+                {l.nome ?? 'Por sortear'}
               </span>
             </td>
-            <td class="num j">{l.jogos}</td>
-            <td class="num pts">{l.pontos}</td>
+            <td class="num j">{l.nome ? l.jogos : '–'}</td>
+            <td class="num pts">{l.nome ? l.pontos : '–'}</td>
           </tr>
         ))
       }
@@ -138,6 +139,15 @@ const { grupo, linhas, href, apurados = 2 } = Astro.props;
   }
   .j {
     color: var(--texto-2);
+  }
+  .vago td,
+  .vago .equipa {
+    color: var(--texto-2);
+    font-weight: 500;
+  }
+  .vago td.pts {
+    font-family: var(--font-body);
+    font-weight: 500;
   }
   td.pts {
     padding-left: 10px;

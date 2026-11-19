@@ -1,0 +1,55 @@
+---
+// Estado vazio (DESIGN.md): contorno --linha tracejado, texto secundário, sem ícones decorativos.
+// O slot recebe conteúdo opcional por baixo do texto (ex.: cromos em silhueta).
+interface Props {
+  texto: string;
+  /** Linha de apoio por baixo (ex.: a fase do dia). */
+  detalhe?: string;
+  /** Mais baixo, para listas. */
+  compacto?: boolean;
+}
+const { texto, detalhe, compacto = false } = Astro.props;
+---
+
+<div class:list={['vazio', { compacto }]}>
+  <p class="texto">{texto}</p>
+  {detalhe && <p class="detalhe">{detalhe}</p>}
+  {Astro.slots.has('default') && <div class="extra"><slot /></div>}
+</div>
+
+<style>
+  .vazio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 140px;
+    padding: 24px 20px;
+    border: 1.5px dashed var(--linha);
+    border-radius: var(--raio-linha);
+    text-align: center;
+    color: var(--texto-2);
+  }
+  .compacto {
+    min-height: 88px;
+    padding: 18px 16px;
+  }
+  p {
+    margin: 0;
+  }
+  .texto {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .detalhe {
+    font-size: 13px;
+  }
+  .extra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 14px;
+  }
+</style>

@@ -4,6 +4,7 @@ import CabecalhoSeccao from './CabecalhoSeccao.astro';
 import Cromo from './Cromo.astro';
 import Icone from './Icone.astro';
 import PilulaLink from './PilulaLink.astro';
+import EstadoVazio from './EstadoVazio.astro';
 
 interface Marcador {
   id: string;
@@ -17,14 +18,27 @@ interface Props {
   marcadores: Marcador[];
   frase?: string;
 }
-const { marcadores, frase = 'Quem mais marcou até agora.' } = Astro.props;
+const vazio = Astro.props.marcadores.length === 0;
+const { marcadores, frase = vazio ? 'Os golos contam a partir do primeiro jogo.' : 'Quem mais marcou até agora.' } =
+  Astro.props;
 ---
 
 <section class="marcadores" aria-labelledby="titulo-marcadores">
   <CabecalhoSeccao titulo="Melhores marcadores" frase={frase} id="titulo-marcadores">
     <PilulaLink slot="acao" href="/cromos">Todos os cromos</PilulaLink>
   </CabecalhoSeccao>
-  <ol class="lista">
+  {
+    vazio && (
+      <div class="vazio">
+        <EstadoVazio texto="Os marcadores aparecem a partir do primeiro jogo">
+          <Cromo vazio largura={68} />
+          <Cromo vazio largura={68} />
+          <Cromo vazio largura={68} />
+        </EstadoVazio>
+      </div>
+    )
+  }
+  <ol class="lista" hidden={vazio}>
     {
       marcadores.map((m, i) => (
         <li>
@@ -56,6 +70,12 @@ const { marcadores, frase = 'Quem mais marcou até agora.' } = Astro.props;
     border: 1px solid var(--linha);
     border-radius: 22px;
     background: var(--branco);
+  }
+  .vazio {
+    margin-top: 18px;
+  }
+  .lista[hidden] {
+    display: none;
   }
   .lista {
     display: flex;
