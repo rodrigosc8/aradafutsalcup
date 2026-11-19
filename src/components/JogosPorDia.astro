@@ -176,6 +176,9 @@ const emblema = (lado: Jogo['casa']) => {
   }
   /* Telemóvel (páginas /jogos e /componentes): uma coluna e separadores a toda a largura. */
   @media (max-width: 1023.98px) {
+    .jogos-dia :global(.acao) {
+      width: 100%;
+    }
     .separadores {
       width: 100%;
       flex-wrap: nowrap;
@@ -186,6 +189,7 @@ const emblema = (lado: Jogo['casa']) => {
       min-width: 0;
       padding: 0 4px;
       font-size: 13px;
+      white-space: nowrap;
     }
     .lista {
       grid-template-columns: minmax(0, 1fr);
