@@ -15,9 +15,16 @@ interface Props {
   diaPredefinido: string;
   /** Jogo realçado (por exemplo, o jogo em destaque). */
   idDestaque?: string;
+  titulo?: string;
   frase?: string;
 }
-const { jogos, diaPredefinido, idDestaque, frase = '8 jogos por dia na fase de grupos. Escolhe o dia.' } = Astro.props;
+const {
+  jogos,
+  diaPredefinido,
+  idDestaque,
+  titulo = 'Jogos',
+  frase = '8 jogos por dia na fase de grupos. Escolhe o dia.',
+} = Astro.props;
 
 const SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const dias = torneio.dias.map((iso, i) => ({
@@ -48,7 +55,7 @@ const emblema = (lado: Jogo['casa']) => {
 ---
 
 <section class="jogos-dia" aria-labelledby="titulo-jogos" data-jogos-dia>
-  <CabecalhoSeccao titulo="Jogos" frase={frase} id="titulo-jogos">
+  <CabecalhoSeccao titulo={titulo} frase={frase} id="titulo-jogos">
     <div slot="acao" class="separadores" role="group" aria-label="Dia">
       {
         dias.map((d) => (
@@ -76,7 +83,7 @@ const emblema = (lado: Jogo['casa']) => {
       ) : (
       <ul class="lista" id={`jogos-${d.iso}`} data-painel={d.iso} hidden={d.iso !== diaPredefinido}>
         {d.jogos.map((j) => (
-          <li>
+          <li id={j.id}>
             <LinhaJogo
               hora={horaLisboa(j.inicio)}
               casa={nomeDoLado(j.casa)}
@@ -109,6 +116,16 @@ const emblema = (lado: Jogo['casa']) => {
     // Durante o torneio, abre no dia de hoje.
     const hoje = diaLisboa(new Date());
     if (botoes.some((b) => b.dataset.separador === hoje)) escolher(hoje);
+    // Link para um jogo (/jogos#id): abre o dia desse jogo e mostra-o.
+    const abrirHash = () => {
+      const alvo = location.hash ? raiz.querySelector<HTMLElement>(`[id="${CSS.escape(location.hash.slice(1))}"]`) : null;
+      const painel = alvo?.closest<HTMLElement>('[data-painel]');
+      if (!alvo || !painel) return;
+      escolher(painel.dataset.painel!);
+      alvo.scrollIntoView({ block: 'center' });
+    };
+    abrirHash();
+    window.addEventListener('hashchange', abrirHash);
   });
 </script>
 
@@ -153,6 +170,27 @@ const emblema = (lado: Jogo['casa']) => {
   }
   .lista[hidden] {
     display: none;
+  }
+  .lista li {
+    scroll-margin-top: 110px;
+  }
+  /* Telemóvel (páginas /jogos e /componentes): uma coluna e separadores a toda a largura. */
+  @media (max-width: 1023.98px) {
+    .separadores {
+      width: 100%;
+      flex-wrap: nowrap;
+      gap: 6px;
+    }
+    .separador {
+      flex: 1;
+      min-width: 0;
+      padding: 0 4px;
+      font-size: 13px;
+    }
+    .lista {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
   }
   .painel-vazio {
     margin-top: 22px;

@@ -126,6 +126,26 @@ const rotulo = `Ver o jogo ${casa} contra ${fora}, às ${hora}`;
     color: var(--bordo);
   }
 
+  /* Grelha no telemóvel: sem emblemas nem etiqueta, para os nomes caberem. */
+  @media (max-width: 1023.98px) {
+    .grelha {
+      grid-template-columns: 46px minmax(0, 1fr) 14px minmax(0, 1fr) 18px;
+      gap: 8px;
+      min-height: 56px;
+      padding: 0 10px 0 14px;
+    }
+    .g-hora {
+      font-size: 19px;
+    }
+    .grelha :global(.emblema),
+    .g-etiqueta {
+      display: none;
+    }
+    .g-nome {
+      font-size: 15px;
+    }
+  }
+
   /* Linha simples */
   .linha-jogo {
     display: grid;
