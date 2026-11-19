@@ -18,9 +18,9 @@ import JogosPorDia from '../components/JogosPorDia.astro';
 import CartaoGrupo from '../components/CartaoGrupo.astro';
 import ListaMarcadores from '../components/ListaMarcadores.astro';
 import SeletorEquipa from '../components/SeletorEquipa.astro';
-import { equipa, equipas, idJogoEmDestaque, jogador, jogadoresDe, jogos, resultadosJavalis } from '../data/exemplo';
+import { equipa, equipas, jogador, jogadoresDe, jogos, resultadosJavalis } from '../data/exemplo';
 
-const destaque = jogos.find((j) => j.id === idJogoEmDestaque)!;
+const destaque = jogos.find((j) => j.id === 'd1-a1')!; // Javalis × Bairro FC
 const rui = jogador('javalis-1');
 const javalis = equipa('javalis');
 const larguras = [68, 84, 104, 116, 150, 200, 240];

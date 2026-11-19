@@ -27,7 +27,10 @@ import {
   melhoresMarcadores,
   figuras,
   idJogoEmDestaque,
-  jogador,
+  idsCartoes,
+  estadoDoJogo,
+  resultadoDo,
+  nomeDoLado,
   jogadoresDe,
   jogos,
   haSorteio,
@@ -44,9 +47,11 @@ const outrosDoDia = jogos
   .sort((a, b) => Math.abs(Date.parse(a.inicio) - t0) - Math.abs(Date.parse(b.inicio) - t0))
   .slice(0, 3)
   .sort((a, b) => a.inicio.localeCompare(b.inicio));
-// Um cartão por jogo do 1.º dia: todas as equipas jogam nesse dia (são todos jogos de grupo).
-const jogosCartao = jogos.filter((j) => j.inicio.startsWith(torneio.dias[0]));
+// Cartões já gerados no build: o jogo em destaque e o próximo jogo de cada equipa (para "Sigo: equipa").
+const jogosCartao = jogos.filter((j) => idsCartoes.includes(j.id) && typeof j.casa === 'string' && typeof j.fora === 'string');
 const id = (lado: (typeof jogos)[number]['casa']) => lado as string;
+// "Jogadores a seguir": os 2 que mais marcaram (em empate, a ordem do plantel).
+const aSeguir = (idEquipa: string) => [...jogadoresDe(idEquipa)].sort((a, b) => b.golos - a.golos).slice(0, 2);
 
 const marcadores = melhoresMarcadores(5).map((j) => {
   const e = equipa(j.equipa);
@@ -81,8 +86,8 @@ const cincoDias = torneio.dias.map((d, i) => ({
     <h1 class="visually-hidden">{torneio.nome}: {torneio.subtitulo}</h1>
 
     {/*
-      Um cartão por jogo, já gerado no build. Sem equipa seguida mostra-se o jogo em destaque;
-      com equipa seguida, o primeiro jogo dessa equipa (o script troca no browser).
+      Cartões já gerados no build. Sem equipa seguida mostra-se o jogo em destaque;
+      com equipa seguida, o próximo jogo dessa equipa (o script troca no browser).
     */}
     <div class="faixa-destaque">
       {!destaque && <CartaoJogoDestaque />}
@@ -99,8 +104,8 @@ const cincoDias = torneio.dias.map((d, i) => ({
               jogo={j}
               casa={equipa(id(j.casa))}
               fora={equipa(id(j.fora))}
-              jogadoresCasa={jogadoresDe(id(j.casa))}
-              jogadoresFora={jogadoresDe(id(j.fora))}
+              jogadoresCasa={aSeguir(id(j.casa))}
+              jogadoresFora={aSeguir(id(j.fora))}
             />
           </div>
         ))
@@ -118,14 +123,13 @@ const cincoDias = torneio.dias.map((d, i) => ({
       </div>
       <div class="fila-cromos">
         {
-          figuras.map((id) => {
-            const j = jogador(id);
+          figuras.map(({ jogador: j, golos }) => {
             const e = equipa(j.equipa);
             return (
               <Cromo
                 nome={j.nome}
                 numero={j.numero}
-                subtitulo={`${j.golos} ${j.golos === 1 ? "golo" : "golos"} · ${e.nome}`}
+                subtitulo={`${golos} ${golos === 1 ? 'golo' : 'golos'} · ${e.nome}`}
                 cor={e.cor}
                 largura={84}
               />
@@ -162,9 +166,11 @@ const cincoDias = torneio.dias.map((d, i) => ({
               <li>
                 <LinhaJogo
                   hora={horaLisboa(j.inicio)}
-                  casa={equipa(id(j.casa)).nome}
-                  fora={equipa(id(j.fora)).nome}
+                  casa={nomeDoLado(j.casa)}
+                  fora={nomeDoLado(j.fora)}
                   href={`/jogos#${j.id}`}
+                  estado={estadoDoJogo(j)}
+                  resultado={resultadoDo(j)}
                 />
               </li>
             ))

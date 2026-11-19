@@ -37,7 +37,14 @@ const porEquipa = equipas.map((e) => ({ equipa: e, jogadores: jogadoresDe(e.id) 
         <ul class="grelha">
           {jogadores.map((j) => (
             <li id={j.id}>
-              <Cromo nome={j.nome} numero={j.numero} subtitulo={j.posicao} cor={equipa.cor} largura={104} larguraComputador={150} />
+              <Cromo
+                nome={j.nome}
+                numero={j.numero}
+                subtitulo={j.golos > 0 ? `${j.posicao} · ${j.golos} ${j.golos === 1 ? 'golo' : 'golos'}` : j.posicao}
+                cor={equipa.cor}
+                largura={104}
+                larguraComputador={150}
+              />
             </li>
           ))}
         </ul>

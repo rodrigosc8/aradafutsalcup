@@ -5,7 +5,7 @@ import CabecalhoSeccao from './CabecalhoSeccao.astro';
 import LinhaJogo from './LinhaJogo.astro';
 import EstadoVazio from './EstadoVazio.astro';
 import type { Jogo } from '../data/fonte';
-import { equipaDoLado, nomeDoLado } from '../data/fonte';
+import { equipaDoLado, estadoDoJogo, nomeDoLado, resultadoDo } from '../data/fonte';
 import { torneio } from '../data/torneio';
 import { horaLisboa } from '../scripts/datas';
 
@@ -91,6 +91,8 @@ const emblema = (lado: Jogo['casa']) => {
               emblemaCasa={emblema(j.casa)}
               emblemaFora={emblema(j.fora)}
               etiqueta={etiqueta(j)}
+              estado={estadoDoJogo(j)}
+              resultado={resultadoDo(j)}
               href={`/jogos#${j.id}`}
               destaque={j.id === idDestaque}
             />

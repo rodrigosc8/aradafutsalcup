@@ -4,6 +4,7 @@
 // Com `etiqueta` (grupo ou fase) usa a grelha de colunas fixas da secção "Jogos" do computador:
 // hora | casa (à direita, nome + emblema) | × | fora (à esquerda, emblema + nome) | etiqueta | ›
 // para os nomes ficarem alinhados de linha para linha.
+// Com `resultado`, o "×" dá lugar ao resultado; com estado 'a-decorrer', aparece "A decorrer".
 import EmblemaEquipa from './EmblemaEquipa.astro';
 import Icone from './Icone.astro';
 
@@ -21,50 +22,65 @@ interface Props {
   emblemaFora?: Emblema;
   /** Grupo ou fase ("Grupo C", "Quartos"). Ativa a grelha de colunas fixas. */
   etiqueta?: string;
-  /** Realça o jogo (por exemplo, o jogo em destaque). */
+  /** Realça o jogo (o jogo em destaque). */
   destaque?: boolean;
+  /** Golos [casa, fora]: final se terminado, parcial se a decorrer. */
+  resultado?: [number, number];
+  estado?: 'por-jogar' | 'a-decorrer' | 'terminado';
 }
-const { hora, casa, fora, href, emblemaCasa, emblemaFora, etiqueta, destaque = false } = Astro.props;
-const rotulo = `Ver o jogo ${casa} contra ${fora}, às ${hora}`;
+const { hora, casa, fora, href, emblemaCasa, emblemaFora, etiqueta, destaque = false, resultado, estado = 'por-jogar' } =
+  Astro.props;
+const placar = resultado ? `${resultado[0]}–${resultado[1]}` : undefined;
+const rotulo =
+  estado === 'terminado' && placar
+    ? `Ver o jogo ${casa} ${placar} ${fora}, terminado`
+    : estado === 'a-decorrer'
+      ? `Ver o jogo ${casa} contra ${fora}, a decorrer${placar ? `, ${placar}` : ''}`
+      : `Ver o jogo ${casa} contra ${fora}, às ${hora}`;
 ---
 
 {
   etiqueta !== undefined ? (
-    <a class:list={['grelha', { destaque }]} href={href} aria-label={rotulo}>
+    <a class:list={['grelha', estado, { destaque }]} href={href} aria-label={rotulo}>
       <span class="g-hora">{hora}</span>
       <span class="g-casa">
         <span class="g-nome">{casa}</span>
         {emblemaCasa && <EmblemaEquipa sigla={emblemaCasa.sigla} cor={emblemaCasa.cor} tamanho={32} anel={0} />}
       </span>
-      <span class="g-x" aria-hidden="true">×</span>
+      <span class:list={['g-x', { placar: !!placar }]} aria-hidden="true">{placar ?? '×'}</span>
       <span class="g-fora">
         {emblemaFora && <EmblemaEquipa sigla={emblemaFora.sigla} cor={emblemaFora.cor} tamanho={32} anel={0} />}
         <span class="g-nome">{fora}</span>
       </span>
-      <span class="g-etiqueta">{etiqueta}</span>
+      <span class:list={['g-etiqueta', { 'ao-vivo': estado === 'a-decorrer' }]}>
+        {estado === 'a-decorrer' ? 'A decorrer' : etiqueta}
+      </span>
       <span class="g-seta"><Icone nome="seta" tamanho={18} /></span>
     </a>
   ) : (
 
-<a class:list={['linha-jogo', { destaque }]} href={href} aria-label={rotulo}>
+<a class:list={['linha-jogo', estado, { destaque }]} href={href} aria-label={rotulo}>
   <span class="hora">{hora}</span>
   <span class="equipas">
     {emblemaCasa && <EmblemaEquipa sigla={emblemaCasa.sigla} cor={emblemaCasa.cor} tamanho={26} anel={0} />}
     <span class="nome">{casa}</span>
-    <span class="x">×</span>
+    <span class:list={['x', { placar: !!placar }]}>{placar ?? '×'}</span>
     {emblemaFora && <EmblemaEquipa sigla={emblemaFora.sigla} cor={emblemaFora.cor} tamanho={26} anel={0} />}
     <span class="nome">{fora}</span>
   </span>
-  <span class="ver">Ver jogo<Icone nome="seta" tamanho={16} /></span>
+  <span class:list={['ver', { 'ao-vivo': estado === 'a-decorrer' }]}>
+    {estado === 'a-decorrer' ? 'A decorrer' : 'Ver jogo'}<Icone nome="seta" tamanho={16} />
+  </span>
 </a>
   )
 }
 
 <style>
-  /* Grelha de colunas fixas (secção "Jogos" do computador) */
+  /* Grelha de colunas fixas (secção "Jogos" do computador).
+     A 3.ª coluna tem 40px para caber o resultado ("10–2"). */
   .grelha {
     display: grid;
-    grid-template-columns: 64px minmax(0, 1fr) 28px minmax(0, 1fr) 72px 24px;
+    grid-template-columns: 64px minmax(0, 1fr) 40px minmax(0, 1fr) 72px 24px;
     align-items: center;
     gap: 12px;
     min-height: 64px;
@@ -126,10 +142,30 @@ const rotulo = `Ver o jogo ${casa} contra ${fora}, às ${hora}`;
     color: var(--bordo);
   }
 
+  /* Resultado e estado */
+  .placar {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 19px;
+    color: var(--texto);
+    white-space: nowrap;
+  }
+  .terminado .g-hora,
+  .terminado .hora {
+    color: var(--texto-2);
+  }
+  .ao-vivo {
+    font-weight: 700;
+    color: var(--bordo);
+  }
+  .a-decorrer {
+    border-color: var(--bordo);
+  }
+
   /* Grelha no telemóvel: sem emblemas nem etiqueta, para os nomes caberem. */
   @media (max-width: 1023.98px) {
     .grelha {
-      grid-template-columns: 46px minmax(0, 1fr) 14px minmax(0, 1fr) 18px;
+      grid-template-columns: 46px minmax(0, 1fr) 32px minmax(0, 1fr) 18px;
       gap: 8px;
       min-height: 56px;
       padding: 0 10px 0 14px;
@@ -143,6 +179,10 @@ const rotulo = `Ver o jogo ${casa} contra ${fora}, às ${hora}`;
     }
     .g-nome {
       font-size: 15px;
+    }
+    /* Sem a coluna da etiqueta, o jogo a decorrer distingue-se pela hora a bordô. */
+    .a-decorrer .g-hora {
+      color: var(--bordo);
     }
   }
 
