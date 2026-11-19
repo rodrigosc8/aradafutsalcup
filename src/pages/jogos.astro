@@ -1,0 +1,34 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import JogosPorDia from '../components/JogosPorDia.astro';
+import { haSorteio, idJogoEmDestaque, jogos } from '../data/fonte';
+import { torneio } from '../data/torneio';
+import { diaLisboa } from '../scripts/datas';
+
+// Dia mostrado por omissão: o primeiro dia do torneio (o script troca para hoje durante o torneio).
+const diaPredefinido = torneio.dias.includes(diaLisboa(new Date())) ? diaLisboa(new Date()) : torneio.dias[0];
+---
+
+<Pagina
+  titulo="Jogos"
+  frase={haSorteio
+    ? `${jogos.length} jogos em 5 dias: ${torneio.diasTexto}, no ${torneio.local}.`
+    : `${torneio.diasTexto}, no ${torneio.local}. Os horários são publicados depois do sorteio.`}
+  atual="jogos"
+>
+  <div class="bloco">
+    <JogosPorDia
+      jogos={jogos}
+      diaPredefinido={diaPredefinido}
+      idDestaque={idJogoEmDestaque}
+      titulo="Por dia"
+      frase={haSorteio ? '8 jogos por dia na fase de grupos. Escolhe o dia.' : 'Cinco dias de jogos em dezembro. Escolhe o dia.'}
+    />
+  </div>
+</Pagina>
+
+<style>
+  .bloco {
+    margin-top: 32px;
+  }
+</style>
