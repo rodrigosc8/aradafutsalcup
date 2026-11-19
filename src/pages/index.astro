@@ -1,16 +1,13 @@
 ---
-// Início. Telemóvel: docs/design/bordo-Inicio.html. Computador (≥ 1024px): docs/design/bordo-Inicio-PC-v2.html.
+// Início: as mesmas secções e a mesma ordem no telemóvel e no computador (docs/design/bordo-Inicio-PC-v2.html).
+// Abaixo de 1024px muda só a disposição: uma coluna, com carrosséis onde o computador tem filas.
 // Equipas, jogadores e jogos vêm de ../data/fonte. Em torneio.fase === 'pre-sorteio' essas listas
 // estão vazias e cada secção mostra o seu estado vazio (sem dados inventados).
 import Base from '../layouts/Base.astro';
 import NavFlutuante from '../components/NavFlutuante.astro';
 import CartaoJogoDestaque from '../components/CartaoJogoDestaque.astro';
 import BarraPatrocinadores from '../components/BarraPatrocinadores.astro';
-import Cromo from '../components/Cromo.astro';
-import LinhaJogo from '../components/LinhaJogo.astro';
 import PilulaLink from '../components/PilulaLink.astro';
-import Botao from '../components/Botao.astro';
-import FaixaNumeros from '../components/FaixaNumeros.astro';
 import Rodape from '../components/Rodape.astro';
 import CabecalhoSeccao from '../components/CabecalhoSeccao.astro';
 import JogosPorDia from '../components/JogosPorDia.astro';
@@ -18,35 +15,21 @@ import CartaoGrupo from '../components/CartaoGrupo.astro';
 import ListaMarcadores from '../components/ListaMarcadores.astro';
 import CartaoPrimeiraEdicao from '../components/CartaoPrimeiraEdicao.astro';
 import SeccaoPatamares from '../components/SeccaoPatamares.astro';
-import EstadoVazio from '../components/EstadoVazio.astro';
 import { torneio } from '../data/torneio';
 import {
-  classificacaoGrupoA,
   classificacoes,
   equipa,
   melhoresMarcadores,
-  figuras,
   idJogoEmDestaque,
   idsCartoes,
-  estadoDoJogo,
-  resultadoDo,
-  nomeDoLado,
   jogadoresDe,
   jogos,
   haSorteio,
   GRUPOS,
 } from '../data/fonte';
-import { horaLisboa } from '../scripts/datas';
 
 const destaque = jogos.find((j) => j.id === idJogoEmDestaque);
 const diaDestaque = destaque ? destaque.inicio.slice(0, 10) : torneio.dias[0];
-// Telemóvel, "No mesmo dia": os 3 jogos mais próximos do jogo em destaque.
-const t0 = destaque ? Date.parse(destaque.inicio) : 0;
-const outrosDoDia = jogos
-  .filter((j) => j.id !== destaque?.id && j.inicio.startsWith(diaDestaque))
-  .sort((a, b) => Math.abs(Date.parse(a.inicio) - t0) - Math.abs(Date.parse(b.inicio) - t0))
-  .slice(0, 3)
-  .sort((a, b) => a.inicio.localeCompare(b.inicio));
 // Cartões já gerados no build: o jogo em destaque e o próximo jogo de cada equipa (para "Sigo: equipa").
 const jogosCartao = jogos.filter((j) => idsCartoes.includes(j.id) && typeof j.casa === 'string' && typeof j.fora === 'string');
 const id = (lado: (typeof jogos)[number]['casa']) => lado as string;
@@ -69,18 +52,10 @@ const gruposClassificacao = haSorteio
     }))
   : GRUPOS.map((g) => ({ grupo: g, linhas: [{}, {}, {}, {}] }));
 
-const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-const cincoDias = torneio.dias.map((d, i) => ({
-  iso: d,
-  semana: DIAS_SEMANA[new Date(`${d}T12:00:00Z`).getUTCDay()],
-  dia: Number(d.slice(8, 10)),
-  fase: torneio.fases[i],
-  final: i === torneio.dias.length - 1,
-}));
 ---
 
 <Base>
-  <NavFlutuante atual="inicio" />
+  <NavFlutuante atual="inicio" sobreDestaque />
 
   <main>
     <h1 class="visually-hidden">{torneio.nome}: {torneio.subtitulo}</h1>
@@ -92,155 +67,30 @@ const cincoDias = torneio.dias.map((d, i) => ({
     <div class="faixa-destaque">
       {!destaque && <CartaoJogoDestaque />}
       {
-        destaque && jogosCartao.map((j) => (
-          <div
-            class="cartao"
-            data-cartao-jogo={j.id}
-            data-equipas={`${id(j.casa)} ${id(j.fora)}`}
-            data-predefinido={j.id === destaque.id ? '' : undefined}
-            hidden={j.id !== destaque.id}
-          >
-            <CartaoJogoDestaque
-              jogo={j}
-              casa={equipa(id(j.casa))}
-              fora={equipa(id(j.fora))}
-              jogadoresCasa={aSeguir(id(j.casa))}
-              jogadoresFora={aSeguir(id(j.fora))}
-            />
-          </div>
-        ))
+        destaque &&
+          jogosCartao.map((j) => (
+            <div
+              class="cartao"
+              data-cartao-jogo={j.id}
+              data-equipas={`${id(j.casa)} ${id(j.fora)}`}
+              data-predefinido={j.id === destaque.id ? '' : undefined}
+              hidden={j.id !== destaque.id}
+            >
+              <CartaoJogoDestaque
+                jogo={j}
+                casa={equipa(id(j.casa))}
+                fora={equipa(id(j.fora))}
+                jogadoresCasa={aSeguir(id(j.casa))}
+                jogadoresFora={aSeguir(id(j.fora))}
+              />
+            </div>
+          ))
       }
     </div>
 
     <BarraPatrocinadores />
 
-    {/* Telemóvel: Figuras de ontem (só depois do sorteio) */}
-    {figuras.length > 0 && (
-    <section class="figuras so-telemovel" aria-labelledby="titulo-figuras">
-      <div class="cabeca">
-        <h2 class="titulo-seccao" id="titulo-figuras">Figuras de ontem</h2>
-        <PilulaLink href="/cromos" aria-label="Ver todas as figuras de ontem">Ver todas</PilulaLink>
-      </div>
-      <div class="fila-cromos">
-        {
-          figuras.map(({ jogador: j, golos }) => {
-            const e = equipa(j.equipa);
-            return (
-              <Cromo
-                nome={j.nome}
-                numero={j.numero}
-                subtitulo={`${golos} ${golos === 1 ? 'golo' : 'golos'} · ${e.nome}`}
-                cor={e.cor}
-                largura={84}
-              />
-            );
-          })
-        }
-      </div>
-    </section>
-    )}
-
-    {/* Telemóvel */}
-    <div class:list={['grelha', 'so-telemovel', { 'sem-figuras': figuras.length === 0 }]}>
-      <section aria-labelledby="titulo-hoje">
-        <div class="cabeca">
-          {
-            destaque ? (
-              <h2 class="titulo-seccao" id="titulo-hoje" data-titulo-dia data-inicio={destaque.inicio}>
-                <span data-hoje="Também hoje">No mesmo dia</span>
-              </h2>
-            ) : (
-              <h2 class="titulo-seccao" id="titulo-hoje">Jogos</h2>
-            )
-          }
-          <PilulaLink href="/jogos" aria-label="Ver o calendário de jogos">Calendário</PilulaLink>
-        </div>
-        {!destaque && (
-          <div class="vazio-movel">
-            <EstadoVazio texto="Calendário publicado depois do sorteio" detalhe={`${torneio.diasTexto}`} compacto />
-          </div>
-        )}
-        <ul class="lista-jogos" hidden={!destaque}>
-          {
-            outrosDoDia.map((j) => (
-              <li>
-                <LinhaJogo
-                  hora={horaLisboa(j.inicio)}
-                  casa={nomeDoLado(j.casa)}
-                  fora={nomeDoLado(j.fora)}
-                  href={`/jogos#${j.id}`}
-                  estado={estadoDoJogo(j)}
-                  resultado={resultadoDo(j)}
-                />
-              </li>
-            ))
-          }
-        </ul>
-      </section>
-
-      <section class="cartao-grupo" aria-labelledby="titulo-grupo">
-        <h2 class="titulo-seccao" id="titulo-grupo">Grupo A</h2>
-        <table class="tabela">
-          <caption class="visually-hidden">Classificação do Grupo A</caption>
-          <thead>
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Equipa</th>
-              <th scope="col" class="num"><abbr title="Diferença de golos">DG</abbr></th>
-              <th scope="col" class="num"><abbr title="Pontos">Pts</abbr></th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              classificacaoGrupoA.map((l, i) => (
-                <tr class:list={{ apurado: i < 2 }}>
-                  <td class="pos">{i + 1}</td>
-                  <td class="nome">{equipa(l.equipa).nome}</td>
-                  <td class="num dg">{l.dg > 0 ? `+${l.dg}` : l.dg}</td>
-                  <td class="num pts">{l.pontos}</td>
-                </tr>
-              ))
-            }
-            {
-              !haSorteio &&
-                [1, 2, 3, 4].map((n) => (
-                  <tr class="vago">
-                    <td class="pos">{n}</td>
-                    <td class="nome">Por sortear</td>
-                    <td class="num dg">–</td>
-                    <td class="num pts">–</td>
-                  </tr>
-                ))
-            }
-          </tbody>
-        </table>
-        <Botao href="/grupos" largo class="botao-grupos">Ver todos os grupos</Botao>
-      </section>
-
-      <section aria-labelledby="titulo-dias">
-        <h2 class="titulo-seccao" id="titulo-dias">Os 5 dias</h2>
-        <ol class="dias">
-          {
-            cincoDias.map((d) => (
-              <li class:list={['dia', { final: d.final }]} data-dia={d.iso}>
-                <span class="semana">{d.semana}</span>
-                <span class="numero">{d.dia}</span>
-                <span class="fase" data-fase={d.fase}>{d.fase}</span>
-              </li>
-            ))
-          }
-        </ol>
-        <p class="pausa"><strong>{torneio.pausaNatal}</strong> O torneio regressa no sábado, 26, com os quartos-de-final.</p>
-      </section>
-    </div>
-
-    <section class="em-numeros so-telemovel" aria-label="O torneio em números">
-      <FaixaNumeros />
-      <p class="nota-numeros">Os espaços de patrocinador ficam por preencher até os patrocínios estarem fechados.</p>
-    </section>
-
-    {/* Computador */}
-    <div class="pc so-computador">
+    <div class="pc">
       <div class="contentor bloco">
         <JogosPorDia
           jogos={jogos}
@@ -250,7 +100,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
         />
       </div>
 
-      <section class="contentor bloco" aria-labelledby="titulo-classificacao">
+      <section class="contentor bloco classificacao" aria-labelledby="titulo-classificacao">
         <CabecalhoSeccao
           titulo="Classificação"
           frase={haSorteio
@@ -283,8 +133,6 @@ const cincoDias = torneio.dias.map((d, i) => ({
 
 <script>
   import { aoMudarEquipa } from '../scripts/seguir';
-  import { diaLisboa, textoDia } from '../scripts/datas';
-  import { agora } from '../scripts/agora';
 
   // Cartão em destaque: o jogo da equipa seguida, ou o jogo em destaque.
   const cartoes = [...document.querySelectorAll<HTMLElement>('[data-cartao-jogo]')];
@@ -298,222 +146,11 @@ const cincoDias = torneio.dias.map((d, i) => ({
       });
     });
   });
-
-  // "Também hoje" / "Hoje no pavilhão" no próprio dia; antes disso, a data.
-  document.querySelectorAll<HTMLElement>('[data-titulo-dia]').forEach((titulo) => {
-    if (textoDia(titulo.dataset.inicio!) !== 'hoje') return;
-    titulo.querySelectorAll<HTMLElement>('[data-hoje]').forEach((el) => (el.textContent = el.dataset.hoje!));
-  });
-
-  // Os 5 dias: marca o dia de hoje.
-  const hoje = diaLisboa(agora());
-  document.querySelectorAll<HTMLElement>('[data-dia]').forEach((el) => {
-    if (el.dataset.dia !== hoje) return;
-    el.classList.add('hoje');
-    el.setAttribute('aria-current', 'date');
-    const fase = el.querySelector('[data-fase]');
-    if (fase) fase.textContent = 'hoje';
-  });
 </script>
 
 <style>
-  main {
-    padding-top: 14px;
-  }
-  .faixa-destaque {
-    padding-inline: 20px;
-  }
-
-  .cabeca {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  /* Figuras de ontem */
-  .figuras {
-    margin-top: 16px;
-  }
-  .figuras .cabeca {
-    padding-inline: 20px;
-  }
-  .fila-cromos {
-    display: flex;
-    gap: 10px;
-    padding: 10px 20px 16px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  /* Grelha: Hoje / Grupo / 5 dias */
-  .grelha {
-    display: grid;
-    gap: 28px;
-    padding: 6px 20px 0;
-  }
-  .lista-jogos {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 10px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .cartao-grupo {
-    padding: 18px 22px;
-    border-radius: 18px;
-    background: var(--branco);
-  }
-  .tabela {
-    width: 100%;
-    margin-top: 6px;
-    border-collapse: collapse;
-    font-size: 15px;
-  }
-  .tabela th {
-    padding-bottom: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-align: left;
-    text-transform: uppercase;
-    color: var(--texto-2);
-  }
-  .tabela abbr {
-    text-decoration: none;
-  }
-  .tabela td {
-    padding: 11px 0;
-    border-top: 1px solid var(--linha);
-  }
-  .tabela .num {
-    text-align: right;
-  }
-  .pos {
-    width: 26px;
-    font-weight: 800;
-    color: var(--texto-2);
-  }
-  .apurado .pos {
-    color: var(--bordo);
-  }
-  .nome {
-    font-weight: 500;
-  }
-  .apurado:first-child .nome {
-    font-weight: 700;
-  }
-  .dg {
-    color: var(--texto-2);
-  }
-  .vago .pos,
-  .vago .nome,
-  .tabela .vago .pts {
-    color: var(--texto-2);
-    font-weight: 500;
-  }
-  .tabela .vago .pts {
-    font-family: var(--font-body);
-    font-size: 15px;
-  }
-  .vazio-movel {
-    margin-top: 10px;
-  }
-  .sem-figuras {
-    margin-top: 22px;
-  }
-  .lista-jogos[hidden] {
-    display: none;
-  }
-  .tabela .pts {
-    padding-left: 12px;
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 18px;
-  }
-  .cartao-grupo :global(.botao-grupos) {
-    margin-top: 14px;
-    min-height: 46px;
-    font-size: 14px;
-  }
-
-  .dias {
-    display: flex;
-    gap: 8px;
-    margin: 14px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-  .dia {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 12px 4px;
-    border: 1px solid var(--linha);
-    border-radius: var(--raio-botao);
-    background: var(--branco);
-    text-align: center;
-  }
-  .dia.final {
-    box-shadow: inset 0 0 0 1.5px var(--dourado);
-  }
-  .dia.hoje {
-    background: var(--bordo);
-    border-color: var(--bordo);
-    color: var(--branco);
-  }
-  .semana {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1px;
-  }
-  .numero {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 26px;
-    line-height: 1.1;
-  }
-  .fase {
-    font-size: 11px;
-  }
-  .pausa {
-    margin: 14px 0 0;
-    padding: 14px 16px;
-    border-radius: var(--raio-linha);
-    background: var(--branco);
-    font-size: 14px;
-    line-height: 1.45;
-  }
-
-  .em-numeros {
-    margin-top: 28px;
-    padding-inline: 20px;
-  }
-  .nota-numeros {
-    margin: 14px 0 0;
-    font-size: 12px;
-    color: var(--texto-2);
-  }
-
-  @media (max-width: 1023.98px) {
-    main {
-      max-width: 720px;
-      margin-inline: auto;
-    }
-  }
-
   /* Computador */
   @media (min-width: 1024px) {
-    main {
-      padding-top: 0;
-    }
-    .faixa-destaque {
-      padding-inline: 0;
-    }
     .bloco {
       padding-top: 64px;
     }
@@ -531,6 +168,129 @@ const cincoDias = torneio.dias.map((d, i) => ({
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       align-items: start;
       gap: 24px;
+    }
+  }
+
+  /* Telemóvel e tablet: as mesmas secções numa coluna. */
+  @media (max-width: 1023.98px) {
+    .pc .contentor {
+      padding-inline: 20px;
+    }
+    .bloco {
+      padding-top: 40px;
+    }
+    .pc > .bloco:first-child {
+      padding-top: 32px;
+    }
+
+    /* Jogos: separadores numa fila que desliza; linhas de jogo em duas linhas. */
+    .pc :global(.jogos-dia .acao) {
+      min-width: 0; /* deixa a fila dos separadores deslizar em vez de alargar a página */
+    }
+    .pc :global(.jogos-dia .separadores) {
+      flex-wrap: nowrap;
+      width: calc(100% + 40px);
+      margin-inline: -20px;
+      padding: 2px 20px 4px;
+      overflow-x: auto;
+      scroll-padding-inline: 20px;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;
+    }
+    .pc :global(.jogos-dia .separador) {
+      flex: none;
+      min-width: 78px;
+      scroll-snap-align: start;
+    }
+    .pc :global(.jogos-dia .grelha) {
+      grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      row-gap: 8px;
+      column-gap: 10px;
+      padding: 12px 14px;
+    }
+    .pc :global(.jogos-dia .grelha .g-casa) {
+      grid-area: 1 / 1;
+    }
+    .pc :global(.jogos-dia .grelha .g-x) {
+      grid-area: 1 / 2;
+    }
+    .pc :global(.jogos-dia .grelha .g-fora) {
+      grid-area: 1 / 3;
+    }
+    .pc :global(.jogos-dia .grelha .g-hora) {
+      grid-area: 2 / 1;
+      font-size: 16px;
+    }
+    .pc :global(.jogos-dia .grelha .g-etiqueta) {
+      display: block;
+      grid-area: 2 / 2 / 3 / 4;
+      align-self: center;
+      justify-self: start;
+      text-align: left;
+    }
+    .pc :global(.jogos-dia .grelha .g-seta) {
+      grid-area: 2 / 3;
+      align-items: center;
+      gap: 2px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .pc :global(.jogos-dia .grelha .g-ver) {
+      display: inline;
+    }
+    .pc :global(.jogos-dia .grelha .emblema) {
+      display: inline-flex;
+      --tamanho: 26px !important;
+    }
+
+    /* Classificação: os 4 cartões num carrossel; "Ver o quadro das finais" por baixo. */
+    .classificacao {
+      display: flex;
+      flex-direction: column;
+    }
+    .classificacao :global(.cabecalho-seccao) {
+      display: contents;
+    }
+    .classificacao :global(.acao) {
+      order: 3;
+      margin-top: 14px;
+    }
+    .grupos {
+      order: 2;
+      display: flex;
+      gap: 12px;
+      margin: 18px -20px 0;
+      padding: 0 20px 6px;
+      overflow-x: auto;
+      scroll-padding-inline: 20px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .grupos > :global(*) {
+      flex: 0 0 82%;
+      max-width: 340px;
+      scroll-snap-align: start;
+    }
+
+    /* Melhores marcadores e 1.ª edição, um por baixo do outro. */
+    .duas-colunas {
+      display: grid;
+      gap: 16px;
+    }
+    .duas-colunas :global(.marcadores) {
+      padding: 18px 16px;
+    }
+    .duas-colunas :global(.marcadores .linha) {
+      grid-template-columns: 22px 56px minmax(0, 1fr) auto auto;
+      gap: 10px;
+      padding: 10px;
+    }
+    .duas-colunas :global(.primeira) {
+      padding: 22px 20px;
+    }
+    .duas-colunas :global(.primeira .video) {
+      min-height: 140px;
     }
   }
 </style>

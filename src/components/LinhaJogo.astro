@@ -55,7 +55,7 @@ const rotulo =
       <span class:list={['g-etiqueta', { 'ao-vivo': estado === 'a-decorrer' }]}>
         {estado === 'a-decorrer' ? 'A decorrer' : etiqueta}
       </span>
-      <span class="g-seta"><Icone nome="seta" tamanho={18} /></span>
+      <span class="g-seta"><span class="g-ver">Ver jogo</span><Icone nome="seta" tamanho={18} /></span>
     </a>
   ) : (
 
@@ -140,6 +140,10 @@ const rotulo =
     display: flex;
     justify-content: flex-end;
     color: var(--bordo);
+  }
+  /* Texto "Ver jogo" escondido por omissão (o Início no telemóvel mostra-o). */
+  .g-ver {
+    display: none;
   }
 
   /* Resultado e estado */
