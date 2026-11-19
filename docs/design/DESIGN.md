@@ -71,7 +71,7 @@ Sombras: só na navegação flutuante (`0 10px 30px rgba(42,20,24,.10–.14)`) e
    - Cápsula de link: fundo branco, contorno, texto bordô e uma seta ›.
 9. **Mosaico de resultado:** um cartão com contorno, o resultado em Barlow, o adversário e "Ver jogo ›".
 10. **Barra de patrocinadores "Quem apoia":** uma fila que se desloca com `@keyframes translateX(0 → -50%)` e o conteúdo duplicado (a cópia com `aria-hidden`). Esbate nas pontas com `mask-image`. Para quando o rato passa por cima e fica parada com `prefers-reduced-motion`. A Abílio Pinto aparece primeiro, numa faixa `--azul-ap`; os outros espaços são marcadores. No computador tem o botão "Quero patrocinar".
-11. **Faixa de números:** 16 equipas, 224 cromos, 32 jogos e 5 dias.
+11. **Faixa de números:** 16 equipas, 192 cromos (16 × 12 jogadores, o máximo do regulamento), 32 jogos e 5 dias.
 12. **Rodapé:** "Patrocinador principal: Abílio Pinto" e "Organização: Junta de Freguesia de Arada · Pavilhão Gimnodesportivo de Arada".
 
 ## Regra de interação

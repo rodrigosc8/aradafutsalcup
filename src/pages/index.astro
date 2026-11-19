@@ -80,10 +80,10 @@ const cincoDias = torneio.dias.map((d, i) => ({
   <main>
     <h1 class="visually-hidden">{torneio.nome}: {torneio.subtitulo}</h1>
 
-    <!--
+    {/*
       Um cartão por jogo, já gerado no build. Sem equipa seguida mostra-se o jogo em destaque;
       com equipa seguida, o primeiro jogo dessa equipa (o script troca no browser).
-    -->
+    */}
     <div class="faixa-destaque">
       {!destaque && <CartaoJogoDestaque />}
       {
@@ -109,7 +109,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
 
     <BarraPatrocinadores />
 
-    <!-- Telemóvel: Figuras de ontem (só depois do sorteio) -->
+    {/* Telemóvel: Figuras de ontem (só depois do sorteio) */}
     {figuras.length > 0 && (
     <section class="figuras so-telemovel" aria-labelledby="titulo-figuras">
       <div class="cabeca">
@@ -136,7 +136,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
     </section>
     )}
 
-    <!-- Telemóvel -->
+    {/* Telemóvel */}
     <div class:list={['grelha', 'so-telemovel', { 'sem-figuras': figuras.length === 0 }]}>
       <section aria-labelledby="titulo-hoje">
         <div class="cabeca">
@@ -230,13 +230,10 @@ const cincoDias = torneio.dias.map((d, i) => ({
 
     <section class="em-numeros so-telemovel" aria-label="O torneio em números">
       <FaixaNumeros />
-      <p class="nota-exemplo">
-        {haSorteio ? 'Equipas, nomes e resultados de exemplo. ' : ''}Os espaços de patrocinador ficam por preencher até os
-        patrocínios estarem fechados.
-      </p>
+      <p class="nota-numeros">Os espaços de patrocinador ficam por preencher até os patrocínios estarem fechados.</p>
     </section>
 
-    <!-- Computador -->
+    {/* Computador */}
     <div class="pc so-computador">
       <div class="contentor bloco">
         <JogosPorDia
@@ -270,10 +267,6 @@ const cincoDias = torneio.dias.map((d, i) => ({
         <ListaMarcadores marcadores={marcadores} />
         <CartaoPrimeiraEdicao />
       </div>
-      <p class="contentor nota-pc">
-        {haSorteio ? 'Equipas, jogadores, horários e classificações de exemplo. ' : ''}Os números da 1.ª edição são
-        reais (carta da Junta).
-      </p>
 
       <SeccaoPatamares />
     </div>
@@ -285,6 +278,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
 <script>
   import { aoMudarEquipa } from '../scripts/seguir';
   import { diaLisboa, textoDia } from '../scripts/datas';
+  import { agora } from '../scripts/agora';
 
   // Cartão em destaque: o jogo da equipa seguida, ou o jogo em destaque.
   const cartoes = [...document.querySelectorAll<HTMLElement>('[data-cartao-jogo]')];
@@ -306,7 +300,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
   });
 
   // Os 5 dias: marca o dia de hoje.
-  const hoje = diaLisboa(new Date());
+  const hoje = diaLisboa(agora());
   document.querySelectorAll<HTMLElement>('[data-dia]').forEach((el) => {
     if (el.dataset.dia !== hoje) return;
     el.classList.add('hoje');
@@ -493,7 +487,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
     margin-top: 28px;
     padding-inline: 20px;
   }
-  .nota-exemplo {
+  .nota-numeros {
     margin: 14px 0 0;
     font-size: 12px;
     color: var(--texto-2);
@@ -531,12 +525,6 @@ const cincoDias = torneio.dias.map((d, i) => ({
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       align-items: start;
       gap: 24px;
-    }
-    .nota-pc {
-      margin-top: 18px;
-      margin-bottom: 0;
-      font-size: 12px;
-      color: var(--texto-2);
     }
   }
 </style>

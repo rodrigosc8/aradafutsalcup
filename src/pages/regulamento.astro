@@ -79,7 +79,7 @@ const premios = [
     Descarregar o regulamento (PDF)
   </Botao>
 
-  <!-- Em resumo -->
+  {/* Em resumo */}
   <section class="resumo" aria-labelledby="titulo-resumo">
     <h2 id="titulo-resumo" class="titulo-resumo">Em resumo</h2>
     <ul>
@@ -98,7 +98,7 @@ const premios = [
   </section>
 
   <div class="corpo">
-    <!-- Índice: cartão no telemóvel, coluna fixa no computador -->
+    {/* Índice: cartão no telemóvel, coluna fixa no computador */}
     <aside class="lateral">
       <nav class="indice" aria-labelledby="titulo-indice">
         <h2 id="titulo-indice">Índice</h2>
@@ -122,7 +122,7 @@ const premios = [
     </aside>
 
     <div class="seccoes">
-      <!-- 1 -->
+      {/* 1 */}
       <section class="seccao" id="disposicoes-gerais" aria-labelledby="t-disposicoes-gerais">
         <h2 id="t-disposicoes-gerais"><span class="num">{n('disposicoes-gerais')}</span>{t('disposicoes-gerais')}</h2>
         <ul class="lista">
@@ -135,14 +135,14 @@ const premios = [
         </ul>
       </section>
 
-      <!-- 2 -->
+      {/* 2 */}
       <section class="seccao" id="inscricoes" aria-labelledby="t-inscricoes">
         <h2 id="t-inscricoes"><span class="num">{n('inscricoes')}</span>{t('inscricoes')}</h2>
         <div class="com-destaque">
           <p class="destaque-data"><span class="dd-num">19</span><span class="dd-txt">dezembro<br />prazo limite</span></p>
           <ul class="lista">
             <li>O prazo limite para a inscrição de equipas e jogadores é o dia 19 de dezembro.</li>
-            <!-- TODO: o PDF não indica o valor da taxa de inscrição. -->
+            {/* TODO: o PDF não indica o valor da taxa de inscrição. */}
             <li>O pagamento da taxa de inscrição deverá ser efetuado no ato da mesma.</li>
             <li>A lista de jogadores pode ser alterada até à data limite de inscrição (19 de dezembro).</li>
             <li>
@@ -153,7 +153,7 @@ const premios = [
         </div>
       </section>
 
-      <!-- 3 -->
+      {/* 3 */}
       <section class="seccao" id="formato" aria-labelledby="t-formato">
         <h2 id="t-formato"><span class="num">{n('formato')}</span>{t('formato')}</h2>
         <ol class="fases" aria-label="Estrutura competitiva">
@@ -173,12 +173,12 @@ const premios = [
             A estrutura competitiva compreende: Fase de Grupos, Quartos-de-Final, Meias-Finais e Finais (3.º/4.º e 1.º/2.º
             lugar).
           </li>
-          <!-- TODO: o PDF não define os cruzamentos dos quartos-de-final (quem joga com quem). -->
+          {/* TODO: o PDF não define os cruzamentos dos quartos-de-final (quem joga com quem). */}
           <li>Qualificam-se para a fase seguinte (Quartos-de-Final) apenas os 2 primeiros classificados de cada grupo.</li>
         </ul>
       </section>
 
-      <!-- 4 -->
+      {/* 4 */}
       <section class="seccao" id="duracao" aria-labelledby="t-duracao">
         <h2 id="t-duracao"><span class="num">{n('duracao')}</span>{t('duracao')}</h2>
         <p class="nota">Todos os jogos têm 5 minutos de intervalo.</p>
@@ -213,7 +213,7 @@ const premios = [
             <p class="caixa-t">Quartos-de-Final e Meias-Finais</p>
             <p>Em caso de empate, a decisão será feita através de pontapés da marca de grande penalidade.</p>
           </div>
-          <!-- TODO: o PDF fala só da Final; confirmar se o jogo do 3.º/4.º lugar também tem prolongamento. -->
+          {/* TODO: o PDF fala só da Final; confirmar se o jogo do 3.º/4.º lugar também tem prolongamento. */}
           <div class="caixa">
             <p class="caixa-t">Final</p>
             <p>
@@ -224,7 +224,7 @@ const premios = [
         </div>
       </section>
 
-      <!-- 5 -->
+      {/* 5 */}
       <section class="seccao" id="equipas" aria-labelledby="t-equipas">
         <h2 id="t-equipas"><span class="num">{n('equipas')}</span>{t('equipas')}</h2>
         <div class="com-destaque">
@@ -239,7 +239,7 @@ const premios = [
         </div>
       </section>
 
-      <!-- 6 -->
+      {/* 6 */}
       <section class="seccao" id="pontuacao" aria-labelledby="t-pontuacao">
         <h2 id="t-pontuacao"><span class="num">{n('pontuacao')}</span>{t('pontuacao')}</h2>
         <ul class="pontos">
@@ -248,7 +248,7 @@ const premios = [
           <li><span class="p-num">0</span><span>pontos por derrota</span></li>
         </ul>
         <h3>Critérios de desempate (aplicados por ordem)</h3>
-        <!-- TODO: o PDF não diz como se aplica o confronto direto quando 3 ou mais equipas empatam. -->
+        {/* TODO: o PDF não diz como se aplica o confronto direto quando 3 ou mais equipas empatam. */}
         <ol class="passos">
           {
             desempateGrupos.map((c, i) => (
@@ -261,7 +261,7 @@ const premios = [
         </ol>
       </section>
 
-      <!-- 7 -->
+      {/* 7 */}
       <section class="seccao" id="arbitragem" aria-labelledby="t-arbitragem">
         <h2 id="t-arbitragem"><span class="num">{n('arbitragem')}</span>{t('arbitragem')}</h2>
         <ul class="lista">
@@ -270,7 +270,7 @@ const premios = [
         </ul>
       </section>
 
-      <!-- 8 -->
+      {/* 8 */}
       <section class="seccao" id="conduta" aria-labelledby="t-conduta">
         <h2 id="t-conduta"><span class="num">{n('conduta')}</span>{t('conduta')}</h2>
         <p class="lead">É exigido um comportamento adequado e de fair-play por parte de todos os intervenientes.</p>
@@ -288,7 +288,7 @@ const premios = [
             <span><strong>Cartão Vermelho por conduta violenta</strong>Resultará na exclusão do jogador do Torneio.</span>
           </li>
         </ul>
-        <!-- TODO: o PDF não diz se a "reincidência" conta por jogo ou ao longo de todo o torneio. -->
+        {/* TODO: o PDF não diz se a "reincidência" conta por jogo ou ao longo de todo o torneio. */}
         <div class="caixa tolerancia">
           <p class="caixa-t">Tolerância de 10 minutos</p>
           <p>
@@ -298,7 +298,7 @@ const premios = [
         </div>
       </section>
 
-      <!-- 9 -->
+      {/* 9 */}
       <section class="seccao" id="material" aria-labelledby="t-material">
         <h2 id="t-material"><span class="num">{n('material')}</span>{t('material')}</h2>
         <ul class="lista">
@@ -308,7 +308,7 @@ const premios = [
         </ul>
       </section>
 
-      <!-- 10 -->
+      {/* 10 */}
       <section class="seccao" id="premios" aria-labelledby="t-premios">
         <h2 id="t-premios"><span class="num">{n('premios')}</span>{t('premios')}</h2>
         <ul class="podio">
@@ -333,7 +333,7 @@ const premios = [
         </p>
       </section>
 
-      <!-- 11 -->
+      {/* 11 */}
       <section class="seccao" id="casos-omissos" aria-labelledby="t-casos-omissos">
         <h2 id="t-casos-omissos"><span class="num">{n('casos-omissos')}</span>{t('casos-omissos')}</h2>
         <ul class="lista">

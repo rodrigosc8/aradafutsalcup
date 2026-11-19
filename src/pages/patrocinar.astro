@@ -29,7 +29,7 @@ const assunto = encodeURIComponent(`Patrocínio · ${torneio.nome} ${torneio.dia
       {
         torneio.patamares.map((p) => (
           <li class="patamar">
-            <p class="nome">{p.nome}</p>
+            <p class="nome">{p.titulo}</p>
             <p class="valor">{euros(p.valor)}</p>
             {p.beneficios.length > 0 ? (
               <ul class="beneficios">
@@ -44,6 +44,7 @@ const assunto = encodeURIComponent(`Patrocínio · ${torneio.nome} ${torneio.dia
         ))
       }
     </ul>
+    <p class="nota-patamares">{torneio.notaPatamares}</p>
   </section>
 
   <section class="bloco duas" aria-labelledby="titulo-site">
@@ -165,6 +166,11 @@ const assunto = encodeURIComponent(`Patrocínio · ${torneio.nome} ${torneio.dia
     padding-left: 18px;
     font-size: 14px;
     line-height: 1.5;
+  }
+  .nota-patamares {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--texto-2);
   }
   .a-confirmar {
     margin-top: 14px;

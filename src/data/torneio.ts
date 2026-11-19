@@ -8,6 +8,13 @@ export const torneio = {
   // o Início mostra estados vazios. Mudar para 'grupos' depois do sorteio (com dados reais).
   fase: 'pre-sorteio' as FaseTorneio,
 
+  // Modo de revisão (para a comissão rever o site com dados): com `true`, o site comporta-se como
+  // na fase 'grupos', usa os dados de src/data/exemplo.ts (através de fonte.ts), fixa o "agora" em
+  // `dataSimulada` e pede aos motores de pesquisa para não indexar (meta robots + robots.txt).
+  // Para voltar ao modo antes do sorteio: `modoRevisao: false`.
+  modoRevisao: false,
+  dataSimulada: '2026-12-22T19:00:00+00:00',
+
   nome: 'Abílio Pinto Futsal Cup',
   edicao: '2.ª edição',
   subtitulo: 'Torneio de Futsal de Natal de Arada',
@@ -27,7 +34,7 @@ export const torneio = {
 
   numeros: [
     { valor: '16', rotulo: 'equipas' },
-    { valor: '224', rotulo: 'cromos para colecionar' },
+    { valor: '192', rotulo: 'cromos para colecionar' }, // 16 equipas × 12 jogadores (máximo do regulamento)
     { valor: '32', rotulo: 'jogos' },
     { valor: '5', rotulo: 'dias de dezembro' },
   ],
@@ -36,8 +43,8 @@ export const torneio = {
   fases: ['grupos', 'grupos', 'grupos', 'quartos', 'finais'],
   pausaNatal: '24 e 25: pausa de Natal.',
 
-  // Duração usada no evento de calendário (.ics). Estimativa: confirmar com a organização.
-  duracaoJogoMinutos: 50,
+  // Duração de cada jogo no calendário (.ics) e para saber se um jogo está "a decorrer".
+  duracaoJogoMinutos: 40,
 
   // 1.ª edição (Natal de 2025): números reais, da carta da Junta.
   primeiraEdicao: {
@@ -54,16 +61,47 @@ export const torneio = {
   },
 
   // Patamares de patrocínio da 2.ª edição.
-  // TODO: preencher `beneficios` de cada patamar a partir do documento de patamares da Junta
-  // (lonas, Flash Interview, cartaz, redes sociais, Welcome Kit…). Enquanto estiver vazio, a
-  // página /patrocinar mostra "Benefícios a confirmar com a Junta".
+  // Patamares de patrocínio (patamares da Junta). `nome` curto para o Início; `titulo` na /patrocinar.
   patamares: [
-    { nome: 'Anual', valor: 500, beneficios: [] as string[] },
-    { nome: 'Destaque', valor: 250, beneficios: [] as string[] },
-    { nome: 'Cartaz', valor: 100, beneficios: [] as string[] },
-    { nome: 'Parceiro', valor: 50, beneficios: [] as string[] },
-    { nome: 'Apoiante', valor: 25, beneficios: [] as string[] },
+    {
+      nome: 'Anual',
+      titulo: 'Patrocinador Anual',
+      valor: 500,
+      beneficios: [
+        'Logótipo nas duas lonas',
+        'Destaque na lona Flash Interview',
+        'Cartaz oficial',
+        'Redes sociais',
+        'Presença permanente no pavilhão durante todo o ano',
+        'Welcome Kit',
+      ],
+    },
+    {
+      nome: 'Destaque',
+      titulo: 'Parceiro de Destaque',
+      valor: 250,
+      beneficios: ['Destaque na lona Flash Interview', 'Cartaz', 'Redes sociais', 'Lona geral', 'Welcome Kit'],
+    },
+    {
+      nome: 'Cartaz',
+      titulo: 'Parceiro Cartaz',
+      valor: 100,
+      beneficios: ['Lona Flash Interview', 'Cartaz do evento', 'Lona geral', 'Welcome Kit'],
+    },
+    {
+      nome: 'Parceiro',
+      titulo: 'Parceiro',
+      valor: 50,
+      beneficios: ['Logótipo na lona geral, com mais destaque do que os apoiantes'],
+    },
+    {
+      nome: 'Apoiante',
+      titulo: 'Apoiante',
+      valor: 25,
+      beneficios: ['Nome ou logótipo simples na lona geral'],
+    },
   ],
+  notaPatamares: 'Os patamares aplicam-se a torneios, eventos e ao Pavilhão Gimnodesportivo de Arada.',
 
   // Patrocinadores confirmados (além do principal), pela ordem da barra "Quem apoia".
   // Cada um ocupa um dos `espacosPatrocinio`; os que sobram ficam "O seu logótipo aqui".
@@ -89,6 +127,9 @@ export const torneio = {
   moradaJunta: '',
 
   regulamentoPdf: '/regulamento.pdf',
+
+  // Com `false`, o quadro das finais mostra "Proposta de cruzamentos, a confirmar pela organização."
+  quadroFinalConfirmado: false,
 
   // Esqueleto da fase final (/grupos#finais).
   // TODO: confirmar os cruzamentos dos quartos-de-final com a organização: o regulamento
