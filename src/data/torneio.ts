@@ -1,7 +1,13 @@
 // Fonte única de verdade com os dados do torneio.
 // Altera aqui e todas as páginas atualizam.
 
+export type FaseTorneio = 'pre-sorteio' | 'grupos' | 'final';
+
 export const torneio = {
+  // Fase do site. Em 'pre-sorteio' nenhuma página pública usa equipas, jogadores ou jogos:
+  // o Início mostra estados vazios. Mudar para 'grupos' depois do sorteio (com dados reais).
+  fase: 'pre-sorteio' as FaseTorneio,
+
   nome: 'Abílio Pinto Futsal Cup',
   edicao: '2.ª edição',
   subtitulo: 'Torneio de Futsal de Natal de Arada',
