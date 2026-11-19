@@ -12,7 +12,7 @@ export const torneio = {
   // na fase 'grupos', usa os dados de src/data/exemplo.ts (através de fonte.ts), fixa o "agora" em
   // `dataSimulada` e pede aos motores de pesquisa para não indexar (meta robots + robots.txt).
   // Para voltar ao modo antes do sorteio: `modoRevisao: false`.
-  modoRevisao: false,
+  modoRevisao: true,
   dataSimulada: '2026-12-22T19:00:00+00:00',
 
   nome: 'Abílio Pinto Futsal Cup',
