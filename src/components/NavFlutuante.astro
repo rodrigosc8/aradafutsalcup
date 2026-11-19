@@ -1,0 +1,135 @@
+---
+// Navegação flutuante.
+// - Computador (≥ 960px): cápsula branca sticky no topo com logótipo, itens e seletor de equipa.
+// - Telemóvel: cabeçalho com logótipo e seletor; cápsula com os 4 itens fixa em baixo.
+import Logo from './Logo.astro';
+import SeletorEquipa from './SeletorEquipa.astro';
+// TODO: trocar pela lista real de equipas depois do sorteio.
+import { equipas } from '../data/exemplo';
+
+export type ItemNav = 'inicio' | 'jogos' | 'grupos' | 'cromos';
+
+interface Props {
+  /** Item ativo. Sem valor (ex.: página 404), nenhum fica ativo. */
+  atual?: ItemNav;
+}
+const { atual } = Astro.props;
+
+const itens: { id: ItemNav; texto: string; href: string }[] = [
+  { id: 'inicio', texto: 'Início', href: '/' },
+  { id: 'jogos', texto: 'Jogos', href: '/jogos' },
+  { id: 'grupos', texto: 'Grupos', href: '/grupos' },
+  { id: 'cromos', texto: 'Cromos', href: '/cromos' },
+];
+---
+
+<div class="topo">
+  <header class="cabecalho">
+    <Logo />
+    <nav class="nav-topo so-computador" aria-label="Navegação principal">
+      {
+        itens.map((i) => (
+          <a href={i.href} aria-current={i.id === atual ? 'page' : undefined}>
+            {i.texto}
+          </a>
+        ))
+      }
+    </nav>
+    <SeletorEquipa equipas={equipas} />
+  </header>
+</div>
+
+<nav class="nav-baixo so-telemovel" aria-label="Navegação principal">
+  {
+    itens.map((i) => (
+      <a href={i.href} aria-current={i.id === atual ? 'page' : undefined}>
+        {i.texto}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px 0;
+  }
+
+  .nav-topo,
+  .nav-baixo {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-topo a,
+  .nav-baixo a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--toque);
+    border-radius: var(--raio-capsula);
+    color: var(--texto-2);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .nav-topo a:hover,
+  .nav-baixo a:hover {
+    color: var(--texto);
+  }
+  .nav-topo a[aria-current='page'],
+  .nav-baixo a[aria-current='page'] {
+    background: var(--bordo);
+    color: var(--branco);
+  }
+
+  /* Telemóvel: cápsula fixa em baixo */
+  .nav-baixo {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    z-index: 20;
+    padding: 6px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-capsula);
+    background: var(--branco);
+    box-shadow: 0 10px 30px rgb(42 20 24 / 0.14);
+  }
+  .nav-baixo a {
+    flex: 1;
+    min-height: 48px;
+    font-size: 14px;
+  }
+  @media (max-width: 959.98px) {
+    /* Espaço para a cápsula não tapar o fim da página. */
+    :global(body) {
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  /* Computador: cápsula sticky no topo */
+  @media (min-width: 960px) {
+    .topo {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 16px 24px 0;
+    }
+    .cabecalho {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 8px 8px 8px 24px;
+      border: 1px solid var(--linha);
+      border-radius: var(--raio-capsula);
+      background: rgb(255 255 255 / 0.94);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--sombra-nav);
+    }
+    .nav-topo a {
+      padding: 0 16px;
+      font-size: 15px;
+    }
+  }
+</style>

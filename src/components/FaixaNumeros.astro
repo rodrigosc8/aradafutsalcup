@@ -1,0 +1,64 @@
+---
+// Faixa de números do torneio (16 equipas, 224 cromos, 32 jogos, 5 dias).
+import { torneio } from '../data/torneio';
+
+interface Props {
+  itens?: { valor: string; rotulo: string }[];
+}
+const { itens = torneio.numeros } = Astro.props;
+---
+
+<ul class="numeros" aria-label="O torneio em números">
+  {
+    itens.map((n) => (
+      <li>
+        <span class="valor">{n.valor}</span>
+        <span class="rotulo">{n.rotulo}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .numeros {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--linha);
+    border-radius: 22px;
+    background: var(--branco);
+  }
+  li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 8px;
+    text-align: center;
+  }
+  .valor {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    color: var(--bordo);
+  }
+  .rotulo {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--texto-2);
+  }
+  @media (min-width: 720px) {
+    .numeros {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    li {
+      padding: 24px 8px;
+    }
+    .valor {
+      font-size: 52px;
+    }
+  }
+</style>

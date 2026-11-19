@@ -1,0 +1,216 @@
+---
+// Seletor "Sigo: [equipa] ▾". Abre a lista das equipas e guarda a escolha só neste
+// dispositivo (localStorage). Sem contas, sem servidor.
+import Icone from './Icone.astro';
+import type { Equipa } from '../data/exemplo';
+
+interface Props {
+  equipas: Equipa[];
+}
+const { equipas } = Astro.props;
+---
+
+<div class="seletor" data-seletor-equipa>
+  <button
+    type="button"
+    class="gatilho"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-controls="lista-equipas"
+    data-gatilho
+  >
+    <span class="cor" data-cor hidden></span>
+    <span data-rotulo>Seguir equipa</span>
+    <Icone nome="seta-baixo" tamanho={14} class="seta" />
+  </button>
+
+  <div class="painel" id="lista-equipas" hidden data-painel>
+    <p class="titulo" id="titulo-lista-equipas">Que equipa segues?</p>
+    <p class="nota">Fica guardado só neste dispositivo.</p>
+    <ul class="lista" aria-labelledby="titulo-lista-equipas">
+      {
+        equipas.map((e) => (
+          <li>
+            <button
+              type="button"
+              class="opcao"
+              data-opcao={e.id}
+              data-nome={e.nome}
+              data-cor-equipa={e.cor}
+              aria-pressed="false"
+            >
+              <span class="cor" style={`background: ${e.cor}`} aria-hidden="true" />
+              {e.nome}
+            </button>
+          </li>
+        ))
+      }
+    </ul>
+    <button type="button" class="nenhuma" data-opcao="">Não seguir nenhuma equipa</button>
+  </div>
+</div>
+
+<script>
+  import { aoMudarEquipa, guardarEquipa } from '../scripts/seguir';
+
+  document.querySelectorAll<HTMLElement>('[data-seletor-equipa]').forEach((raiz) => {
+    const gatilho = raiz.querySelector<HTMLButtonElement>('[data-gatilho]')!;
+    const painel = raiz.querySelector<HTMLElement>('[data-painel]')!;
+    const rotulo = raiz.querySelector<HTMLElement>('[data-rotulo]')!;
+    const cor = raiz.querySelector<HTMLElement>('[data-cor]')!;
+    const opcoes = [...raiz.querySelectorAll<HTMLButtonElement>('.opcao')];
+
+    const abrir = (sim: boolean) => {
+      painel.hidden = !sim;
+      gatilho.setAttribute('aria-expanded', String(sim));
+      if (sim) (opcoes.find((o) => o.getAttribute('aria-pressed') === 'true') ?? opcoes[0])?.focus();
+    };
+
+    gatilho.addEventListener('click', () => abrir(painel.hidden));
+
+    raiz.addEventListener('click', (ev) => {
+      const opcao = (ev.target as Element).closest<HTMLButtonElement>('[data-opcao]');
+      if (!opcao) return;
+      guardarEquipa(opcao.dataset.opcao || null);
+      abrir(false);
+      gatilho.focus();
+    });
+
+    document.addEventListener('click', (ev) => {
+      if (!painel.hidden && !raiz.contains(ev.target as Node)) abrir(false);
+    });
+    raiz.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Escape' && !painel.hidden) {
+        abrir(false);
+        gatilho.focus();
+      }
+    });
+
+    aoMudarEquipa((id) => {
+      const escolhida = opcoes.find((o) => o.dataset.opcao === id);
+      opcoes.forEach((o) => o.setAttribute('aria-pressed', String(o === escolhida)));
+      if (escolhida) {
+        rotulo.textContent = `Sigo: ${escolhida.dataset.nome}`;
+        cor.style.background = escolhida.dataset.corEquipa ?? '';
+        cor.hidden = false;
+      } else {
+        rotulo.textContent = 'Seguir equipa';
+        cor.hidden = true;
+      }
+    });
+  });
+</script>
+
+<style>
+  .seletor {
+    position: relative;
+  }
+  .gatilho {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--toque);
+    padding: 0 12px;
+    border: 1.5px solid var(--linha);
+    border-radius: 10px;
+    background: var(--branco);
+    color: var(--texto);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .gatilho:hover {
+    border-color: var(--texto-2);
+  }
+  .gatilho :global(.seta) {
+    color: var(--texto-2);
+  }
+  .gatilho[aria-expanded='true'] :global(.seta) {
+    transform: scaleY(-1);
+  }
+  .cor {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+  .cor[hidden] {
+    display: none;
+  }
+
+  .painel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 30;
+    width: min(340px, calc(100vw - 40px));
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    padding: 16px;
+    border: 1px solid var(--linha);
+    border-radius: 18px;
+    background: var(--branco);
+    box-shadow: var(--sombra-nav);
+  }
+  .titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    text-transform: uppercase;
+  }
+  .nota {
+    margin: 2px 0 12px;
+    font-size: 13px;
+    color: var(--texto-2);
+  }
+  .lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .opcao,
+  .nenhuma {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--toque);
+    padding: 0 12px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-botao);
+    background: var(--branco);
+    color: var(--texto);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+  }
+  .opcao:hover,
+  .nenhuma:hover {
+    border-color: var(--texto-2);
+  }
+  .opcao[aria-pressed='true'] {
+    border-color: var(--bordo);
+    box-shadow: inset 0 0 0 1px var(--bordo);
+    color: var(--bordo);
+    font-weight: 800;
+  }
+  .nenhuma {
+    justify-content: center;
+    margin-top: 10px;
+    background: transparent;
+    color: var(--texto-2);
+  }
+
+  @media (min-width: 960px) {
+    .gatilho {
+      border-radius: var(--raio-capsula);
+      font-size: 14px;
+    }
+  }
+</style>

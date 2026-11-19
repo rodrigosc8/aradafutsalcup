@@ -1,0 +1,332 @@
+---
+// Cartão "Jogo em destaque": fundo bordô, as duas equipas, a hora, a contagem e
+// "Jogadores a seguir" (2 cromos de cada equipa: os jogadores nunca representam a equipa sozinhos).
+// Telemóvel e computador têm disposições diferentes (ver design-ref/).
+import Botao from './Botao.astro';
+import Cromo from './Cromo.astro';
+import EmblemaEquipa from './EmblemaEquipa.astro';
+import Icone from './Icone.astro';
+import type { Equipa, Jogador, Jogo } from '../data/exemplo';
+import { torneio } from '../data/torneio';
+import { horaLisboa, textoContagem, textoDia } from '../scripts/datas';
+
+interface Props {
+  jogo: Jogo;
+  casa: Equipa;
+  fora: Equipa;
+  /** 2 jogadores de cada equipa. */
+  jogadoresCasa: Jogador[];
+  jogadoresFora: Jogador[];
+  rotulo?: string;
+  /** Destino de "Ver as duas equipas". */
+  hrefEquipas?: string;
+}
+
+const {
+  jogo,
+  casa,
+  fora,
+  jogadoresCasa,
+  jogadoresFora,
+  rotulo = 'Jogo em destaque',
+  hrefEquipas = `/jogos#${jogo.id}`,
+} = Astro.props;
+
+const hora = horaLisboa(jogo.inicio);
+// Texto do build; o script atualiza no browser.
+const agora = new Date();
+const dia = textoDia(jogo.inicio, agora);
+const contagemCurta = textoContagem(jogo.inicio, 'curto', agora);
+const contagemLonga = textoContagem(jogo.inicio, 'longo', agora);
+const etiqueta = [jogo.grupo ? `Grupo ${jogo.grupo}` : jogo.fase].join(' · ');
+const titulo = `${casa.nome} × ${fora.nome}`;
+const local = 'Pavilhão de Arada';
+
+const ics = {
+  'data-ics': '',
+  'data-ics-uid': `${jogo.id}-${jogo.inicio.slice(0, 10)}`,
+  'data-ics-inicio': jogo.inicio,
+  'data-ics-titulo': `${titulo} · ${torneio.nome}`,
+  'data-ics-ficheiro': `${casa.id}-${fora.id}.ics`,
+};
+const equipasCromos = [
+  { equipa: casa, jogadores: jogadoresCasa.slice(0, 2) },
+  { equipa: fora, jogadores: jogadoresFora.slice(0, 2) },
+];
+---
+
+<section class="destaque" aria-label={`${rotulo}: ${titulo}`}>
+  <!-- Telemóvel -->
+  <div class="movel so-telemovel">
+    <p class="etiqueta centro">
+      <Icone nome="estrela" tamanho={12} /><span><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</span>
+    </p>
+    <div class="confronto">
+      <div class="lado">
+        <EmblemaEquipa sigla={casa.sigla} cor={casa.cor} />
+        <span class="nome-equipa">{casa.nome}</span>
+      </div>
+      <div class="quando">
+        <span class="hora">{hora}</span>
+        <span class="dia" data-quando="dia" data-inicio={jogo.inicio}>{dia}</span>
+        <span class="contagem" data-quando="contagem" data-inicio={jogo.inicio} hidden={!contagemCurta}
+          >{contagemCurta}</span
+        >
+      </div>
+      <div class="lado">
+        <EmblemaEquipa sigla={fora.sigla} cor={fora.cor} />
+        <span class="nome-equipa">{fora.nome}</span>
+      </div>
+    </div>
+    <div class="seguir">
+      <p class="etiqueta">Jogadores a seguir</p>
+      <div class="cromos-movel">
+        {
+          equipasCromos.flatMap(({ equipa, jogadores }) =>
+            jogadores.map((j) => (
+              <Cromo nome={j.nome} numero={j.numero} subtitulo={equipa.nome} cor={equipa.cor} largura={68} />
+            )),
+          )
+        }
+      </div>
+    </div>
+    <Botao variante="branco" icone="calendario" largo class="botao-cal" {...ics}>Adicionar ao calendário</Botao>
+  </div>
+
+  <!-- Computador -->
+  <div class="pc so-computador">
+    <div class="pc-info">
+      <p class="etiqueta">
+        <Icone nome="estrela" tamanho={14} /><span><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</span>
+      </p>
+      <h2 class="titulo-pc">{casa.nome}<br /><span class="fora">× {fora.nome}</span></h2>
+      <p class="linha-hora">
+        <span class="hora-pc">{hora}</span>
+        <span class="info-pc">
+          <span data-quando="dia" data-inicio={jogo.inicio}>{dia}</span>
+          <span class="contagem-pc" data-quando="contagem" data-formato="longo" data-inicio={jogo.inicio} hidden={!contagemLonga}
+            >{contagemLonga}</span
+          >
+          <span>{local}</span>
+        </span>
+      </p>
+      <div class="acoes">
+        <Botao variante="branco" icone="calendario" {...ics}>Adicionar ao calendário</Botao>
+        <Botao variante="claro" href={hrefEquipas}>Ver as duas equipas</Botao>
+      </div>
+    </div>
+    <div class="pc-cromos">
+      <p class="etiqueta centro">Jogadores a seguir</p>
+      <div class="equipas-cromos">
+        {
+          equipasCromos.map(({ equipa, jogadores }) => (
+            <div>
+              <p class="mini-equipa">
+                <EmblemaEquipa sigla={equipa.sigla} cor={equipa.cor} tamanho={26} anel={2} />
+                {equipa.nome}
+              </p>
+              <div class="par">
+                {jogadores.map((j) => (
+                  <Cromo
+                    nome={j.nome}
+                    numero={j.numero}
+                    subtitulo={`${j.posicao} · ${equipa.nome}`}
+                    cor={equipa.cor}
+                    largura={116}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { atualizarQuando } from '../scripts/datas';
+  import { ligarBotoesCalendario } from '../scripts/calendario';
+
+  ligarBotoesCalendario();
+  atualizarQuando();
+  setInterval(() => atualizarQuando(), 30_000);
+</script>
+
+<style>
+  .destaque {
+    border-radius: var(--raio-cartao);
+    background: var(--bordo);
+    color: var(--branco);
+  }
+  .etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--dourado-claro);
+  }
+  .centro {
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Telemóvel */
+  .movel {
+    padding: 14px 16px 16px;
+  }
+  .confronto {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .lado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+  .nome-equipa {
+    max-width: 100%;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    line-height: 1.05;
+    text-align: center;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+  }
+  .quando {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .hora {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 34px;
+    line-height: 1;
+  }
+  .dia,
+  .contagem {
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--bordo-claro);
+  }
+  .contagem {
+    margin-top: 0;
+  }
+  .seguir {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgb(255 255 255 / 0.2);
+  }
+  .cromos-movel {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    justify-items: center;
+    margin-top: 8px;
+  }
+  .movel :global(.botao-cal) {
+    margin-top: 14px;
+    min-height: 46px;
+    font-size: 14px;
+  }
+
+  /* Computador */
+  .pc {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    align-items: center;
+    gap: 24px;
+    padding: 40px 48px;
+    border-radius: var(--raio-cartao-grande);
+  }
+  .pc .etiqueta {
+    gap: 8px;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+  }
+  .titulo-pc {
+    margin: 14px 0 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 76px;
+    line-height: 0.92;
+    text-transform: uppercase;
+  }
+  .fora {
+    color: var(--bordo-claro);
+  }
+  .linha-hora {
+    display: flex;
+    align-items: baseline;
+    gap: 18px;
+    margin: 18px 0 0;
+  }
+  .hora-pc {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 44px;
+    line-height: 1;
+  }
+  .info-pc {
+    font-size: 16px;
+    color: var(--bordo-claro);
+  }
+  .info-pc > span:not(:first-child)::before {
+    content: ' · ';
+  }
+  .acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .acoes :global(.botao) {
+    min-height: 50px;
+    padding-inline: 22px;
+    border-radius: var(--raio-linha);
+  }
+  .pc-cromos .etiqueta {
+    margin-bottom: 12px;
+    font-size: 12px;
+    letter-spacing: 1.2px;
+  }
+  .equipas-cromos {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+  }
+  .mini-equipa {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 16px;
+    text-transform: uppercase;
+  }
+  .par {
+    display: flex;
+    gap: 12px;
+  }
+
+  @media (min-width: 960px) {
+    .destaque {
+      border-radius: var(--raio-cartao-grande);
+    }
+  }
+</style>

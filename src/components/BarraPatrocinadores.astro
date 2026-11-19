@@ -1,0 +1,197 @@
+---
+// Barra "Quem apoia": fila em movimento contínuo (conteúdo duplicado; a cópia tem aria-hidden).
+// Para com o rato por cima ou com foco, e fica parada com prefers-reduced-motion.
+// No computador mostra o rótulo "Quem apoia" e o botão "Quero patrocinar".
+import Icone from './Icone.astro';
+import { torneio } from '../data/torneio';
+
+interface Props {
+  /** Número de espaços de patrocinador ainda por preencher (marcadores). */
+  vagas?: number;
+  /** Destino de "Quero patrocinar". */
+  hrefPatrocinar?: string;
+}
+const {
+  vagas = 6,
+  hrefPatrocinar = torneio.contactoEmail ? `mailto:${torneio.contactoEmail}?subject=Patrocínio` : '/patrocinar',
+} = Astro.props;
+const marcadores = Array.from({ length: vagas });
+---
+
+<section class="patrocinadores" aria-label="Patrocinadores">
+  <div class="conteudo">
+    <p class="rotulo so-computador">Quem<br />apoia</p>
+    <div class="marquee">
+      <div class="pista">
+        {
+          [false, true].map((copia) => (
+            <ul class="grupo" aria-hidden={copia ? 'true' : undefined}>
+              <li class="principal">
+                <span class="principal-etiqueta so-computador">Patrocinador principal</span>
+                <span class="principal-nome">{torneio.patrocinadorPrincipal}</span>
+              </li>
+              {marcadores.map(() => (
+                <li class="vaga">
+                  <span class="so-telemovel">Patrocinador</span>
+                  <span class="so-computador">Logótipo patrocinador</span>
+                </li>
+              ))}
+            </ul>
+          ))
+        }
+      </div>
+    </div>
+    <a class="patrocinar so-computador" href={hrefPatrocinar}>Quero patrocinar<Icone nome="seta" tamanho={14} /></a>
+  </div>
+</section>
+
+<style>
+  .patrocinadores {
+    margin-top: 16px;
+  }
+  .conteudo {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .marquee {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .pista {
+    display: flex;
+    width: max-content;
+    animation: deslizar 38s linear infinite;
+  }
+  .marquee:hover .pista,
+  .marquee:focus-within .pista {
+    animation-play-state: paused;
+  }
+  @keyframes deslizar {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pista {
+      animation: none;
+    }
+    .marquee {
+      overflow-x: auto;
+    }
+  }
+
+  .grupo {
+    display: flex;
+    gap: 10px;
+    margin: 0;
+    padding: 0 10px 0 0;
+    list-style: none;
+  }
+  .principal,
+  .vaga {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .principal {
+    gap: 10px;
+    padding: 0 16px;
+    background: var(--azul-ap);
+    color: var(--branco);
+  }
+  .principal-nome {
+    /* Marcador até chegar o logótipo oficial. */
+    font-family: var(--font-marcador);
+    font-style: italic;
+    font-weight: 800;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  .principal-etiqueta {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--azul-ap-claro);
+    white-space: nowrap;
+  }
+  .vaga {
+    justify-content: center;
+    width: 112px;
+    border: 1.5px dashed var(--linha);
+    background: var(--branco);
+    color: var(--texto-2);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .rotulo {
+    flex: none;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .patrocinar {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: var(--toque);
+    padding: 0 14px 0 18px;
+    border: 1.5px solid var(--bordo);
+    border-radius: var(--raio-capsula);
+    color: var(--bordo);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .patrocinar:hover {
+    background: var(--branco);
+  }
+
+  @media (min-width: 960px) {
+    .patrocinadores {
+      margin-top: 28px;
+      border-block: 1px solid var(--linha);
+    }
+    .conteudo {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 32px;
+    }
+    .marquee {
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+    }
+    .grupo {
+      gap: 16px;
+      padding-right: 16px;
+    }
+    .principal,
+    .vaga {
+      height: 56px;
+      border-radius: 14px;
+    }
+    .principal {
+      padding: 0 26px;
+    }
+    .principal-nome {
+      font-size: 22px;
+    }
+    .vaga {
+      width: 170px;
+      font-size: 13px;
+    }
+  }
+</style>

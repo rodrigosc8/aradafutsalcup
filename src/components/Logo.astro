@@ -1,0 +1,44 @@
+---
+// Logótipo de texto. Duas linhas no telemóvel, uma só no computador.
+// Não é um link: o texto simples nunca é clicável (o Início está na navegação).
+interface Props {
+  /** 'auto' (2 linhas no telemóvel, 1 no computador), ou forçar. */
+  linhas?: 'auto' | 1 | 2;
+  tamanho?: number;
+}
+const { linhas = 'auto', tamanho = 21 } = Astro.props;
+---
+
+<p class:list={['logo', `linhas-${linhas}`]} style={`--tamanho: ${tamanho}px`}>
+  <span>Abílio Pinto</span> <span class="cup">Futsal Cup</span>
+</p>
+
+<style>
+  .logo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--tamanho);
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: var(--texto);
+  }
+  .cup {
+    color: var(--destaque);
+  }
+  .linhas-2 span,
+  .linhas-auto span {
+    display: block;
+  }
+  .linhas-1 {
+    white-space: nowrap;
+  }
+  @media (min-width: 960px) {
+    .linhas-auto {
+      white-space: nowrap;
+    }
+    .linhas-auto span {
+      display: inline;
+    }
+  }
+</style>

@@ -1,0 +1,60 @@
+---
+// Ícones de traço (decorativos: aria-hidden). Quem só tem ícone precisa de aria-label no botão/link.
+interface Props {
+  nome: 'seta' | 'seta-baixo' | 'calendario' | 'partilhar' | 'transferir' | 'estrela';
+  tamanho?: number;
+  class?: string;
+}
+const { nome, tamanho = 16, class: classe } = Astro.props;
+---
+
+{
+  nome === 'estrela' ? (
+    <svg class={classe} width={tamanho} height={tamanho} viewBox="-10 -10 20 20" aria-hidden="true">
+      <polygon
+        points="0,-10 2.5,-3.4 9.5,-3.1 4,1.3 5.9,8.1 0,4.2 -5.9,8.1 -4,1.3 -9.5,-3.1 -2.5,-3.4"
+        fill="var(--dourado)"
+      />
+    </svg>
+  ) : (
+    <svg
+      class={classe}
+      width={tamanho}
+      height={tamanho}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width={nome === 'seta' || nome === 'seta-baixo' ? 2.4 : 2}
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      {nome === 'seta' && <path d="m9 6 6 6-6 6" />}
+      {nome === 'seta-baixo' && <path d="m6 9 6 6 6-6" />}
+      {nome === 'calendario' && (
+        <>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M3 10h18M8 3v4M16 3v4M12 14v4M10 16h4" />
+        </>
+      )}
+      {nome === 'partilhar' && (
+        <>
+          <path d="M12 3v12M7 8l5-5 5 5" />
+          <path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" />
+        </>
+      )}
+      {nome === 'transferir' && (
+        <>
+          <path d="M12 4v11M7 10l5 5 5-5" />
+          <path d="M5 20h14" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+<style>
+  svg {
+    flex: none;
+  }
+</style>

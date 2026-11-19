@@ -1,0 +1,39 @@
+---
+import { torneio } from '../data/torneio';
+---
+
+<footer class="rodape">
+  <div class="conteudo">
+    <p>Patrocinador principal: <strong>{torneio.patrocinadorPrincipal}</strong></p>
+    <p>Organização: {torneio.organizacao} · {torneio.local}</p>
+  </div>
+</footer>
+
+<style>
+  .rodape {
+    margin-top: 40px;
+    border-top: 1px solid var(--linha);
+  }
+  .conteudo {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 24px;
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 20px 20px 28px;
+    font-size: 14px;
+    color: var(--texto-2);
+  }
+  p {
+    margin: 0;
+  }
+  strong {
+    color: var(--texto);
+  }
+  @media (min-width: 960px) {
+    .conteudo {
+      padding-inline: 32px;
+    }
+  }
+</style>

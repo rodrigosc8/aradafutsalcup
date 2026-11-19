@@ -1,0 +1,41 @@
+---
+// Cápsula de link: fundo branco, contorno, texto bordô e seta ›.
+// Visualmente tem 36px; a área de toque é alargada para 44px.
+import Icone from './Icone.astro';
+
+interface Props {
+  href: string;
+  'aria-label'?: string;
+}
+const { href, 'aria-label': rotulo } = Astro.props;
+---
+
+<a class="pilula" href={href} aria-label={rotulo}><slot /><Icone nome="seta" tamanho={14} /></a>
+
+<style>
+  .pilula {
+    position: relative;
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 36px;
+    padding: 0 10px 0 14px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-capsula);
+    background: var(--branco);
+    color: var(--bordo);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .pilula::before {
+    content: '';
+    position: absolute;
+    inset: -4px 0;
+  }
+  .pilula:hover {
+    border-color: var(--bordo);
+  }
+</style>

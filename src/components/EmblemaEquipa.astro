@@ -1,0 +1,44 @@
+---
+// Emblema de equipa: círculo na cor da equipa, iniciais em Barlow e anel branco.
+// Decorativo por omissão (o nome da equipa aparece sempre ao lado). Passa `rotulo` se estiver sozinho.
+interface Props {
+  sigla: string;
+  cor: string;
+  tamanho?: number;
+  /** Largura do anel branco, em px. */
+  anel?: number;
+  /** Fio dourado por fora do anel (página da equipa). */
+  dourado?: boolean;
+  rotulo?: string;
+}
+const { sigla, cor, tamanho = 52, anel = 3, dourado = false, rotulo } = Astro.props;
+const sombra = dourado
+  ? `0 0 0 ${anel}px var(--branco), 0 0 0 ${anel + 1.5}px var(--dourado)`
+  : `0 0 0 ${anel}px var(--branco)`;
+---
+
+<span
+  class="emblema"
+  style={`--cor: ${cor}; --tamanho: ${tamanho}px; box-shadow: ${sombra}`}
+  role={rotulo ? 'img' : undefined}
+  aria-label={rotulo}
+  aria-hidden={rotulo ? undefined : 'true'}>{sigla}</span
+>
+
+<style>
+  .emblema {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tamanho);
+    height: var(--tamanho);
+    border-radius: 50%;
+    background: var(--cor);
+    color: var(--branco);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: calc(var(--tamanho) * 0.38);
+    line-height: 1;
+  }
+</style>

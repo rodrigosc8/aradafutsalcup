@@ -1,0 +1,97 @@
+---
+// Botão. Com `href` é um link (<a>) e leva sempre a seta ›; sem `href` é um <button> de ação.
+// Os restantes atributos (data-*, aria-*, type…) passam para o elemento.
+import type { HTMLAttributes } from 'astro/types';
+import Icone from './Icone.astro';
+
+type Variante =
+  | 'primario' // bordô com texto branco
+  | 'secundario' // transparente com contorno
+  | 'branco' // branco com texto bordô (sobre fundo bordô)
+  | 'claro'; // contorno claro (sobre fundo bordô)
+
+interface Props extends Omit<HTMLAttributes<'button'>, 'class'> {
+  variante?: Variante;
+  href?: string;
+  icone?: 'calendario' | 'partilhar' | 'transferir';
+  /** Ocupa a largura toda. */
+  largo?: boolean;
+  class?: string;
+}
+
+const { variante = 'primario', href, icone, largo = false, class: classe, type = 'button', ...resto } = Astro.props;
+const classes = ['botao', variante, { largo }, classe];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...(resto as HTMLAttributes<'a'>)}>
+      {icone && <Icone nome={icone} tamanho={18} />}
+      <span>
+        <slot />
+      </span>
+      <Icone nome="seta" tamanho={16} />
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...resto}>
+      {icone && <Icone nome={icone} tamanho={18} />}
+      <span>
+        <slot />
+      </span>
+    </button>
+  )
+}
+
+<style>
+  .botao {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 20px;
+    border: 1.5px solid transparent;
+    border-radius: var(--raio-botao);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .botao:hover {
+    filter: brightness(0.94);
+  }
+  .largo {
+    width: 100%;
+  }
+
+  .primario {
+    background: var(--bordo);
+    color: var(--branco);
+  }
+  .secundario {
+    background: transparent;
+    border-color: var(--linha);
+    color: var(--texto);
+  }
+  .secundario:hover {
+    filter: none;
+    border-color: var(--texto-2);
+  }
+  .branco {
+    background: var(--branco);
+    color: var(--bordo);
+    font-weight: 800;
+  }
+  .claro {
+    background: transparent;
+    border-color: rgb(255 255 255 / 0.5);
+    color: var(--branco);
+  }
+  .claro:hover {
+    filter: none;
+    border-color: var(--branco);
+  }
+</style>
