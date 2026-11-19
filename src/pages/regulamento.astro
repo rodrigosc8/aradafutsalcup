@@ -1,0 +1,287 @@
+---
+// Regulamento: transcrição de public/regulamento.pdf ("Regulamento Oficial do Torneio de Futsal
+// de Natal de Arada", 3 páginas). O texto segue o PDF; só a pontuação e os ordinais foram normalizados.
+// Se o PDF mudar, atualizar também esta página.
+import Pagina from '../layouts/Pagina.astro';
+import Botao from '../components/Botao.astro';
+import { torneio } from '../data/torneio';
+
+type Item = string | { texto: string; sub: string[] };
+interface Seccao {
+  id: string;
+  titulo: string;
+  itens: Item[];
+}
+
+const seccoes: Seccao[] = [
+  {
+    id: 'disposicoes-gerais',
+    titulo: 'Disposições gerais',
+    itens: [
+      'O Torneio rege-se pelas regras oficiais da FIFA, com as adaptações e exceções previstas no presente Regulamento.',
+      'A Organização é a entidade soberana e responsável pela decisão final em todos os casos omissos ou de interpretação duvidosa do presente Regulamento.',
+      'Todos os participantes estão abrangidos por Seguro Desportivo.',
+    ],
+  },
+  {
+    id: 'inscricoes',
+    titulo: 'Inscrições',
+    itens: [
+      'O prazo limite para a inscrição de equipas e jogadores é o dia 19 de dezembro.',
+      // TODO: o PDF não indica o valor da taxa de inscrição.
+      'O pagamento da taxa de inscrição deverá ser efetuado no ato da mesma.',
+      'A lista de jogadores pode ser alterada até à data limite de inscrição (19 de dezembro).',
+      'É obrigatória a apresentação do Nome Completo e Número de Cartão de Cidadão de cada jogador para a formalização da ficha oficial de inscrição.',
+    ],
+  },
+  {
+    id: 'formato',
+    titulo: 'Formato do torneio',
+    itens: [
+      'O Torneio será realizado entre os dias 21, 22, 23, 26 e 27 de dezembro.',
+      'Participarão 16 equipas, distribuídas por 4 grupos de 4 equipas.',
+      'A estrutura competitiva compreende: Fase de Grupos, Quartos-de-Final, Meias-Finais e Finais (3.º/4.º e 1.º/2.º lugar).',
+      // TODO: o PDF não define os cruzamentos dos quartos-de-final (quem joga com quem).
+      'Qualificam-se para a fase seguinte (Quartos-de-Final) apenas os 2 primeiros classificados de cada grupo.',
+    ],
+  },
+  {
+    id: 'duracao',
+    titulo: 'Duração e desempates dos jogos',
+    itens: [
+      'Fase de Grupos: 2 partes de 15 minutos (tempo corrido) com 5 minutos de intervalo. É permitido 1 Time-out por jogo por equipa.',
+      'Quartos-de-Final: 2 partes de 15 minutos, sendo o último minuto da segunda parte cronometrado, com 5 minutos de intervalo. É permitido 1 Time-out por jogo por equipa.',
+      'Meias-Finais: 2 partes de 20 minutos, sendo os últimos 5 minutos de cada parte cronometrados, com 5 minutos de intervalo. É permitido 1 Time-out por parte por equipa.',
+      'Final e 3.º/4.º Lugar: 2 partes de 20 minutos (tempo cronometrado), com 5 minutos de intervalo. É permitido 1 Time-out por parte por equipa.',
+      {
+        texto: 'Desempates (eliminatórias):',
+        sub: [
+          'Quartos-de-Final e Meias-Finais: em caso de empate, a decisão será feita através de pontapés da marca de grande penalidade.',
+          // TODO: o PDF fala só da Final; confirmar se o jogo do 3.º/4.º lugar também tem prolongamento.
+          'Final: em caso de empate, haverá um Prolongamento de 2 partes de 5 minutos. Se o empate persistir, recorrer-se-á aos pontapés da marca de grande penalidade.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'equipas',
+    titulo: 'Composição das equipas',
+    itens: [
+      'Cada equipa pode inscrever um máximo de 12 jogadores.',
+      'As funções de Treinador e Delegado são opcionais.',
+      'É permitida a acumulação da função de Treinador com a de Jogador.',
+      'Apenas os jogadores devidamente inscritos poderão participar nos jogos.',
+      'É obrigatório o uso de equipamento numerado.',
+    ],
+  },
+  {
+    id: 'pontuacao',
+    titulo: 'Sistema de pontuação',
+    itens: [
+      'Vitória: 3 pontos.',
+      'Empate: 1 ponto.',
+      'Derrota: 0 pontos.',
+      // TODO: o PDF não diz como se aplica o confronto direto quando 3 ou mais equipas empatam.
+      'Critérios de desempate (aplicados por ordem): 1.º Confronto Direto, 2.º Diferença de Golos, 3.º Golos Marcados, 4.º Golos Sofridos, 5.º Fair-Play (menor pontuação; amarelo: 1 ponto, vermelho: 3 pontos), 6.º Sorteio.',
+    ],
+  },
+  {
+    id: 'arbitragem',
+    titulo: 'Arbitragem',
+    itens: [
+      'A arbitragem será assegurada por elementos da Organização.',
+      'As decisões da equipa de arbitragem são finais e não passíveis de protesto.',
+    ],
+  },
+  {
+    id: 'conduta',
+    titulo: 'Conduta e disciplina',
+    itens: [
+      'É exigido um comportamento adequado e de fair-play por parte de todos os intervenientes.',
+      'Cartão Amarelo: Advertência.',
+      'Cartão Vermelho: Expulsão imediata e suspensão por 1 jogo.',
+      'Cartão Vermelho por conduta violenta: resultará na exclusão do jogador do Torneio.',
+      // TODO: o PDF não diz se a "reincidência" conta por jogo ou ao longo de todo o torneio.
+      'Será concedida uma tolerância máxima de 10 minutos para o início dos jogos. Ultrapassado este período, será aplicada uma advertência e, em caso de reincidência, será decretada a derrota por falta de comparência.',
+    ],
+  },
+  {
+    id: 'material',
+    titulo: 'Material',
+    itens: [
+      'A bola oficial de futsal será providenciada pela Organização.',
+      'Cada equipa deve apresentar o seu equipamento e coletes.',
+      'A Organização poderá ceder coletes em caso de necessidade.',
+    ],
+  },
+  {
+    id: 'premios',
+    titulo: 'Prémios',
+    itens: [
+      '1.º Lugar: 450 €',
+      '2.º Lugar: 300 €',
+      '3.º Lugar: 150 €',
+      'Serão ainda atribuídos os seguintes Prémios Individuais: Melhor Jogador, Melhor Guarda-Redes e Prémio Fair-Play (a equipa será escolhida pela Organização com base na sua conduta exemplar, desportivismo e atitude positiva ao longo dos jogos).',
+    ],
+  },
+  {
+    id: 'casos-omissos',
+    titulo: 'Casos omissos',
+    itens: [
+      'Qualquer situação não prevista no presente Regulamento será decidida pela Organização, sendo a sua decisão inalterável e não passível de recurso.',
+    ],
+  },
+];
+---
+
+<Pagina
+  titulo="Regulamento"
+  frase="Regulamento Oficial do Torneio de Futsal de Natal de Arada. Esta página reproduz o documento em PDF."
+  largura="texto"
+>
+  <Botao slot="acao" variante="secundario" icone="transferir" href={torneio.regulamentoPdf} download>
+    Descarregar o regulamento (PDF)
+  </Botao>
+
+  <nav class="indice" aria-labelledby="titulo-indice">
+    <h2 id="titulo-indice">Índice</h2>
+    <ol>
+      {
+        seccoes.map((s, i) => (
+          <li>
+            <a href={`#${s.id}`}>
+              <span class="n">{i + 1}.</span>
+              {s.titulo}
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+
+  <div class="conteudo">
+    {
+      seccoes.map((s, i) => (
+        <section id={s.id} aria-labelledby={`t-${s.id}`}>
+          <h2 id={`t-${s.id}`}>
+            <span class="n">{i + 1}.</span> {s.titulo}
+          </h2>
+          <ul>
+            {s.itens.map((item) =>
+              typeof item === 'string' ? (
+                <li>{item}</li>
+              ) : (
+                <li>
+                  {item.texto}
+                  <ul class="sub">
+                    {item.sub.map((x) => (
+                      <li>{x}</li>
+                    ))}
+                  </ul>
+                </li>
+              ),
+            )}
+          </ul>
+          <a class="topo" href="#titulo-indice">Voltar ao índice</a>
+        </section>
+      ))
+    }
+  </div>
+</Pagina>
+
+<style>
+  .indice {
+    margin-top: 28px;
+    padding: 18px 20px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-cartao);
+    background: var(--branco);
+  }
+  .indice h2 {
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    text-transform: uppercase;
+  }
+  .indice ol {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  /* Links do índice: cápsulas com contorno (regra de interação do DESIGN.md). */
+  .indice a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: var(--toque);
+    padding: 0 12px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-botao);
+    color: var(--texto);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .indice a::after {
+    content: '›';
+    margin-left: auto;
+    color: var(--bordo);
+    font-weight: 700;
+  }
+  .indice a:hover {
+    border-color: var(--bordo);
+  }
+  .n {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--bordo);
+  }
+  .conteudo section {
+    margin-top: 36px;
+    scroll-margin-top: 110px;
+  }
+  .conteudo h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 28px;
+    line-height: 1.1;
+    text-transform: uppercase;
+  }
+  .conteudo ul {
+    margin: 12px 0 0;
+    padding-left: 22px;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .conteudo li + li {
+    margin-top: 6px;
+  }
+  .conteudo .sub {
+    margin-top: 6px;
+  }
+  .topo {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--toque);
+    margin-top: 8px;
+    padding: 0 12px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-capsula);
+    background: var(--branco);
+    color: var(--bordo);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .topo::after {
+    content: ' ›';
+    white-space: pre;
+  }
+  .topo:hover {
+    border-color: var(--bordo);
+  }
+</style>

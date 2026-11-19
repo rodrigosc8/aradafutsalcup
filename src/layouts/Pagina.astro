@@ -1,0 +1,72 @@
+---
+// Layout das páginas interiores: navegação, cabeçalho (título a 40px + frase de apoio), conteúdo e rodapé.
+import Base from './Base.astro';
+import NavFlutuante, { type ItemNav } from '../components/NavFlutuante.astro';
+import Rodape from '../components/Rodape.astro';
+import { torneio } from '../data/torneio';
+
+interface Props {
+  titulo: string;
+  frase?: string;
+  description?: string;
+  atual?: ItemNav;
+  /** Largura do conteúdo: 'texto' (760px, páginas de leitura) ou 'larga' (contentor de 1320px). */
+  largura?: 'texto' | 'larga';
+}
+const { titulo, frase, description, atual, largura = 'larga' } = Astro.props;
+---
+
+<Base title={`${titulo} · ${torneio.nome}`} description={description ?? frase}>
+  <NavFlutuante atual={atual} />
+  <main class:list={['pagina', largura]}>
+    <header class="cabeca">
+      <h1>{titulo}</h1>
+      {frase && <p class="frase">{frase}</p>}
+      {Astro.slots.has('acao') && <div class="acao"><slot name="acao" /></div>}
+    </header>
+    <slot />
+  </main>
+  <Rodape />
+</Base>
+
+<style>
+  .pagina {
+    margin: 0 auto;
+    padding: 24px 20px 0;
+  }
+  .texto {
+    max-width: 800px;
+  }
+  .larga {
+    max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .frase {
+    max-width: 60ch;
+    margin: 8px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--texto-2);
+  }
+  .acao {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  @media (min-width: 1024px) {
+    .pagina {
+      padding: 56px var(--margem-largo) 0;
+    }
+    h1 {
+      font-size: 56px;
+    }
+  }
+</style>
