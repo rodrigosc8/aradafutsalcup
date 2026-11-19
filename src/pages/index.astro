@@ -137,7 +137,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
     )}
 
     <!-- Telemóvel -->
-    <div class="grelha so-telemovel">
+    <div class:list={['grelha', 'so-telemovel', { 'sem-figuras': figuras.length === 0 }]}>
       <section aria-labelledby="titulo-hoje">
         <div class="cabeca">
           {
@@ -420,6 +420,9 @@ const cincoDias = torneio.dias.map((d, i) => ({
   }
   .vazio-movel {
     margin-top: 10px;
+  }
+  .sem-figuras {
+    margin-top: 22px;
   }
   .lista-jogos[hidden] {
     display: none;
