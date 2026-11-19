@@ -8,7 +8,7 @@ import EmblemaEquipa from './EmblemaEquipa.astro';
 import Icone from './Icone.astro';
 import type { Equipa, Jogador, Jogo } from '../data/exemplo';
 import { torneio } from '../data/torneio';
-import { horaLisboa, textoContagem, textoDia } from '../scripts/datas';
+import { dataLonga, horaLisboa, partesContagem, textoContagem, textoDia } from '../scripts/datas';
 
 interface Props {
   jogo: Jogo;
@@ -37,10 +37,10 @@ const hora = horaLisboa(jogo.inicio);
 const agora = new Date();
 const dia = textoDia(jogo.inicio, agora);
 const contagemCurta = textoContagem(jogo.inicio, 'curto', agora);
-const contagemLonga = textoContagem(jogo.inicio, 'longo', agora);
+const diaLongo = dataLonga(jogo.inicio, agora);
+const partes = partesContagem(jogo.inicio, agora);
 const etiqueta = [jogo.grupo ? `Grupo ${jogo.grupo}` : jogo.fase].join(' · ');
 const titulo = `${casa.nome} × ${fora.nome}`;
-const local = 'Pavilhão de Arada';
 
 const ics = {
   'data-ics': '',
@@ -93,52 +93,62 @@ const equipasCromos = [
     <Botao variante="branco" icone="calendario" largo class="botao-cal" {...ics}>Adicionar ao calendário</Botao>
   </div>
 
-  <!-- Computador -->
-  <div class="pc so-computador">
-    <div class="pc-info">
-      <p class="etiqueta">
-        <Icone nome="estrela" tamanho={14} /><span><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</span>
-      </p>
-      <h2 class="titulo-pc">{casa.nome}<br /><span class="fora">× {fora.nome}</span></h2>
-      <p class="linha-hora">
-        <span class="hora-pc">{hora}</span>
-        <span class="info-pc">
-          <span data-quando="dia" data-inicio={jogo.inicio}>{dia}</span>
-          <span class="contagem-pc" data-quando="contagem" data-formato="longo" data-inicio={jogo.inicio} hidden={!contagemLonga}
-            >{contagemLonga}</span
-          >
-          <span>{local}</span>
-        </span>
-      </p>
-      <div class="acoes">
-        <Botao variante="branco" icone="calendario" {...ics}>Adicionar ao calendário</Botao>
-        <Botao variante="claro" href={hrefEquipas}>Ver as duas equipas</Botao>
+  <!-- Computador: cartaz de jogo em largura total -->
+  <div class="cartaz so-computador">
+    <div class="cartaz-conteudo">
+      <div class="cartaz-topo">
+        <p class="cartaz-rotulo"><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</p>
+        <p class="cartaz-data">
+          <span data-quando="dia-longo" data-inicio={jogo.inicio}>{diaLongo}</span> · {torneio.local}
+        </p>
       </div>
-    </div>
-    <div class="pc-cromos">
-      <p class="etiqueta centro">Jogadores a seguir</p>
-      <div class="equipas-cromos">
+      <div class="cartaz-grelha">
         {
-          equipasCromos.map(({ equipa, jogadores }) => (
-            <div>
-              <p class="mini-equipa">
-                <EmblemaEquipa sigla={equipa.sigla} cor={equipa.cor} tamanho={26} anel={2} />
-                {equipa.nome}
-              </p>
+          equipasCromos.map(({ equipa, jogadores }, lado) => (
+            <div class:list={['cartaz-lado', lado === 0 ? 'esquerda' : 'direita']}>
+              <div class="cartaz-equipa">
+                <EmblemaEquipa sigla={equipa.sigla} cor={equipa.cor} tamanho={96} />
+                <p class="cartaz-nome">{equipa.nome}</p>
+              </div>
               <div class="par">
                 {jogadores.map((j) => (
-                  <Cromo
-                    nome={j.nome}
-                    numero={j.numero}
-                    subtitulo={`${j.posicao} · ${equipa.nome}`}
-                    cor={equipa.cor}
-                    largura={116}
-                  />
+                  <Cromo nome={j.nome} numero={j.numero} subtitulo={j.posicao} cor={equipa.cor} largura={132} />
                 ))}
               </div>
+              <p class="cartaz-legenda">Jogadores a seguir</p>
             </div>
           ))
         }
+        <div class="cartaz-centro">
+          <p class="cartaz-hora"><span class="visually-hidden">{titulo}, às </span>{hora}</p>
+          <div class="contagem-partes" data-quando="partes" data-inicio={jogo.inicio}>
+            <ul class="mosaicos" data-mosaicos hidden={partes.estado !== 'antes'} aria-label="Tempo até ao apito inicial">
+              {
+                (
+                  [
+                    ['dias', 'dias'],
+                    ['horas', 'horas'],
+                    ['minutos', 'min'],
+                  ] as const
+                ).map(([k, legenda]) => (
+                  <li>
+                    <span class="mosaico-num" data-parte={k}>
+                      {partes.estado === 'antes' ? String(partes[k]).padStart(k === 'dias' ? 1 : 2, '0') : ''}
+                    </span>
+                    <span class="mosaico-legenda">{legenda}</span>
+                  </li>
+                ))
+              }
+            </ul>
+            <p class="cartaz-sub" data-legenda>
+              {partes.estado === 'antes' ? 'para o apito inicial' : partes.estado === 'decorrer' ? 'A decorrer' : 'Jogo terminado'}
+            </p>
+          </div>
+          <div class="cartaz-acoes">
+            <Botao variante="branco" icone="calendario" {...ics}>Adicionar ao calendário</Botao>
+            <Botao variante="claro" href={hrefEquipas}>Ver as duas equipas</Botao>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -243,90 +253,154 @@ const equipasCromos = [
     font-size: 14px;
   }
 
-  /* Computador */
-  .pc {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-    align-items: center;
-    gap: 24px;
-    padding: 40px 48px;
-    border-radius: var(--raio-cartao-grande);
+  /* Computador: cartaz em largura total, por baixo da navegação flutuante */
+  .cartaz {
+    margin-top: -76px; /* sobe para trás da navegação sticky (16px + 60px) */
+    padding: 124px 0 48px;
   }
-  .pc .etiqueta {
-    gap: 8px;
-    font-size: 13px;
-    letter-spacing: 1.5px;
+  .cartaz-conteudo {
+    max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
+    margin: 0 auto;
+    padding-inline: var(--margem-largo);
   }
-  .titulo-pc {
-    margin: 14px 0 0;
+  .cartaz p {
+    margin: 0;
+  }
+  .cartaz-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgb(255 255 255 / 0.18);
+  }
+  .cartaz-rotulo {
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 76px;
-    line-height: 0.92;
+    font-size: 22px;
     text-transform: uppercase;
   }
-  .fora {
+  .cartaz-data {
+    font-size: 15px;
     color: var(--bordo-claro);
   }
-  .linha-hora {
+  .cartaz-grelha {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-areas: 'esq centro dir';
+    align-items: start;
+    gap: 32px;
+    margin-top: 32px;
+  }
+  .cartaz-lado {
     display: flex;
-    align-items: baseline;
+    flex-direction: column;
     gap: 18px;
-    margin: 18px 0 0;
+    min-width: 0;
   }
-  .hora-pc {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 44px;
-    line-height: 1;
+  .esquerda {
+    grid-area: esq;
+    align-items: flex-start;
   }
-  .info-pc {
-    font-size: 16px;
-    color: var(--bordo-claro);
+  .direita {
+    grid-area: dir;
+    align-items: flex-end;
   }
-  .info-pc > span:not(:first-child)::before {
-    content: ' · ';
-  }
-  .acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 24px;
-  }
-  .acoes :global(.botao) {
-    min-height: 50px;
-    padding-inline: 22px;
-    border-radius: var(--raio-linha);
-  }
-  .pc-cromos .etiqueta {
-    margin-bottom: 12px;
-    font-size: 12px;
-    letter-spacing: 1.2px;
-  }
-  .equipas-cromos {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-  }
-  .mini-equipa {
+  .cartaz-equipa {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin: 0 0 10px;
+    gap: 18px;
+    min-width: 0;
+  }
+  .direita .cartaz-equipa {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+  .cartaz-nome {
+    min-width: 0;
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 16px;
+    font-size: clamp(48px, 5vw, 72px);
+    line-height: 0.9;
     text-transform: uppercase;
   }
   .par {
     display: flex;
-    gap: 12px;
+    gap: 14px;
+  }
+  .cartaz-legenda {
+    font-size: 14px;
+    color: var(--bordo-claro);
+  }
+  .cartaz-centro {
+    grid-area: centro;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding-top: 6px;
+  }
+  .cartaz-hora {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(88px, 8.4vw, 120px);
+    line-height: 0.85;
+  }
+  .contagem-partes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .mosaicos {
+    display: flex;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .mosaicos[hidden] {
+    display: none;
+  }
+  .mosaicos li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 78px;
+    padding: 10px 8px;
+    border-radius: var(--raio-botao);
+    background: rgb(0 0 0 / 0.18);
+  }
+  .mosaico-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+  }
+  .mosaico-legenda {
+    font-size: 12px;
+    color: var(--bordo-claro);
+  }
+  .cartaz-sub {
+    font-size: 13px;
+    color: var(--bordo-claro);
+  }
+  .cartaz-acoes {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .cartaz-acoes :global(.botao) {
+    min-height: 50px;
+    padding-inline: 22px;
+    border-radius: var(--raio-linha);
   }
 
   @media (min-width: 1024px) {
     .destaque {
-      border-radius: var(--raio-cartao-grande);
+      border-radius: 0;
     }
   }
 </style>
