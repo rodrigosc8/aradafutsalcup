@@ -103,8 +103,8 @@ const itens: { id: ItemNav; texto: string; href: string }[] = [
     font-size: 14px;
   }
   @media (max-width: 1023.98px) {
-    /* Espaço para a cápsula não tapar o fim da página. */
-    :global(body) {
+    /* Espaço para a cápsula não tapar o fim da página (com rodapé, é o rodapé que o reserva). */
+    :global(body:not(:has(footer.rodape))) {
       padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
     }
   }

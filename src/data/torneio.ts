@@ -7,11 +7,14 @@ export const torneio = {
   subtitulo: 'Torneio de Futsal de Natal de Arada',
   organizacao: 'Junta de Freguesia de Arada',
   local: 'Pavilhão Gimnodesportivo de Arada',
+  // TODO: morada do pavilhão (rua, código postal, localidade). Enquanto vazia, não aparece no rodapé.
+  morada: '',
   patrocinadorPrincipal: 'Abílio Pinto',
 
   // Dias de jogo (ISO, hora de Lisboa).
   dias: ['2026-12-21', '2026-12-22', '2026-12-23', '2026-12-26', '2026-12-27'],
   diasTexto: '21, 22, 23, 26 e 27 de dezembro',
+  datasCurtas: '21–27 dez 2026',
   // Início da contagem decrescente. Atualizar com a hora do 1.º jogo quando houver horários.
   inicio: '2026-12-21T00:00:00+00:00',
   fimInscricoes: '19 de dezembro',
@@ -64,6 +67,8 @@ export const torneio = {
     patamares: '/patrocinar',
     regulamento: '/regulamento',
     contactos: '/contactos',
+    privacidade: '/privacidade',
+    acessibilidade: '/acessibilidade',
     comoChegar: 'https://www.google.com/maps/search/?api=1&query=Pavilh%C3%A3o+Gimnodesportivo+de+Arada',
   },
 

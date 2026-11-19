@@ -16,6 +16,9 @@
   --linha: #e8ddd2; /* contornos e separadores */
   --azul-ap: #1f2a55; /* faixa do patrocinador principal (Abílio Pinto) */
   --azul-ap-claro: #c9cfe3; /* texto pequeno sobre azul-ap */
+  /* Rodapé (fundo --texto) */
+  --rodape-link: #e7d9cf;
+  --rodape-fraco: #bfafa5;
 
   /* Tipografia */
   --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;

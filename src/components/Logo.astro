@@ -5,11 +5,13 @@ interface Props {
   /** 'auto' (2 linhas no telemóvel, 1 no computador), ou forçar. */
   linhas?: 'auto' | 1 | 2;
   tamanho?: number;
+  /** Para fundos escuros: "Abílio Pinto" a branco e "Futsal Cup" em bordô-claro. */
+  claro?: boolean;
 }
-const { linhas = 'auto', tamanho = 21 } = Astro.props;
+const { linhas = 'auto', tamanho = 21, claro = false } = Astro.props;
 ---
 
-<p class:list={['logo', `linhas-${linhas}`]} style={`--tamanho: ${tamanho}px`}>
+<p class:list={['logo', `linhas-${linhas}`, { claro }]} style={`--tamanho: ${tamanho}px`}>
   <span>Abílio Pinto</span> <span class="cup">Futsal Cup</span>
 </p>
 
@@ -25,6 +27,12 @@ const { linhas = 'auto', tamanho = 21 } = Astro.props;
   }
   .cup {
     color: var(--destaque);
+  }
+  .claro {
+    color: var(--branco);
+  }
+  .claro .cup {
+    color: var(--bordo-claro);
   }
   .linhas-2 span,
   .linhas-auto span {

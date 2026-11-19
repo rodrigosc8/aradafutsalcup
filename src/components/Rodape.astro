@@ -1,8 +1,11 @@
 ---
-// Rodapé. Telemóvel: patrocinador e organização. Computador: 4 colunas
-// (marca e datas, Torneio, Local, Organização). Todos os links são cápsulas com seta.
+// Rodapé, igual em todas as páginas. Fundo escuro (--texto).
+// Exceção à regra de interação do DESIGN.md: aqui os links são texto simples, sublinhados no hover.
+// 1) marca e datas | Torneio | Informação | Local
+// 2) patrocinador principal | organização
+// 3) © e links legais
+import Botao from './Botao.astro';
 import Logo from './Logo.astro';
-import PilulaLink from './PilulaLink.astro';
 import { torneio } from '../data/torneio';
 
 interface Props {
@@ -10,119 +13,259 @@ interface Props {
   colado?: boolean;
 }
 const { colado = false } = Astro.props;
-const anoDias = torneio.dias[0].slice(0, 4);
+const ano = torneio.dias[0].slice(0, 4);
+const { links } = torneio;
+
+const colunas = [
+  {
+    titulo: 'Torneio',
+    itens: [
+      { texto: 'Jogos', href: '/jogos' },
+      { texto: 'Grupos', href: '/grupos' },
+      { texto: 'Cromos', href: '/cromos' },
+      { texto: 'Regulamento', href: links.regulamento },
+    ],
+  },
+  {
+    titulo: 'Informação',
+    itens: [
+      { texto: 'Patrocinar', href: links.patamares },
+      { texto: 'Contactos', href: links.contactos },
+      { texto: 'Como chegar', href: links.comoChegar },
+    ],
+  },
+];
 ---
 
 <footer class:list={['rodape', { colado }]}>
-  <div class="movel so-telemovel">
-    <p>Patrocinador principal: <strong>{torneio.patrocinadorPrincipal}</strong></p>
-    <p>Organização: {torneio.organizacao} · {torneio.local}</p>
-  </div>
-
-  <div class="pc so-computador">
-    <div class="colunas">
+  <div class="conteudo">
+    <div class="linha-1">
       <div class="marca">
-        <Logo linhas={2} tamanho={28} />
-        <p>{torneio.edicao} do {torneio.subtitulo}. {torneio.diasTexto} de {anoDias}.</p>
+        <Logo linhas={2} tamanho={28} claro />
+        <p class="frase">{torneio.edicao} do {torneio.subtitulo}</p>
+        <p class="datas">{torneio.datasCurtas}</p>
       </div>
-      <nav aria-label="Torneio">
-        <h2>Torneio</h2>
-        <ul>
-          <li><PilulaLink href="/jogos">Jogos</PilulaLink></li>
-          <li><PilulaLink href="/grupos">Grupos</PilulaLink></li>
-          <li><PilulaLink href="/cromos">Cromos</PilulaLink></li>
-          <li><PilulaLink href={torneio.links.regulamento}>Regulamento</PilulaLink></li>
-        </ul>
-      </nav>
-      <div>
-        <h2>Local</h2>
-        <p>{torneio.local}</p>
-        <PilulaLink href={torneio.links.comoChegar}>Como chegar</PilulaLink>
-      </div>
-      <div>
-        <h2>Organização</h2>
-        <p>{torneio.organizacao}</p>
-        <PilulaLink href={torneio.links.contactos}>Contactos</PilulaLink>
+      {
+        colunas.map((c) => (
+          <nav class="coluna" aria-label={c.titulo}>
+            <h2 class="titulo">{c.titulo}</h2>
+            <ul>
+              {c.itens.map((i) => (
+                <li>
+                  <a href={i.href}>{i.texto}</a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ))
+      }
+      <div class="coluna local">
+        <h2 class="titulo">Local</h2>
+        <p class="nome-local">{torneio.local}</p>
+        {torneio.morada && <p class="morada">{torneio.morada}</p>}
+        <Botao variante="claro" href={links.comoChegar} class="mapa">Abrir no mapa</Botao>
       </div>
     </div>
-    <p class="patrocinador">Patrocinador principal: <strong>{torneio.patrocinadorPrincipal}</strong></p>
+
+    <div class="linha-2">
+      <div class="patrocinador">
+        <span class="rotulo">Patrocinador principal</span>
+        <!-- Espaço do logótipo oficial; o nome em itálico é um marcador. -->
+        <span class="logo-ap">{torneio.patrocinadorPrincipal}</span>
+      </div>
+      <p class="organizacao">Organização: {torneio.organizacao}</p>
+    </div>
+
+    <div class="linha-3">
+      <p>© {ano} {torneio.organizacao}</p>
+      <ul class="legais">
+        <li><a href={links.privacidade}>Privacidade</a></li>
+        <li><a href={links.acessibilidade}>Acessibilidade</a></li>
+      </ul>
+    </div>
   </div>
 </footer>
 
 <style>
   .rodape {
     margin-top: 40px;
-    border-top: 1px solid var(--linha);
+    padding: 56px 0 0;
+    background: var(--texto);
+    color: var(--papel);
   }
-  .movel {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 6px 24px;
-    max-width: var(--max);
+  .conteudo {
+    max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
     margin: 0 auto;
-    padding: 20px 20px 28px;
-    font-size: 14px;
-    color: var(--texto-2);
+    padding-inline: 20px;
   }
   p {
     margin: 0;
   }
-  strong {
-    color: var(--texto);
+  a {
+    color: var(--rodape-link);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--branco);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Linha 1 */
+  .linha-1 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 24px;
+  }
+  .marca,
+  .local {
+    grid-column: 1 / -1;
+  }
+  .frase {
+    margin-top: 12px;
+    max-width: 34ch;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--rodape-link);
+  }
+  .datas {
+    margin-top: 8px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    text-transform: uppercase;
+    color: var(--branco);
+  }
+  .titulo {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--bordo-claro);
+  }
+  .coluna ul {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 15px;
+  }
+  .coluna li a {
+    display: inline-block;
+    padding-block: 2px;
+  }
+  .nome-local {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .morada {
+    margin-top: 4px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--rodape-link);
+  }
+  .local :global(.mapa) {
+    margin-top: 16px;
+    min-height: var(--toque);
+    font-size: 14px;
+  }
+  .local :global(.mapa:hover) {
+    text-decoration: none;
+  }
+
+  /* Linha 2 */
+  .linha-2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 32px;
+    margin-top: 40px;
+    padding: 24px 0;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+  }
+  .patrocinador {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 16px;
+  }
+  .rotulo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--bordo-claro);
+  }
+  .logo-ap {
+    display: inline-flex;
+    align-items: center;
+    height: 52px;
+    padding: 0 22px;
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: var(--raio-botao);
+    background: var(--azul-ap);
+    color: var(--branco);
+    font-family: var(--font-marcador);
+    font-style: italic;
+    font-weight: 800;
+    font-size: 20px;
+    white-space: nowrap;
+  }
+  .organizacao {
+    font-size: 15px;
+    color: var(--rodape-link);
+  }
+
+  /* Linha 3 */
+  .linha-3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 24px;
+    padding: 18px 0 28px;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+    font-size: 13px;
+    color: var(--rodape-fraco);
+  }
+  .legais {
+    display: flex;
+    gap: 20px;
+  }
+  .legais a {
+    color: var(--rodape-fraco);
+  }
+  .legais a:hover {
+    color: var(--branco);
+  }
+
+  /* Telemóvel: o rodapé passa por baixo da navegação flutuante. */
+  @media (max-width: 1023.98px) {
+    .rodape {
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   @media (min-width: 1024px) {
-    .rodape {
-      background: var(--branco);
-    }
     .colado {
       margin-top: 0;
     }
-    .pc {
-      max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
-      margin: 0 auto;
-      padding: 40px var(--margem-largo) 28px;
-      font-size: 15px;
+    .conteudo {
+      padding-inline: var(--margem-largo);
     }
-    .colunas {
-      display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    .linha-1 {
+      grid-template-columns: 2fr 1fr 1fr 1.2fr;
       gap: 32px;
     }
-    .marca p,
-    .colunas div > p {
-      margin-top: 12px;
-      line-height: 1.5;
-      color: var(--texto-2);
-    }
-    .colunas div > p {
-      margin: 0 0 12px;
-    }
-    .marca p {
-      margin-top: 12px;
-      max-width: 36ch;
-    }
-    h2 {
-      margin: 0 0 10px;
-      font-size: 15px;
-      font-weight: 700;
-    }
-    ul {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 8px;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .patrocinador {
-      margin-top: 32px;
-      padding-top: 18px;
-      border-top: 1px solid var(--linha);
-      font-size: 14px;
-      color: var(--texto-2);
+    .marca,
+    .local {
+      grid-column: auto;
     }
   }
 </style>
