@@ -1,197 +1,441 @@
 ---
 // Regulamento: transcrição de public/regulamento.pdf ("Regulamento Oficial do Torneio de Futsal
-// de Natal de Arada", 3 páginas). O texto segue o PDF; só a pontuação e os ordinais foram normalizados.
+// de Natal de Arada", 3 páginas). Todo o conteúdo vem do PDF: os resumos, a tabela de duração,
+// os passos de desempate e os prémios só reorganizam o texto, não acrescentam regras.
 // Se o PDF mudar, atualizar também esta página.
 import Pagina from '../layouts/Pagina.astro';
 import Botao from '../components/Botao.astro';
+import PilulaLink from '../components/PilulaLink.astro';
 import { torneio } from '../data/torneio';
 
-type Item = string | { texto: string; sub: string[] };
-interface Seccao {
-  id: string;
-  titulo: string;
-  itens: Item[];
-}
+const seccoes = [
+  { id: 'disposicoes-gerais', titulo: 'Disposições gerais' },
+  { id: 'inscricoes', titulo: 'Inscrições' },
+  { id: 'formato', titulo: 'Formato do torneio' },
+  { id: 'duracao', titulo: 'Duração e desempates dos jogos' },
+  { id: 'equipas', titulo: 'Composição das equipas' },
+  { id: 'pontuacao', titulo: 'Sistema de pontuação' },
+  { id: 'arbitragem', titulo: 'Arbitragem' },
+  { id: 'conduta', titulo: 'Conduta e disciplina' },
+  { id: 'material', titulo: 'Material' },
+  { id: 'premios', titulo: 'Prémios' },
+  { id: 'casos-omissos', titulo: 'Casos omissos' },
+];
+const n = (id: string) => seccoes.findIndex((s) => s.id === id) + 1;
+const t = (id: string) => seccoes.find((s) => s.id === id)!.titulo;
 
-const seccoes: Seccao[] = [
+// Em resumo (tudo do PDF)
+const resumo = [
+  { valor: '5', unidade: 'dias', texto: '21, 22, 23, 26 e 27 de dezembro', secao: 'formato' },
+  { valor: '16', unidade: 'equipas', texto: '4 grupos de 4 equipas', secao: 'formato' },
+  { valor: '12', unidade: 'jogadores', texto: 'no máximo, por equipa', secao: 'equipas' },
+  { valor: '2 × 15', unidade: 'min', texto: 'cada jogo da fase de grupos', secao: 'duracao' },
+  { valor: '3 · 1 · 0', unidade: 'pontos', texto: 'vitória, empate e derrota', secao: 'pontuacao' },
+  { valor: '450 €', unidade: '', texto: 'para o 1.º lugar', secao: 'premios' },
+  { valor: '19', unidade: 'dez', texto: 'último dia de inscrições', secao: 'inscricoes' },
+  { valor: '10', unidade: 'min', texto: 'de tolerância para o início dos jogos', secao: 'conduta' },
+];
+
+const fases = ['Fase de Grupos', 'Quartos-de-Final', 'Meias-Finais', 'Finais (3.º/4.º e 1.º/2.º lugar)'];
+
+const duracoes = [
+  { fase: 'Fase de Grupos', partes: '2 × 15 min', tempo: 'Tempo corrido', timeout: '1 por jogo, por equipa' },
   {
-    id: 'disposicoes-gerais',
-    titulo: 'Disposições gerais',
-    itens: [
-      'O Torneio rege-se pelas regras oficiais da FIFA, com as adaptações e exceções previstas no presente Regulamento.',
-      'A Organização é a entidade soberana e responsável pela decisão final em todos os casos omissos ou de interpretação duvidosa do presente Regulamento.',
-      'Todos os participantes estão abrangidos por Seguro Desportivo.',
-    ],
+    fase: 'Quartos-de-Final',
+    partes: '2 × 15 min',
+    tempo: 'Último minuto da 2.ª parte cronometrado',
+    timeout: '1 por jogo, por equipa',
   },
   {
-    id: 'inscricoes',
-    titulo: 'Inscrições',
-    itens: [
-      'O prazo limite para a inscrição de equipas e jogadores é o dia 19 de dezembro.',
-      // TODO: o PDF não indica o valor da taxa de inscrição.
-      'O pagamento da taxa de inscrição deverá ser efetuado no ato da mesma.',
-      'A lista de jogadores pode ser alterada até à data limite de inscrição (19 de dezembro).',
-      'É obrigatória a apresentação do Nome Completo e Número de Cartão de Cidadão de cada jogador para a formalização da ficha oficial de inscrição.',
-    ],
+    fase: 'Meias-Finais',
+    partes: '2 × 20 min',
+    tempo: 'Últimos 5 minutos de cada parte cronometrados',
+    timeout: '1 por parte, por equipa',
   },
-  {
-    id: 'formato',
-    titulo: 'Formato do torneio',
-    itens: [
-      'O Torneio será realizado entre os dias 21, 22, 23, 26 e 27 de dezembro.',
-      'Participarão 16 equipas, distribuídas por 4 grupos de 4 equipas.',
-      'A estrutura competitiva compreende: Fase de Grupos, Quartos-de-Final, Meias-Finais e Finais (3.º/4.º e 1.º/2.º lugar).',
-      // TODO: o PDF não define os cruzamentos dos quartos-de-final (quem joga com quem).
-      'Qualificam-se para a fase seguinte (Quartos-de-Final) apenas os 2 primeiros classificados de cada grupo.',
-    ],
-  },
-  {
-    id: 'duracao',
-    titulo: 'Duração e desempates dos jogos',
-    itens: [
-      'Fase de Grupos: 2 partes de 15 minutos (tempo corrido) com 5 minutos de intervalo. É permitido 1 Time-out por jogo por equipa.',
-      'Quartos-de-Final: 2 partes de 15 minutos, sendo o último minuto da segunda parte cronometrado, com 5 minutos de intervalo. É permitido 1 Time-out por jogo por equipa.',
-      'Meias-Finais: 2 partes de 20 minutos, sendo os últimos 5 minutos de cada parte cronometrados, com 5 minutos de intervalo. É permitido 1 Time-out por parte por equipa.',
-      'Final e 3.º/4.º Lugar: 2 partes de 20 minutos (tempo cronometrado), com 5 minutos de intervalo. É permitido 1 Time-out por parte por equipa.',
-      {
-        texto: 'Desempates (eliminatórias):',
-        sub: [
-          'Quartos-de-Final e Meias-Finais: em caso de empate, a decisão será feita através de pontapés da marca de grande penalidade.',
-          // TODO: o PDF fala só da Final; confirmar se o jogo do 3.º/4.º lugar também tem prolongamento.
-          'Final: em caso de empate, haverá um Prolongamento de 2 partes de 5 minutos. Se o empate persistir, recorrer-se-á aos pontapés da marca de grande penalidade.',
-        ],
-      },
-    ],
-  },
-  {
-    id: 'equipas',
-    titulo: 'Composição das equipas',
-    itens: [
-      'Cada equipa pode inscrever um máximo de 12 jogadores.',
-      'As funções de Treinador e Delegado são opcionais.',
-      'É permitida a acumulação da função de Treinador com a de Jogador.',
-      'Apenas os jogadores devidamente inscritos poderão participar nos jogos.',
-      'É obrigatório o uso de equipamento numerado.',
-    ],
-  },
-  {
-    id: 'pontuacao',
-    titulo: 'Sistema de pontuação',
-    itens: [
-      'Vitória: 3 pontos.',
-      'Empate: 1 ponto.',
-      'Derrota: 0 pontos.',
-      // TODO: o PDF não diz como se aplica o confronto direto quando 3 ou mais equipas empatam.
-      'Critérios de desempate (aplicados por ordem): 1.º Confronto Direto, 2.º Diferença de Golos, 3.º Golos Marcados, 4.º Golos Sofridos, 5.º Fair-Play (menor pontuação; amarelo: 1 ponto, vermelho: 3 pontos), 6.º Sorteio.',
-    ],
-  },
-  {
-    id: 'arbitragem',
-    titulo: 'Arbitragem',
-    itens: [
-      'A arbitragem será assegurada por elementos da Organização.',
-      'As decisões da equipa de arbitragem são finais e não passíveis de protesto.',
-    ],
-  },
-  {
-    id: 'conduta',
-    titulo: 'Conduta e disciplina',
-    itens: [
-      'É exigido um comportamento adequado e de fair-play por parte de todos os intervenientes.',
-      'Cartão Amarelo: Advertência.',
-      'Cartão Vermelho: Expulsão imediata e suspensão por 1 jogo.',
-      'Cartão Vermelho por conduta violenta: resultará na exclusão do jogador do Torneio.',
-      // TODO: o PDF não diz se a "reincidência" conta por jogo ou ao longo de todo o torneio.
-      'Será concedida uma tolerância máxima de 10 minutos para o início dos jogos. Ultrapassado este período, será aplicada uma advertência e, em caso de reincidência, será decretada a derrota por falta de comparência.',
-    ],
-  },
-  {
-    id: 'material',
-    titulo: 'Material',
-    itens: [
-      'A bola oficial de futsal será providenciada pela Organização.',
-      'Cada equipa deve apresentar o seu equipamento e coletes.',
-      'A Organização poderá ceder coletes em caso de necessidade.',
-    ],
-  },
-  {
-    id: 'premios',
-    titulo: 'Prémios',
-    itens: [
-      '1.º Lugar: 450 €',
-      '2.º Lugar: 300 €',
-      '3.º Lugar: 150 €',
-      'Serão ainda atribuídos os seguintes Prémios Individuais: Melhor Jogador, Melhor Guarda-Redes e Prémio Fair-Play (a equipa será escolhida pela Organização com base na sua conduta exemplar, desportivismo e atitude positiva ao longo dos jogos).',
-    ],
-  },
-  {
-    id: 'casos-omissos',
-    titulo: 'Casos omissos',
-    itens: [
-      'Qualquer situação não prevista no presente Regulamento será decidida pela Organização, sendo a sua decisão inalterável e não passível de recurso.',
-    ],
-  },
+  { fase: 'Final e 3.º/4.º Lugar', partes: '2 × 20 min', tempo: 'Tempo cronometrado', timeout: '1 por parte, por equipa' },
+];
+
+const desempateGrupos = [
+  'Confronto Direto',
+  'Diferença de Golos',
+  'Golos Marcados',
+  'Golos Sofridos',
+  'Fair-Play (menor pontuação; amarelo: 1 ponto, vermelho: 3 pontos)',
+  'Sorteio',
+];
+
+const premios = [
+  { lugar: '1.º Lugar', valor: '450 €' },
+  { lugar: '2.º Lugar', valor: '300 €' },
+  { lugar: '3.º Lugar', valor: '150 €' },
 ];
 ---
 
 <Pagina
   titulo="Regulamento"
-  frase="Regulamento Oficial do Torneio de Futsal de Natal de Arada. Esta página reproduz o documento em PDF."
-  largura="texto"
+  frase="Regulamento Oficial do Torneio de Futsal de Natal de Arada. Esta página reproduz o documento em PDF, organizado por secções."
 >
   <Botao slot="acao" variante="secundario" icone="transferir" href={torneio.regulamentoPdf} download>
     Descarregar o regulamento (PDF)
   </Botao>
 
-  <nav class="indice" aria-labelledby="titulo-indice">
-    <h2 id="titulo-indice">Índice</h2>
-    <ol>
+  <!-- Em resumo -->
+  <section class="resumo" aria-labelledby="titulo-resumo">
+    <h2 id="titulo-resumo" class="titulo-resumo">Em resumo</h2>
+    <ul>
       {
-        seccoes.map((s, i) => (
+        resumo.map((r) => (
           <li>
-            <a href={`#${s.id}`}>
-              <span class="n">{i + 1}.</span>
-              {s.titulo}
-            </a>
+            <span class="r-valor">
+              {r.valor}
+              {r.unidade && <span class="r-unidade"> {r.unidade}</span>}
+            </span>
+            <span class="r-texto">{r.texto}</span>
           </li>
         ))
       }
-    </ol>
-  </nav>
+    </ul>
+  </section>
 
-  <div class="conteudo">
-    {
-      seccoes.map((s, i) => (
-        <section id={s.id} aria-labelledby={`t-${s.id}`}>
-          <h2 id={`t-${s.id}`}>
-            <span class="n">{i + 1}.</span> {s.titulo}
-          </h2>
-          <ul>
-            {s.itens.map((item) =>
-              typeof item === 'string' ? (
-                <li>{item}</li>
-              ) : (
-                <li>
-                  {item.texto}
-                  <ul class="sub">
-                    {item.sub.map((x) => (
-                      <li>{x}</li>
-                    ))}
-                  </ul>
-                </li>
-              ),
-            )}
+  <div class="corpo">
+    <!-- Índice: cartão no telemóvel, coluna fixa no computador -->
+    <aside class="lateral">
+      <nav class="indice" aria-labelledby="titulo-indice">
+        <h2 id="titulo-indice">Índice</h2>
+        <ol>
+          {
+            seccoes.map((s, i) => (
+              <li>
+                <a href={`#${s.id}`} data-indice={s.id}>
+                  <span class="n">{i + 1}.</span>
+                  <span class="t">{s.titulo}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+      <div class="lateral-pdf so-computador">
+        <p>Versão oficial em PDF, com 3 páginas.</p>
+        <Botao variante="secundario" icone="transferir" href={torneio.regulamentoPdf} download largo>Descarregar PDF</Botao>
+      </div>
+    </aside>
+
+    <div class="seccoes">
+      <!-- 1 -->
+      <section class="seccao" id="disposicoes-gerais" aria-labelledby="t-disposicoes-gerais">
+        <h2 id="t-disposicoes-gerais"><span class="num">{n('disposicoes-gerais')}</span>{t('disposicoes-gerais')}</h2>
+        <ul class="lista">
+          <li>O Torneio rege-se pelas regras oficiais da FIFA, com as adaptações e exceções previstas no presente Regulamento.</li>
+          <li>
+            A Organização é a entidade soberana e responsável pela decisão final em todos os casos omissos ou de
+            interpretação duvidosa do presente Regulamento.
+          </li>
+          <li>Todos os participantes estão abrangidos por Seguro Desportivo.</li>
+        </ul>
+      </section>
+
+      <!-- 2 -->
+      <section class="seccao" id="inscricoes" aria-labelledby="t-inscricoes">
+        <h2 id="t-inscricoes"><span class="num">{n('inscricoes')}</span>{t('inscricoes')}</h2>
+        <div class="com-destaque">
+          <p class="destaque-data"><span class="dd-num">19</span><span class="dd-txt">dezembro<br />prazo limite</span></p>
+          <ul class="lista">
+            <li>O prazo limite para a inscrição de equipas e jogadores é o dia 19 de dezembro.</li>
+            <!-- TODO: o PDF não indica o valor da taxa de inscrição. -->
+            <li>O pagamento da taxa de inscrição deverá ser efetuado no ato da mesma.</li>
+            <li>A lista de jogadores pode ser alterada até à data limite de inscrição (19 de dezembro).</li>
+            <li>
+              É obrigatória a apresentação do Nome Completo e Número de Cartão de Cidadão de cada jogador para a
+              formalização da ficha oficial de inscrição.
+            </li>
           </ul>
-          <a class="topo" href="#titulo-indice">Voltar ao índice</a>
-        </section>
-      ))
-    }
+        </div>
+      </section>
+
+      <!-- 3 -->
+      <section class="seccao" id="formato" aria-labelledby="t-formato">
+        <h2 id="t-formato"><span class="num">{n('formato')}</span>{t('formato')}</h2>
+        <ol class="fases" aria-label="Estrutura competitiva">
+          {
+            fases.map((f, i) => (
+              <li>
+                <span class="f-n">{i + 1}</span>
+                {f}
+              </li>
+            ))
+          }
+        </ol>
+        <ul class="lista">
+          <li>O Torneio será realizado entre os dias 21, 22, 23, 26 e 27 de dezembro.</li>
+          <li>Participarão 16 equipas, distribuídas por 4 grupos de 4 equipas.</li>
+          <li>
+            A estrutura competitiva compreende: Fase de Grupos, Quartos-de-Final, Meias-Finais e Finais (3.º/4.º e 1.º/2.º
+            lugar).
+          </li>
+          <!-- TODO: o PDF não define os cruzamentos dos quartos-de-final (quem joga com quem). -->
+          <li>Qualificam-se para a fase seguinte (Quartos-de-Final) apenas os 2 primeiros classificados de cada grupo.</li>
+        </ul>
+      </section>
+
+      <!-- 4 -->
+      <section class="seccao" id="duracao" aria-labelledby="t-duracao">
+        <h2 id="t-duracao"><span class="num">{n('duracao')}</span>{t('duracao')}</h2>
+        <p class="nota">Todos os jogos têm 5 minutos de intervalo.</p>
+        <div class="rolar">
+          <table class="tabela">
+            <caption class="visually-hidden">Duração dos jogos e time-outs por fase</caption>
+            <thead>
+              <tr>
+                <th scope="col">Fase</th>
+                <th scope="col">Duração</th>
+                <th scope="col">Tempo</th>
+                <th scope="col">Time-outs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                duracoes.map((d) => (
+                  <tr>
+                    <th scope="row">{d.fase}</th>
+                    <td class="partes" data-rotulo="Duração">{d.partes}</td>
+                    <td data-rotulo="Tempo">{d.tempo}</td>
+                    <td data-rotulo="Time-outs">{d.timeout}</td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <h3>Desempates nas eliminatórias</h3>
+        <div class="dois">
+          <div class="caixa">
+            <p class="caixa-t">Quartos-de-Final e Meias-Finais</p>
+            <p>Em caso de empate, a decisão será feita através de pontapés da marca de grande penalidade.</p>
+          </div>
+          <!-- TODO: o PDF fala só da Final; confirmar se o jogo do 3.º/4.º lugar também tem prolongamento. -->
+          <div class="caixa">
+            <p class="caixa-t">Final</p>
+            <p>
+              Em caso de empate, haverá um Prolongamento de 2 partes de 5 minutos. Se o empate persistir, recorrer-se-á
+              aos pontapés da marca de grande penalidade.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 -->
+      <section class="seccao" id="equipas" aria-labelledby="t-equipas">
+        <h2 id="t-equipas"><span class="num">{n('equipas')}</span>{t('equipas')}</h2>
+        <div class="com-destaque">
+          <p class="destaque-data"><span class="dd-num">12</span><span class="dd-txt">jogadores<br />no máximo</span></p>
+          <ul class="lista">
+            <li>Cada equipa pode inscrever um máximo de 12 jogadores.</li>
+            <li>As funções de Treinador e Delegado são opcionais.</li>
+            <li>É permitida a acumulação da função de Treinador com a de Jogador.</li>
+            <li>Apenas os jogadores devidamente inscritos poderão participar nos jogos.</li>
+            <li>É obrigatório o uso de equipamento numerado.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 6 -->
+      <section class="seccao" id="pontuacao" aria-labelledby="t-pontuacao">
+        <h2 id="t-pontuacao"><span class="num">{n('pontuacao')}</span>{t('pontuacao')}</h2>
+        <ul class="pontos">
+          <li><span class="p-num">3</span><span>pontos por vitória</span></li>
+          <li><span class="p-num">1</span><span>ponto por empate</span></li>
+          <li><span class="p-num">0</span><span>pontos por derrota</span></li>
+        </ul>
+        <h3>Critérios de desempate (aplicados por ordem)</h3>
+        <!-- TODO: o PDF não diz como se aplica o confronto direto quando 3 ou mais equipas empatam. -->
+        <ol class="passos">
+          {
+            desempateGrupos.map((c, i) => (
+              <li>
+                <span class="passo-n">{i + 1}.º</span>
+                {c}
+              </li>
+            ))
+          }
+        </ol>
+      </section>
+
+      <!-- 7 -->
+      <section class="seccao" id="arbitragem" aria-labelledby="t-arbitragem">
+        <h2 id="t-arbitragem"><span class="num">{n('arbitragem')}</span>{t('arbitragem')}</h2>
+        <ul class="lista">
+          <li>A arbitragem será assegurada por elementos da Organização.</li>
+          <li>As decisões da equipa de arbitragem são finais e não passíveis de protesto.</li>
+        </ul>
+      </section>
+
+      <!-- 8 -->
+      <section class="seccao" id="conduta" aria-labelledby="t-conduta">
+        <h2 id="t-conduta"><span class="num">{n('conduta')}</span>{t('conduta')}</h2>
+        <p class="lead">É exigido um comportamento adequado e de fair-play por parte de todos os intervenientes.</p>
+        <ul class="cartoes">
+          <li>
+            <span class="cartao-cor amarelo" aria-hidden="true"></span>
+            <span><strong>Cartão Amarelo</strong>Advertência.</span>
+          </li>
+          <li>
+            <span class="cartao-cor vermelho" aria-hidden="true"></span>
+            <span><strong>Cartão Vermelho</strong>Expulsão imediata e suspensão por 1 jogo.</span>
+          </li>
+          <li>
+            <span class="cartao-cor vermelho" aria-hidden="true"></span>
+            <span><strong>Cartão Vermelho por conduta violenta</strong>Resultará na exclusão do jogador do Torneio.</span>
+          </li>
+        </ul>
+        <!-- TODO: o PDF não diz se a "reincidência" conta por jogo ou ao longo de todo o torneio. -->
+        <div class="caixa tolerancia">
+          <p class="caixa-t">Tolerância de 10 minutos</p>
+          <p>
+            Será concedida uma tolerância máxima de 10 minutos para o início dos jogos. Ultrapassado este período, será
+            aplicada uma advertência e, em caso de reincidência, será decretada a derrota por falta de comparência.
+          </p>
+        </div>
+      </section>
+
+      <!-- 9 -->
+      <section class="seccao" id="material" aria-labelledby="t-material">
+        <h2 id="t-material"><span class="num">{n('material')}</span>{t('material')}</h2>
+        <ul class="lista">
+          <li>A bola oficial de futsal será providenciada pela Organização.</li>
+          <li>Cada equipa deve apresentar o seu equipamento e coletes.</li>
+          <li>A Organização poderá ceder coletes em caso de necessidade.</li>
+        </ul>
+      </section>
+
+      <!-- 10 -->
+      <section class="seccao" id="premios" aria-labelledby="t-premios">
+        <h2 id="t-premios"><span class="num">{n('premios')}</span>{t('premios')}</h2>
+        <ul class="podio">
+          {
+            premios.map((p, i) => (
+              <li class:list={[`lugar-${i + 1}`]}>
+                <span class="pd-lugar">{p.lugar}</span>
+                <span class="pd-valor">{p.valor}</span>
+              </li>
+            ))
+          }
+        </ul>
+        <h3>Prémios individuais</h3>
+        <ul class="individuais">
+          <li>Melhor Jogador</li>
+          <li>Melhor Guarda-Redes</li>
+          <li>Prémio Fair-Play</li>
+        </ul>
+        <p class="nota">
+          Prémio Fair-Play: a equipa será escolhida pela Organização com base na sua conduta exemplar, desportivismo e
+          atitude positiva ao longo dos jogos.
+        </p>
+      </section>
+
+      <!-- 11 -->
+      <section class="seccao" id="casos-omissos" aria-labelledby="t-casos-omissos">
+        <h2 id="t-casos-omissos"><span class="num">{n('casos-omissos')}</span>{t('casos-omissos')}</h2>
+        <ul class="lista">
+          <li>
+            Qualquer situação não prevista no presente Regulamento será decidida pela Organização, sendo a sua decisão
+            inalterável e não passível de recurso.
+          </li>
+        </ul>
+      </section>
+
+      <section class="fecho" aria-labelledby="titulo-fecho">
+        <h2 id="titulo-fecho">Dúvidas sobre o regulamento?</h2>
+        <p>A Organização é a {torneio.organizacao}.</p>
+        <div class="fecho-acoes">
+          <Botao variante="branco" icone="transferir" href={torneio.regulamentoPdf} download>Descarregar o PDF</Botao>
+          <PilulaLink href={torneio.links.contactos}>Contactos</PilulaLink>
+        </div>
+      </section>
+    </div>
   </div>
 </Pagina>
 
+<script>
+  // Índice do computador: marca a secção que está a ser lida.
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-indice]')];
+  const porId = new Map(links.map((a) => [a.dataset.indice!, a]));
+  const visiveis = new Set<string>();
+  const marcar = () => {
+    const primeiro = links.find((a) => visiveis.has(a.dataset.indice!));
+    links.forEach((a) => {
+      if (a === primeiro) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+  };
+  const obs = new IntersectionObserver(
+    (entradas) => {
+      entradas.forEach((e) => (e.isIntersecting ? visiveis.add(e.target.id) : visiveis.delete(e.target.id)));
+      marcar();
+    },
+    { rootMargin: '-120px 0px -55% 0px' },
+  );
+  porId.forEach((_, id) => {
+    const s = document.getElementById(id);
+    if (s) obs.observe(s);
+  });
+</script>
+
 <style>
+  p {
+    margin: 0;
+  }
+
+  /* Em resumo */
+  .resumo {
+    margin-top: 32px;
+  }
+  .titulo-resumo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 24px;
+    text-transform: uppercase;
+  }
+  .resumo ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .resumo li {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px;
+    border-radius: 16px;
+    background: var(--branco);
+  }
+  .r-valor {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--bordo);
+    white-space: nowrap;
+  }
+  .r-unidade {
+    font-size: 18px;
+    text-transform: uppercase;
+  }
+  .r-texto {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--texto-2);
+  }
+
+  /* Corpo: índice + secções */
+  .corpo {
+    margin-top: 32px;
+  }
   .indice {
-    margin-top: 28px;
     padding: 18px 20px;
     border: 1px solid var(--linha);
     border-radius: var(--raio-cartao);
@@ -206,13 +450,11 @@ const seccoes: Seccao[] = [
   }
   .indice ol {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 6px 16px;
+    gap: 6px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
-  /* Links do índice: cápsulas com contorno (regra de interação do DESIGN.md). */
   .indice a {
     display: flex;
     align-items: center;
@@ -222,6 +464,7 @@ const seccoes: Seccao[] = [
     border: 1px solid var(--linha);
     border-radius: var(--raio-botao);
     color: var(--texto);
+    font-size: 15px;
     font-weight: 600;
     text-decoration: none;
   }
@@ -235,53 +478,505 @@ const seccoes: Seccao[] = [
     border-color: var(--bordo);
   }
   .n {
+    min-width: 22px;
     font-family: var(--font-display);
     font-weight: 800;
     color: var(--bordo);
   }
-  .conteudo section {
-    margin-top: 36px;
+  .lateral-pdf {
+    margin-top: 14px;
+    padding: 16px;
+    border-radius: var(--raio-cartao);
+    background: var(--branco);
+    font-size: 14px;
+    color: var(--texto-2);
+  }
+  .lateral-pdf :global(.botao) {
+    margin-top: 10px;
+  }
+
+  .seccoes {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 24px;
+    min-width: 0;
+  }
+  .seccao {
+    padding: 22px 20px;
+    border-radius: var(--raio-cartao);
+    background: var(--branco);
     scroll-margin-top: 110px;
   }
-  .conteudo h2 {
+  .seccao h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     margin: 0;
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 28px;
-    line-height: 1.1;
+    font-size: 26px;
+    line-height: 1.05;
     text-transform: uppercase;
   }
-  .conteudo ul {
-    margin: 12px 0 0;
-    padding-left: 22px;
+  .num {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--bordo);
+    color: var(--branco);
+    font-size: 19px;
+  }
+  .seccao h3 {
+    margin: 22px 0 0;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .lista {
+    margin: 14px 0 0;
+    padding-left: 20px;
     font-size: 16px;
     line-height: 1.6;
   }
-  .conteudo li + li {
+  .lista li + li {
     margin-top: 6px;
   }
-  .conteudo .sub {
-    margin-top: 6px;
+  .lista li::marker {
+    color: var(--bordo);
   }
-  .topo {
+  .nota {
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--texto-2);
+  }
+  .lead {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Destaque numérico ao lado da lista (inscrições, equipas) */
+  .com-destaque {
+    display: grid;
+    gap: 4px 20px;
+  }
+  .destaque-data {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: var(--papel);
+    width: fit-content;
+  }
+  .dd-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 48px;
+    line-height: 1;
+    color: var(--bordo);
+  }
+  .dd-txt {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--texto-2);
+  }
+
+  /* Formato: fases */
+  .fases {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fases li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--papel);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .f-n {
+    flex: none;
     display: inline-flex;
     align-items: center;
-    min-height: var(--toque);
-    margin-top: 8px;
-    padding: 0 12px;
-    border: 1px solid var(--linha);
-    border-radius: var(--raio-capsula);
-    background: var(--branco);
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--bordo);
     color: var(--bordo);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .fases li:last-child {
+    box-shadow: inset 0 0 0 1.5px var(--dourado);
+  }
+
+  /* Duração: tabela */
+  .rolar {
+    margin-top: 14px;
+    overflow-x: auto;
+  }
+  .tabela {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  .tabela thead th {
+    padding: 0 12px 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-align: left;
+    text-transform: uppercase;
+    color: var(--texto-2);
+  }
+  .tabela tbody th,
+  .tabela td {
+    padding: 12px 12px 12px 0;
+    border-top: 1px solid var(--linha);
+    text-align: left;
+    vertical-align: top;
+  }
+  .tabela tbody th {
+    font-weight: 700;
+  }
+  .partes {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--bordo);
+    white-space: nowrap;
+  }
+
+  .dois {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .caixa {
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--papel);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .caixa-t {
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .tolerancia {
+    margin-top: 12px;
+  }
+
+  /* Pontuação */
+  .pontos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pontos li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 14px 8px;
+    border-radius: 14px;
+    background: var(--papel);
+    font-size: 13px;
+    text-align: center;
+    color: var(--texto-2);
+  }
+  .p-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 44px;
+    line-height: 1;
+    color: var(--bordo);
+  }
+  .passos {
+    display: grid;
+    gap: 6px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .passos li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--bordo);
+    border-radius: 0 12px 12px 0;
+    background: var(--papel);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .passo-n {
+    flex: none;
+    min-width: 28px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--bordo);
+  }
+
+  /* Disciplina */
+  .cartoes {
+    display: grid;
+    gap: 8px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cartoes li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--papel);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  .cartoes strong {
+    display: block;
+  }
+  .cartao-cor {
+    flex: none;
+    width: 22px;
+    height: 30px;
+    border-radius: 4px;
+  }
+  .amarelo {
+    background: #e6b422;
+  }
+  .vermelho {
+    background: #c8102e;
+  }
+
+  /* Prémios */
+  .podio {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: 8px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .podio li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 14px 8px;
+    border-radius: 14px;
+    background: var(--papel);
+    text-align: center;
+  }
+  .podio .lugar-1 {
+    order: 2;
+    min-height: 132px;
+    background: var(--bordo);
+    color: var(--branco);
+    box-shadow: inset 0 0 0 1.5px var(--dourado);
+  }
+  .podio .lugar-2 {
+    order: 1;
+    min-height: 110px;
+  }
+  .podio .lugar-3 {
+    order: 3;
+    min-height: 92px;
+  }
+  .pd-lugar {
     font-size: 13px;
     font-weight: 700;
-    text-decoration: none;
   }
-  .topo::after {
-    content: ' ›';
-    white-space: pre;
+  .lugar-1 .pd-lugar {
+    color: var(--dourado-claro);
   }
-  .topo:hover {
-    border-color: var(--bordo);
+  .pd-valor {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 34px;
+    line-height: 1;
+    color: var(--bordo);
+  }
+  .lugar-1 .pd-valor {
+    font-size: 42px;
+    color: var(--branco);
+  }
+  .individuais {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .individuais li {
+    padding: 8px 14px;
+    border-radius: var(--raio-capsula);
+    background: var(--papel);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Fecho */
+  .fecho {
+    padding: 24px 22px;
+    border-radius: var(--raio-cartao);
+    background: var(--bordo);
+    color: var(--branco);
+  }
+  .fecho h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 26px;
+    text-transform: uppercase;
+  }
+  .fecho p {
+    margin-top: 6px;
+    color: var(--bordo-claro);
+  }
+  .fecho-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  /* Telemóvel: a tabela de duração passa a um cartão por fase. */
+  @media (max-width: 719.98px) {
+    .rolar {
+      overflow: visible;
+    }
+    .tabela {
+      min-width: 0;
+    }
+    .tabela thead {
+      display: none;
+    }
+    .tabela,
+    .tabela tbody,
+    .tabela tr,
+    .tabela tbody th,
+    .tabela td {
+      display: block;
+    }
+    .tabela tr {
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--papel);
+    }
+    .tabela tr + tr {
+      margin-top: 8px;
+    }
+    .tabela tbody th,
+    .tabela td {
+      padding: 2px 0;
+      border: 0;
+    }
+    .tabela tbody th {
+      font-size: 16px;
+    }
+    .tabela td::before {
+      content: attr(data-rotulo) ': ';
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--texto-2);
+    }
+  }
+
+  @media (min-width: 720px) {
+    .resumo ul {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .fases {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .dois {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .com-destaque {
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .r-valor {
+      font-size: 40px;
+    }
+    .corpo {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      align-items: start;
+      gap: 32px;
+      margin-top: 40px;
+    }
+    /* Secção a ser lida (só no computador, onde o índice fica fixo). */
+    .indice a[aria-current] {
+      border-color: var(--bordo);
+      background: var(--bordo);
+      color: var(--branco);
+    }
+    .indice a[aria-current] .n,
+    .indice a[aria-current]::after {
+      color: var(--branco);
+    }
+    .lateral {
+      position: sticky;
+      top: 104px;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .indice a {
+      min-height: var(--toque);
+      font-size: 14px;
+    }
+    .seccoes {
+      margin-top: 0;
+      gap: 20px;
+    }
+    .seccao {
+      padding: 30px 32px;
+    }
+    .seccao h2 {
+      font-size: 32px;
+    }
+    .num {
+      width: 44px;
+      height: 44px;
+      font-size: 22px;
+    }
+    .fecho {
+      padding: 30px 32px;
+    }
   }
 </style>
