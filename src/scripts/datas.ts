@@ -65,32 +65,20 @@ export function textoDia(iso: string, agora = new Date()): string {
 }
 
 /**
- * Contagem para o cartão em destaque.
- * - Antes do torneio: dias até ao apito inicial (21/12).
- * - No dia do jogo: horas e minutos até ao jogo, ou "a decorrer".
- * - Noutros casos: vazio.
+ * Contagem em texto (telemóvel). Usa exatamente a mesma conta que os mosaicos do computador
+ * (partesContagem: dias inteiros arredondados para baixo), para os dois nunca diferirem.
+ * - Falta 1 dia ou mais: "faltam 31 dias" (longo: "... para o apito inicial").
+ * - Menos de 1 dia: "faltam 7 h 12 min".
+ * - Durante o jogo: "a decorrer". Depois: vazio.
  */
 export function textoContagem(iso: string, formato: 'curto' | 'longo', agora = new Date()): string {
-  const t = agora.getTime();
-  const inicioTorneio = Date.parse(torneio.inicio);
-
-  if (t < inicioTorneio) {
-    const dias = Math.max(1, Math.ceil((inicioTorneio - t) / 86_400_000));
-    const base = dias === 1 ? 'falta 1 dia' : `faltam ${dias} dias`;
-    return formato === 'longo' ? `${base} para o apito inicial` : base;
-  }
-
-  const inicioJogo = Date.parse(iso);
-  const fimJogo = inicioJogo + torneio.duracaoJogoMinutos * 60_000;
-  if (diaLisboa(new Date(iso)) !== diaLisboa(agora)) return '';
-  if (t >= inicioJogo && t < fimJogo) return 'a decorrer';
-  if (t < inicioJogo) {
-    const min = Math.ceil((inicioJogo - t) / 60_000);
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return h > 0 ? `faltam ${h} h ${m} min` : `faltam ${m} min`;
-  }
-  return '';
+  const p = partesContagem(iso, agora);
+  if (p.estado === 'decorrer') return 'a decorrer';
+  if (p.estado === 'fim') return '';
+  let base: string;
+  if (p.dias >= 1) base = p.dias === 1 ? 'falta 1 dia' : `faltam ${p.dias} dias`;
+  else base = p.horas > 0 ? `faltam ${p.horas} h ${p.minutos} min` : `faltam ${p.minutos} min`;
+  return formato === 'longo' ? `${base} para o apito inicial` : base;
 }
 
 /** Atualiza no browser todos os elementos [data-quando]. */
