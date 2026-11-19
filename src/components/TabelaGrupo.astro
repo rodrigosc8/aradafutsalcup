@@ -1,0 +1,162 @@
+---
+// Tabela completa de um grupo (/grupos). Sem `nome`, a linha é "Por sortear" (antes do sorteio).
+import EmblemaEquipa from './EmblemaEquipa.astro';
+
+interface Linha {
+  nome?: string;
+  sigla?: string;
+  cor?: string;
+  jogos?: number;
+  vitorias?: number;
+  empates?: number;
+  derrotas?: number;
+  golosMarcados?: number;
+  golosSofridos?: number;
+  pontos?: number;
+}
+interface Props {
+  grupo: string;
+  linhas: Linha[];
+  apurados?: number;
+}
+const { grupo, linhas, apurados = 2 } = Astro.props;
+const dg = (l: Linha) => {
+  const d = (l.golosMarcados ?? 0) - (l.golosSofridos ?? 0);
+  return d > 0 ? `+${d}` : String(d);
+};
+const colunas = [
+  ['J', 'Jogos'],
+  ['V', 'Vitórias'],
+  ['E', 'Empates'],
+  ['D', 'Derrotas'],
+  ['GM', 'Golos marcados'],
+  ['GS', 'Golos sofridos'],
+  ['DG', 'Diferença de golos'],
+  ['Pts', 'Pontos'],
+];
+---
+
+<section class="grupo" id={`grupo-${grupo.toLowerCase()}`} aria-labelledby={`titulo-grupo-${grupo.toLowerCase()}`}>
+  <h2 class="titulo" id={`titulo-grupo-${grupo.toLowerCase()}`}>Grupo {grupo}</h2>
+  <div class="rolar">
+    <table>
+      <caption class="visually-hidden">Classificação do Grupo {grupo}</caption>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Equipa</th>
+          {
+            colunas.map(([c, t]) => (
+              <th scope="col" class="num">
+                <abbr title={t}>{c}</abbr>
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          linhas.map((l, i) => {
+            const valores = l.nome
+              ? [l.jogos, l.vitorias, l.empates, l.derrotas, l.golosMarcados, l.golosSofridos, dg(l), l.pontos]
+              : Array(8).fill('–');
+            return (
+              <tr class:list={{ apurado: i < apurados && l.nome, vago: !l.nome }}>
+                <td class="pos">{i + 1}</td>
+                <td>
+                  <span class="equipa">
+                    <EmblemaEquipa sigla={l.nome ? l.sigla! : ''} cor={l.cor} neutro={!l.nome} tamanho={26} anel={0} />
+                    {l.nome ?? 'Por sortear'}
+                  </span>
+                </td>
+                {valores.map((v, k) => (
+                  <td class:list={['num', { pts: k === 7 }]}>{v}</td>
+                ))}
+              </tr>
+            );
+          })
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<style>
+  .grupo {
+    padding: 18px 20px 10px;
+    border: 1px solid var(--linha);
+    border-radius: 18px;
+    background: var(--branco);
+    scroll-margin-top: 110px;
+  }
+  .titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 28px;
+    text-transform: uppercase;
+  }
+  .rolar {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    min-width: 440px;
+    margin-top: 6px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    padding: 6px 0;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--texto-2);
+  }
+  abbr {
+    text-decoration: none;
+  }
+  td {
+    padding: 10px 0;
+    border-top: 1px solid var(--linha);
+  }
+  .num {
+    width: 34px;
+    text-align: right;
+  }
+  td.num {
+    color: var(--texto-2);
+  }
+  .pos {
+    width: 24px;
+    font-weight: 800;
+    color: var(--texto-2);
+  }
+  .apurado .pos {
+    color: var(--bordo);
+  }
+  .equipa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  td.pts {
+    color: var(--texto);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+  }
+  .vago td,
+  .vago .equipa {
+    color: var(--texto-2);
+    font-weight: 500;
+  }
+  .vago td.pts {
+    color: var(--texto-2);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+  }
+</style>

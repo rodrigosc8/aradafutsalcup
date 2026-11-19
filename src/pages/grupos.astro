@@ -1,0 +1,57 @@
+---
+import Pagina from '../layouts/Pagina.astro';
+import TabelaGrupo from '../components/TabelaGrupo.astro';
+import QuadroFinal from '../components/QuadroFinal.astro';
+import { classificacoes, equipa, GRUPOS, haSorteio } from '../data/fonte';
+
+const grupos = haSorteio
+  ? classificacoes.map((c) => ({
+      grupo: c.grupo,
+      linhas: c.linhas.map((l) => {
+        const e = equipa(l.equipa);
+        return { ...l, nome: e.nome, sigla: e.sigla, cor: e.cor };
+      }),
+    }))
+  : GRUPOS.map((g) => ({ grupo: g, linhas: [{}, {}, {}, {}] }));
+---
+
+<Pagina
+  titulo="Grupos"
+  frase={haSorteio
+    ? '4 grupos de 4 equipas. Os 2 primeiros de cada grupo seguem para os quartos-de-final, a 26 de dezembro.'
+    : '4 grupos de 4 equipas, definidos no sorteio. Os 2 primeiros de cada grupo seguem para os quartos-de-final, a 26 de dezembro.'}
+  atual="grupos"
+>
+  <div class="grupos">
+    {grupos.map((g) => <TabelaGrupo grupo={g.grupo} linhas={g.linhas} />)}
+  </div>
+  <p class="desempate">
+    Vitória: 3 pontos; empate: 1; derrota: 0. Desempate por esta ordem: confronto direto, diferença de golos, golos
+    marcados, golos sofridos, fair-play e sorteio.
+  </p>
+  <div class="bloco">
+    <QuadroFinal />
+  </div>
+</Pagina>
+
+<style>
+  .grupos {
+    display: grid;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .desempate {
+    margin: 16px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--texto-2);
+  }
+  .bloco {
+    margin-top: 48px;
+  }
+  @media (min-width: 1024px) {
+    .grupos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
