@@ -26,6 +26,14 @@ const dias = torneio.dias.map((iso, i) => ({
   fase: torneio.fases[i],
   jogos: jogos.filter((j) => j.inicio.startsWith(iso)),
 }));
+const FASES: Record<Jogo['fase'], string> = {
+  grupos: 'Grupos',
+  quartos: 'Quartos',
+  meias: 'Meia-final',
+  terceiro: '3.º lugar',
+  final: 'Final',
+};
+const etiqueta = (j: Jogo) => (j.grupo ? `Grupo ${j.grupo}` : FASES[j.fase]);
 const emblema = (lado: Jogo['casa']) => {
   const e = equipaDoLado(lado);
   return e ? { sigla: e.sigla, cor: e.cor } : undefined;
@@ -63,6 +71,7 @@ const emblema = (lado: Jogo['casa']) => {
               fora={nomeDoLado(j.fora)}
               emblemaCasa={emblema(j.casa)}
               emblemaFora={emblema(j.fora)}
+              etiqueta={etiqueta(j)}
               href={`/jogos#${j.id}`}
               destaque={j.id === idDestaque}
             />
@@ -124,7 +133,7 @@ const emblema = (lado: Jogo['casa']) => {
   .lista {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px 16px;
+    gap: 12px 20px;
     margin: 22px 0 0;
     padding: 0;
     list-style: none;

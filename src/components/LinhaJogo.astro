@@ -1,6 +1,9 @@
 ---
 // Linha de jogo: cartão branco com contorno que se carrega inteiro.
 // Com `emblemaCasa`/`emblemaFora` mostra emblemas pequenos (26px) antes dos nomes.
+// Com `etiqueta` (grupo ou fase) usa a grelha de colunas fixas da secção "Jogos" do computador:
+// hora | casa (à direita, nome + emblema) | × | fora (à esquerda, emblema + nome) | etiqueta | ›
+// para os nomes ficarem alinhados de linha para linha.
 import EmblemaEquipa from './EmblemaEquipa.astro';
 import Icone from './Icone.astro';
 
@@ -16,13 +19,34 @@ interface Props {
   href: string;
   emblemaCasa?: Emblema;
   emblemaFora?: Emblema;
+  /** Grupo ou fase ("Grupo C", "Quartos"). Ativa a grelha de colunas fixas. */
+  etiqueta?: string;
   /** Realça o jogo (por exemplo, o jogo em destaque). */
   destaque?: boolean;
 }
-const { hora, casa, fora, href, emblemaCasa, emblemaFora, destaque = false } = Astro.props;
+const { hora, casa, fora, href, emblemaCasa, emblemaFora, etiqueta, destaque = false } = Astro.props;
+const rotulo = `Ver o jogo ${casa} contra ${fora}, às ${hora}`;
 ---
 
-<a class:list={['linha-jogo', { destaque }]} href={href} aria-label={`Ver o jogo ${casa} contra ${fora}, às ${hora}`}>
+{
+  etiqueta !== undefined ? (
+    <a class:list={['grelha', { destaque }]} href={href} aria-label={rotulo}>
+      <span class="g-hora">{hora}</span>
+      <span class="g-casa">
+        <span class="g-nome">{casa}</span>
+        {emblemaCasa && <EmblemaEquipa sigla={emblemaCasa.sigla} cor={emblemaCasa.cor} tamanho={32} anel={0} />}
+      </span>
+      <span class="g-x" aria-hidden="true">×</span>
+      <span class="g-fora">
+        {emblemaFora && <EmblemaEquipa sigla={emblemaFora.sigla} cor={emblemaFora.cor} tamanho={32} anel={0} />}
+        <span class="g-nome">{fora}</span>
+      </span>
+      <span class="g-etiqueta">{etiqueta}</span>
+      <span class="g-seta"><Icone nome="seta" tamanho={18} /></span>
+    </a>
+  ) : (
+
+<a class:list={['linha-jogo', { destaque }]} href={href} aria-label={rotulo}>
   <span class="hora">{hora}</span>
   <span class="equipas">
     {emblemaCasa && <EmblemaEquipa sigla={emblemaCasa.sigla} cor={emblemaCasa.cor} tamanho={26} anel={0} />}
@@ -33,8 +57,76 @@ const { hora, casa, fora, href, emblemaCasa, emblemaFora, destaque = false } = A
   </span>
   <span class="ver">Ver jogo<Icone nome="seta" tamanho={16} /></span>
 </a>
+  )
+}
 
 <style>
+  /* Grelha de colunas fixas (secção "Jogos" do computador) */
+  .grelha {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 28px minmax(0, 1fr) 72px 24px;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 0 18px 0 20px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-linha);
+    background: var(--branco);
+    color: var(--texto);
+    text-decoration: none;
+  }
+  .grelha:hover {
+    border-color: var(--bordo);
+  }
+  .g-hora {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    text-align: left;
+  }
+  .g-casa,
+  .g-fora {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .g-casa {
+    justify-content: flex-end;
+  }
+  .g-fora {
+    justify-content: flex-start;
+  }
+  .g-nome {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .destaque .g-nome {
+    font-weight: 800;
+  }
+  .g-x {
+    text-align: center;
+    color: var(--texto-2);
+  }
+  .g-etiqueta {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    text-align: right;
+    color: var(--texto-2);
+  }
+  .g-seta {
+    display: flex;
+    justify-content: flex-end;
+    color: var(--bordo);
+  }
+
+  /* Linha simples */
   .linha-jogo {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
