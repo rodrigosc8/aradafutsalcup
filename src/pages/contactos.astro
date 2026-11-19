@@ -1,0 +1,87 @@
+---
+// Contactos: Junta de Freguesia de Arada e local do torneio. Campos vazios em torneio.ts não aparecem.
+import Pagina from '../layouts/Pagina.astro';
+import Botao from '../components/Botao.astro';
+import { torneio } from '../data/torneio';
+
+const { contactoEmail: email, telefone, moradaJunta } = torneio;
+const telLink = telefone.replace(/[^\d+]/g, '');
+---
+
+<Pagina titulo="Contactos" frase={`O torneio é organizado pela ${torneio.organizacao}.`} largura="texto">
+  <div class="cartoes">
+    <section class="cartao" aria-labelledby="titulo-junta">
+      <h2 id="titulo-junta">{torneio.organizacao}</h2>
+      {moradaJunta && <p class="linha">{moradaJunta}</p>}
+      {
+        (email || telefone) && (
+          <div class="acoes">
+            {email && (
+              <Botao variante="secundario" href={`mailto:${email}`}>
+                {email}
+              </Botao>
+            )}
+            {telefone && (
+              <Botao variante="secundario" href={`tel:${telLink}`}>
+                {telefone}
+              </Botao>
+            )}
+          </div>
+        )
+      }
+    </section>
+
+    <section class="cartao" aria-labelledby="titulo-local">
+      <p class="etiqueta">Local do torneio</p>
+      <h2 id="titulo-local">{torneio.local}</h2>
+      {torneio.morada && <p class="linha">{torneio.morada}</p>}
+      <p class="linha">{torneio.diasTexto}</p>
+      <div class="acoes">
+        <Botao variante="secundario" href={torneio.links.comoChegar}>Abrir no mapa</Botao>
+      </div>
+    </section>
+  </div>
+</Pagina>
+
+<style>
+  .cartoes {
+    display: grid;
+    gap: 16px;
+    margin-top: 28px;
+  }
+  .cartao {
+    padding: 22px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-cartao);
+    background: var(--branco);
+  }
+  h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 28px;
+    line-height: 1.05;
+    text-transform: uppercase;
+  }
+  .etiqueta {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: var(--texto-2);
+  }
+  .linha {
+    margin: 8px 0 0;
+    line-height: 1.5;
+    color: var(--texto-2);
+  }
+  .acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  @media (min-width: 1024px) {
+    .cartoes {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
