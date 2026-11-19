@@ -147,18 +147,40 @@ export const classificacaoGrupoA = [
   { equipa: 'leoes', dg: -2, pontos: 0 },
 ];
 
-/** Classificações de exemplo dos 4 grupos (Início no computador). */
-export const classificacoes: { grupo: Equipa['grupo']; linhas: { equipa: string; jogos: number; pontos: number }[] }[] = [
-  { grupo: 'A', linhas: [{ equipa: 'javalis', jogos: 2, pontos: 4 }, { equipa: 'bairro-fc', jogos: 2, pontos: 3 }, { equipa: 'ponte', jogos: 2, pontos: 1 }, { equipa: 'leoes', jogos: 2, pontos: 0 }] },
-  { grupo: 'B', linhas: [{ equipa: 'unidos', jogos: 2, pontos: 6 }, { equipa: 'mar', jogos: 2, pontos: 3 }, { equipa: 'vila', jogos: 2, pontos: 1 }, { equipa: 'serra', jogos: 2, pontos: 1 }] },
-  { grupo: 'C', linhas: [{ equipa: 'castelo', jogos: 2, pontos: 4 }, { equipa: 'moinho', jogos: 2, pontos: 4 }, { equipa: 'rio', jogos: 2, pontos: 3 }, { equipa: 'lagoa', jogos: 2, pontos: 0 }] },
-  { grupo: 'D', linhas: [{ equipa: 'praia', jogos: 2, pontos: 6 }, { equipa: 'quinta', jogos: 2, pontos: 2 }, { equipa: 'pinhal', jogos: 2, pontos: 2 }, { equipa: 'areal', jogos: 2, pontos: 1 }] },
+export interface LinhaClassificacao {
+  equipa: string;
+  jogos: number;
+  vitorias: number;
+  empates: number;
+  derrotas: number;
+  golosMarcados: number;
+  golosSofridos: number;
+  pontos: number;
+}
+
+const linha = (equipa: string, v: number, e: number, d: number, gm: number, gs: number): LinhaClassificacao => ({
+  equipa,
+  jogos: v + e + d,
+  vitorias: v,
+  empates: e,
+  derrotas: d,
+  golosMarcados: gm,
+  golosSofridos: gs,
+  pontos: v * 3 + e,
+});
+
+/** Classificações de exemplo dos 4 grupos (Início no computador e /grupos). */
+export const classificacoes: { grupo: Equipa['grupo']; linhas: LinhaClassificacao[] }[] = [
+  { grupo: 'A', linhas: [linha('javalis', 1, 1, 0, 5, 3), linha('bairro-fc', 1, 0, 1, 4, 3), linha('ponte', 0, 1, 1, 3, 4), linha('leoes', 0, 0, 2, 2, 4)] },
+  { grupo: 'B', linhas: [linha('unidos', 2, 0, 0, 6, 1), linha('mar', 1, 0, 1, 3, 3), linha('vila', 0, 1, 1, 2, 4), linha('serra', 0, 1, 1, 1, 4)] },
+  { grupo: 'C', linhas: [linha('castelo', 1, 1, 0, 4, 2), linha('moinho', 1, 1, 0, 3, 2), linha('rio', 1, 0, 1, 3, 3), linha('lagoa', 0, 0, 2, 1, 4)] },
+  { grupo: 'D', linhas: [linha('praia', 2, 0, 0, 7, 2), linha('quinta', 0, 2, 0, 3, 3), linha('pinhal', 0, 2, 0, 2, 2), linha('areal', 0, 1, 1, 1, 6)] },
 ];
 
 /** Resultados de exemplo dos Javalis (mosaicos de resultado). */
 export const resultadosJavalis = [
-  { adversario: 'ponte', resultado: '3–1', href: '/jogos#j-exemplo-1' },
-  { adversario: 'leoes', resultado: '2–2', href: '/jogos#j-exemplo-2' },
+  { adversario: 'ponte', resultado: '3–1', href: '/jogos' },
+  { adversario: 'leoes', resultado: '2–2', href: '/jogos' },
 ];
 
 /** "Figuras de ontem": jogadores de exemplo com golos. */

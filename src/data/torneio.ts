@@ -54,12 +54,15 @@ export const torneio = {
   },
 
   // Patamares de patrocínio da 2.ª edição.
+  // TODO: preencher `beneficios` de cada patamar a partir do documento de patamares da Junta
+  // (lonas, Flash Interview, cartaz, redes sociais, Welcome Kit…). Enquanto estiver vazio, a
+  // página /patrocinar mostra "Benefícios a confirmar com a Junta".
   patamares: [
-    { nome: 'Anual', valor: 500 },
-    { nome: 'Destaque', valor: 250 },
-    { nome: 'Cartaz', valor: 100 },
-    { nome: 'Parceiro', valor: 50 },
-    { nome: 'Apoiante', valor: 25 },
+    { nome: 'Anual', valor: 500, beneficios: [] as string[] },
+    { nome: 'Destaque', valor: 250, beneficios: [] as string[] },
+    { nome: 'Cartaz', valor: 100, beneficios: [] as string[] },
+    { nome: 'Parceiro', valor: 50, beneficios: [] as string[] },
+    { nome: 'Apoiante', valor: 25, beneficios: [] as string[] },
   ],
 
   // Patrocinadores confirmados (além do principal), pela ordem da barra "Quem apoia".
@@ -80,5 +83,44 @@ export const torneio = {
 
   // Preencher quando houver: link do formulário de inscrição e contacto da Junta.
   linkInscricao: '',
-  contactoEmail: '',
+  contactoEmail: '', // email da Junta: usado em /contactos e no botão de /patrocinar
+  // TODO: telefone e morada da Junta de Freguesia de Arada. Campos vazios não aparecem.
+  telefone: '',
+  moradaJunta: '',
+
+  regulamentoPdf: '/regulamento.pdf',
+
+  // Esqueleto da fase final (/grupos#finais).
+  // TODO: confirmar os cruzamentos dos quartos-de-final com a organização: o regulamento
+  // só diz que passam os 2 primeiros de cada grupo, não diz quem joga com quem.
+  quadroFinal: [
+    {
+      fase: 'Quartos-de-final',
+      dia: '2026-12-26',
+      jogos: [
+        { id: 'q1', casa: '1.º Grupo A', fora: '2.º Grupo B' },
+        { id: 'q2', casa: '1.º Grupo C', fora: '2.º Grupo D' },
+        { id: 'q3', casa: '1.º Grupo B', fora: '2.º Grupo A' },
+        { id: 'q4', casa: '1.º Grupo D', fora: '2.º Grupo C' },
+      ],
+    },
+    {
+      fase: 'Meias-finais',
+      dia: '2026-12-27',
+      jogos: [
+        { id: 'm1', casa: 'Vencedor Q1', fora: 'Vencedor Q2' },
+        { id: 'm2', casa: 'Vencedor Q3', fora: 'Vencedor Q4' },
+      ],
+    },
+    {
+      fase: '3.º e 4.º lugar',
+      dia: '2026-12-27',
+      jogos: [{ id: 't1', casa: 'Vencido M1', fora: 'Vencido M2' }],
+    },
+    {
+      fase: 'Final',
+      dia: '2026-12-27',
+      jogos: [{ id: 'f1', casa: 'Vencedor M1', fora: 'Vencedor M2' }],
+    },
+  ],
 };

@@ -12,6 +12,7 @@ export type { Equipa, Jogador, Jogo, Lado } from './exemplo';
 export const haSorteio = torneio.fase !== 'pre-sorteio';
 
 export const equipas = haSorteio ? exemplo.equipas : [];
+export const jogadores = haSorteio ? exemplo.jogadores : [];
 export const jogos = haSorteio ? exemplo.jogos : [];
 export const idJogoEmDestaque = haSorteio ? exemplo.idJogoEmDestaque : undefined;
 export const classificacoes = haSorteio ? exemplo.classificacoes : [];
