@@ -1,11 +1,51 @@
 ---
+// Rodapé. Telemóvel: patrocinador e organização. Computador: 4 colunas
+// (marca e datas, Torneio, Local, Organização). Todos os links são cápsulas com seta.
+import Logo from './Logo.astro';
+import PilulaLink from './PilulaLink.astro';
 import { torneio } from '../data/torneio';
+
+interface Props {
+  /** Sem margem por cima no computador (quando vem logo a seguir a uma faixa, ex.: patamares). */
+  colado?: boolean;
+}
+const { colado = false } = Astro.props;
+const anoDias = torneio.dias[0].slice(0, 4);
 ---
 
-<footer class="rodape">
-  <div class="conteudo">
+<footer class:list={['rodape', { colado }]}>
+  <div class="movel so-telemovel">
     <p>Patrocinador principal: <strong>{torneio.patrocinadorPrincipal}</strong></p>
     <p>Organização: {torneio.organizacao} · {torneio.local}</p>
+  </div>
+
+  <div class="pc so-computador">
+    <div class="colunas">
+      <div class="marca">
+        <Logo linhas={2} tamanho={28} />
+        <p>{torneio.edicao} do {torneio.subtitulo}. {torneio.diasTexto} de {anoDias}.</p>
+      </div>
+      <nav aria-label="Torneio">
+        <h2>Torneio</h2>
+        <ul>
+          <li><PilulaLink href="/jogos">Jogos</PilulaLink></li>
+          <li><PilulaLink href="/grupos">Grupos</PilulaLink></li>
+          <li><PilulaLink href="/cromos">Cromos</PilulaLink></li>
+          <li><PilulaLink href={torneio.links.regulamento}>Regulamento</PilulaLink></li>
+        </ul>
+      </nav>
+      <div>
+        <h2>Local</h2>
+        <p>{torneio.local}</p>
+        <PilulaLink href={torneio.links.comoChegar}>Como chegar</PilulaLink>
+      </div>
+      <div>
+        <h2>Organização</h2>
+        <p>{torneio.organizacao}</p>
+        <PilulaLink href={torneio.links.contactos}>Contactos</PilulaLink>
+      </div>
+    </div>
+    <p class="patrocinador">Patrocinador principal: <strong>{torneio.patrocinadorPrincipal}</strong></p>
   </div>
 </footer>
 
@@ -14,7 +54,7 @@ import { torneio } from '../data/torneio';
     margin-top: 40px;
     border-top: 1px solid var(--linha);
   }
-  .conteudo {
+  .movel {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
@@ -31,9 +71,58 @@ import { torneio } from '../data/torneio';
   strong {
     color: var(--texto);
   }
+
   @media (min-width: 1024px) {
-    .conteudo {
-      padding-inline: 32px;
+    .rodape {
+      background: var(--branco);
+    }
+    .colado {
+      margin-top: 0;
+    }
+    .pc {
+      max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
+      margin: 0 auto;
+      padding: 40px var(--margem-largo) 28px;
+      font-size: 15px;
+    }
+    .colunas {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 32px;
+    }
+    .marca p,
+    .colunas div > p {
+      margin-top: 12px;
+      line-height: 1.5;
+      color: var(--texto-2);
+    }
+    .colunas div > p {
+      margin: 0 0 12px;
+    }
+    .marca p {
+      margin-top: 12px;
+      max-width: 36ch;
+    }
+    h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+    ul {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .patrocinador {
+      margin-top: 32px;
+      padding-top: 18px;
+      border-top: 1px solid var(--linha);
+      font-size: 14px;
+      color: var(--texto-2);
     }
   }
 </style>

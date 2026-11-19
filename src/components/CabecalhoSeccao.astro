@@ -1,0 +1,53 @@
+---
+// Cabeçalho de secção do computador: título a 40px em Barlow Condensed, frase de apoio por baixo
+// e, à direita, uma ação opcional (slot "acao": PilulaLink, separadores…).
+interface Props {
+  titulo: string;
+  frase?: string;
+  id?: string;
+  /** Nível do título (h2 por omissão). */
+  nivel?: 2 | 3;
+  /** Texto claro, para fundos escuros. */
+  claro?: boolean;
+}
+const { titulo, frase, id, nivel = 2, claro = false } = Astro.props;
+const Titulo = nivel === 3 ? 'h3' : 'h2';
+---
+
+<div class:list={['cabecalho-seccao', { claro }]}>
+  <div>
+    <Titulo class="titulo" id={id}>{titulo}</Titulo>
+    {frase && <p class="frase">{frase}</p>}
+  </div>
+  {Astro.slots.has('acao') && <div class="acao"><slot name="acao" /></div>}
+</div>
+
+<style>
+  .cabecalho-seccao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .titulo {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .frase {
+    margin: 6px 0 0;
+    font-size: 16px;
+    color: var(--texto-2);
+  }
+  .claro .frase {
+    color: var(--bordo-claro);
+  }
+  .acao {
+    display: flex;
+    align-items: center;
+  }
+</style>

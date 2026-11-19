@@ -1,0 +1,120 @@
+---
+// Cartão escuro "Assim foi a 1.ª edição", com os números reais e o espaço para o vídeo de 2025.
+// Sem link do vídeo em torneio.ts, o espaço fica como marcador (não clicável).
+import Icone from './Icone.astro';
+import { torneio } from '../data/torneio';
+
+const { rotulo, texto, numeros, video } = torneio.primeiraEdicao;
+---
+
+<section class="primeira" aria-labelledby="titulo-primeira">
+  <div>
+    <p class="rotulo">{rotulo}</p>
+    <h2 class="titulo" id="titulo-primeira">Assim foi a 1.ª edição</h2>
+    <p class="texto">{texto}</p>
+  </div>
+  <ul class="numeros">
+    {
+      numeros.map((n) => (
+        <li>
+          <span class="valor">{n.valor}</span>
+          <span class="legenda">{n.rotulo}</span>
+        </li>
+      ))
+    }
+  </ul>
+  {
+    video ? (
+      <a class="video" href={video}>
+        <Icone nome="video" tamanho={28} />
+        Ver o vídeo da 1.ª edição
+        <Icone nome="seta" tamanho={18} />
+      </a>
+    ) : (
+      <div class="video vazio">
+        <Icone nome="video" tamanho={28} />
+        O vídeo da 1.ª edição chega em breve
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .primeira {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 28px;
+    border-radius: 22px;
+    background: var(--texto);
+    color: var(--branco);
+  }
+  .rotulo {
+    margin: 0;
+    font-size: 14px;
+    color: var(--bordo-claro);
+  }
+  .titulo {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 40px;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  .texto {
+    max-width: 46ch;
+    margin: 10px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--bordo-claro);
+  }
+  .numeros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 36px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .numeros li {
+    display: flex;
+    flex-direction: column;
+  }
+  .valor {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 52px;
+    line-height: 1;
+  }
+  .legenda {
+    font-size: 14px;
+    color: var(--bordo-claro);
+  }
+  .video {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 180px;
+    padding: 16px;
+    border: 1.5px dashed rgb(255 255 255 / 0.35);
+    border-radius: 16px;
+    color: var(--branco);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+  }
+  a.video {
+    border-style: solid;
+  }
+  a.video:hover {
+    border-color: var(--branco);
+  }
+  .vazio {
+    color: var(--bordo-claro);
+    font-weight: 600;
+  }
+</style>

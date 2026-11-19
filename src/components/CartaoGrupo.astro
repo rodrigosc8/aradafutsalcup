@@ -1,0 +1,148 @@
+---
+// Cartão de grupo (classificação). O cartão inteiro carrega: o link está no título e
+// estende-se ao cartão, para a tabela continuar legível por leitores de ecrã.
+import EmblemaEquipa from './EmblemaEquipa.astro';
+import Icone from './Icone.astro';
+
+interface Linha {
+  nome: string;
+  sigla: string;
+  cor: string;
+  jogos: number;
+  pontos: number;
+}
+interface Props {
+  grupo: string;
+  linhas: Linha[];
+  href: string;
+  /** Quantos seguem em frente (realçados a bordô). */
+  apurados?: number;
+}
+const { grupo, linhas, href, apurados = 2 } = Astro.props;
+---
+
+<article class="cartao-grupo">
+  <h3 class="titulo">
+    <a href={href}>Grupo {grupo}<span class="visually-hidden">: ver classificação completa</span></a>
+    <Icone nome="seta" tamanho={18} />
+  </h3>
+  <table>
+    <caption class="visually-hidden">Classificação do Grupo {grupo}</caption>
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Equipa</th>
+        <th scope="col" class="num"><abbr title="Jogos">J</abbr></th>
+        <th scope="col" class="num"><abbr title="Pontos">Pts</abbr></th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        linhas.map((l, i) => (
+          <tr class:list={{ apurado: i < apurados }}>
+            <td class="pos">{i + 1}</td>
+            <td>
+              <span class="equipa">
+                <EmblemaEquipa sigla={l.sigla} cor={l.cor} tamanho={22} anel={0} />
+                {l.nome}
+              </span>
+            </td>
+            <td class="num j">{l.jogos}</td>
+            <td class="num pts">{l.pontos}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</article>
+
+<style>
+  .cartao-grupo {
+    position: relative;
+    padding: 16px 18px 12px;
+    border: 1px solid var(--linha);
+    border-radius: 18px;
+    background: var(--branco);
+  }
+  .cartao-grupo:hover {
+    border-color: var(--bordo);
+  }
+  .cartao-grupo:has(a:focus-visible) {
+    outline: 3px solid var(--dourado);
+    outline-offset: 3px;
+  }
+  .titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 26px;
+    text-transform: uppercase;
+    color: var(--texto);
+  }
+  .titulo :global(svg) {
+    color: var(--bordo);
+  }
+  .titulo a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .titulo a:focus-visible {
+    outline: none;
+  }
+  /* O link cobre o cartão todo. */
+  .titulo a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  table {
+    width: 100%;
+    margin-top: 6px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    padding-bottom: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--texto-2);
+  }
+  abbr {
+    text-decoration: none;
+  }
+  td {
+    padding: 10px 0;
+    border-top: 1px solid var(--linha);
+  }
+  .num {
+    text-align: right;
+  }
+  .pos {
+    width: 22px;
+    font-weight: 800;
+    color: var(--texto-2);
+  }
+  .apurado .pos {
+    color: var(--bordo);
+  }
+  .equipa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+  .j {
+    color: var(--texto-2);
+  }
+  td.pts {
+    padding-left: 10px;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 18px;
+  }
+</style>

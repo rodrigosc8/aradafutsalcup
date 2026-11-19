@@ -1,0 +1,125 @@
+---
+// Secção #patamares: o patrocinador principal em destaque e os patamares de patrocínio.
+// Os espaços vazios da BarraPatrocinadores apontam para aqui.
+import PilulaLink from './PilulaLink.astro';
+import { torneio } from '../data/torneio';
+
+const euros = (n: number) => `${n.toLocaleString('pt-PT')} €`;
+---
+
+<section class="patamares" id="patamares" aria-labelledby="titulo-patamares">
+  <div class="conteudo">
+    <div class="principal">
+      <p class="marca">{torneio.patrocinadorPrincipal}</p>
+      <div>
+        <p class="etiqueta">Patrocinador principal</p>
+        <p class="frase">O torneio tem o nome de quem o torna possível.</p>
+      </div>
+    </div>
+    <div>
+      <div class="cabeca">
+        <h2 class="titulo" id="titulo-patamares">Associe a sua marca à {torneio.edicao}</h2>
+        <PilulaLink href={torneio.links.patamares}>Ver patamares</PilulaLink>
+      </div>
+      <ul class="lista">
+        {
+          torneio.patamares.map((p) => (
+            <li>
+              <span class="valor">{euros(p.valor)}</span>
+              <span class="nome">{p.nome}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .patamares {
+    margin-top: 64px;
+    border-block: 1px solid var(--linha);
+    background: var(--branco);
+  }
+  .conteudo {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 40px;
+    max-width: calc(var(--max-largo) + 2 * var(--margem-largo));
+    margin: 0 auto;
+    padding: 28px var(--margem-largo);
+  }
+  p {
+    margin: 0;
+  }
+  .principal {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+  .marca {
+    flex: none;
+    display: flex;
+    align-items: center;
+    height: 84px;
+    padding: 0 30px;
+    border-radius: 16px;
+    background: var(--azul-ap);
+    color: var(--branco);
+    font-family: var(--font-marcador);
+    font-style: italic;
+    font-weight: 800;
+    font-size: 30px;
+    white-space: nowrap;
+  }
+  .etiqueta {
+    font-size: 14px;
+    color: var(--texto-2);
+  }
+  .frase {
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .cabeca {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .titulo {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .lista {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .lista li {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 14px;
+    border-radius: var(--raio-botao);
+    background: var(--papel);
+  }
+  .valor {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--bordo);
+    white-space: nowrap;
+  }
+  .nome {
+    margin-top: 2px;
+    font-size: 12px;
+    color: var(--texto-2);
+  }
+</style>

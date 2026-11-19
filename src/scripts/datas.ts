@@ -28,6 +28,37 @@ export function dataCurta(iso: string): string {
   return `${DIAS_SEMANA[semana]}, ${d} ${MESES[m - 1]}`;
 }
 
+const DIAS_LONGOS = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+const MESES_LONGOS = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+/** "Segunda, 21 de dezembro"; no próprio dia, "Hoje, 21 de dezembro". */
+export function dataLonga(iso: string, agora = new Date()): string {
+  const [a, m, d] = diaLisboa(new Date(iso)).split('-').map(Number);
+  const semana = new Date(Date.UTC(a, m - 1, d)).getUTCDay();
+  const dia = diaLisboa(new Date(iso)) === diaLisboa(agora) ? 'Hoje' : DIAS_LONGOS[semana];
+  return `${dia}, ${d} de ${MESES_LONGOS[m - 1]}`;
+}
+
+export type PartesContagem =
+  | { estado: 'antes'; dias: number; horas: number; minutos: number }
+  | { estado: 'decorrer' }
+  | { estado: 'fim' };
+
+/** Dias, horas e minutos até ao apito do jogo (para os mosaicos do cartaz). */
+export function partesContagem(iso: string, agora = new Date()): PartesContagem {
+  const inicio = Date.parse(iso);
+  const t = agora.getTime();
+  if (t >= inicio + torneio.duracaoJogoMinutos * 60_000) return { estado: 'fim' };
+  if (t >= inicio) return { estado: 'decorrer' };
+  const totalMin = Math.ceil((inicio - t) / 60_000);
+  return {
+    estado: 'antes',
+    dias: Math.floor(totalMin / 1440),
+    horas: Math.floor((totalMin % 1440) / 60),
+    minutos: totalMin % 60,
+  };
+}
+
 /** "hoje" no próprio dia; senão "seg, 21 dez". */
 export function textoDia(iso: string, agora = new Date()): string {
   return diaLisboa(new Date(iso)) === diaLisboa(agora) ? 'hoje' : dataCurta(iso);
@@ -70,6 +101,21 @@ export function atualizarQuando(raiz: ParentNode = document): void {
     if (!iso) return;
     if (el.dataset.quando === 'dia') {
       el.textContent = textoDia(iso, agora);
+    } else if (el.dataset.quando === 'dia-longo') {
+      el.textContent = dataLonga(iso, agora);
+    } else if (el.dataset.quando === 'partes') {
+      const p = partesContagem(iso, agora);
+      const mosaicos = el.querySelector<HTMLElement>('[data-mosaicos]');
+      const legenda = el.querySelector<HTMLElement>('[data-legenda]');
+      if (mosaicos) mosaicos.hidden = p.estado !== 'antes';
+      if (p.estado === 'antes') {
+        const pares = { dias: p.dias, horas: p.horas, minutos: p.minutos };
+        for (const [k, v] of Object.entries(pares)) {
+          const n = el.querySelector<HTMLElement>(`[data-parte="${k}"]`);
+          if (n) n.textContent = String(v).padStart(k === 'dias' ? 1 : 2, '0');
+        }
+      }
+      if (legenda) legenda.textContent = p.estado === 'antes' ? 'para o apito inicial' : p.estado === 'decorrer' ? 'A decorrer' : 'Jogo terminado';
     } else {
       const texto = textoContagem(iso, el.dataset.formato === 'longo' ? 'longo' : 'curto', agora);
       el.textContent = texto;

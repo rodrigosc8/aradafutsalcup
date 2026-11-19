@@ -1,7 +1,7 @@
 ---
 // Ícones de traço (decorativos: aria-hidden). Quem só tem ícone precisa de aria-label no botão/link.
 interface Props {
-  nome: 'seta' | 'seta-baixo' | 'calendario' | 'partilhar' | 'transferir' | 'estrela';
+  nome: 'seta' | 'seta-baixo' | 'calendario' | 'partilhar' | 'transferir' | 'estrela' | 'video';
   tamanho?: number;
   class?: string;
 }
@@ -41,6 +41,12 @@ const { nome, tamanho = 16, class: classe } = Astro.props;
         <>
           <path d="M12 3v12M7 8l5-5 5 5" />
           <path d="M5 13v6a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6" />
+        </>
+      )}
+      {nome === 'video' && (
+        <>
+          <circle cx="12" cy="12" r="9" />
+          <path d="m10 8.5 5 3.5-5 3.5z" />
         </>
       )}
       {nome === 'transferir' && (

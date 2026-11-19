@@ -1,28 +1,43 @@
 ---
 // Linha de jogo: cartão branco com contorno que se carrega inteiro.
+// Com `emblemaCasa`/`emblemaFora` mostra emblemas pequenos (26px) antes dos nomes.
+import EmblemaEquipa from './EmblemaEquipa.astro';
 import Icone from './Icone.astro';
+
+interface Emblema {
+  sigla: string;
+  cor: string;
+}
 
 interface Props {
   hora: string;
   casa: string;
   fora: string;
   href: string;
+  emblemaCasa?: Emblema;
+  emblemaFora?: Emblema;
   /** Realça o jogo (por exemplo, o jogo em destaque). */
   destaque?: boolean;
 }
-const { hora, casa, fora, href, destaque = false } = Astro.props;
+const { hora, casa, fora, href, emblemaCasa, emblemaFora, destaque = false } = Astro.props;
 ---
 
 <a class:list={['linha-jogo', { destaque }]} href={href} aria-label={`Ver o jogo ${casa} contra ${fora}, às ${hora}`}>
   <span class="hora">{hora}</span>
-  <span class="equipas">{casa} <span class="x">×</span> {fora}</span>
-  <span class="ver">Ver jogo</span>
-  <Icone nome="seta" tamanho={16} />
+  <span class="equipas">
+    {emblemaCasa && <EmblemaEquipa sigla={emblemaCasa.sigla} cor={emblemaCasa.cor} tamanho={26} anel={0} />}
+    <span class="nome">{casa}</span>
+    <span class="x">×</span>
+    {emblemaFora && <EmblemaEquipa sigla={emblemaFora.sigla} cor={emblemaFora.cor} tamanho={26} anel={0} />}
+    <span class="nome">{fora}</span>
+  </span>
+  <span class="ver">Ver jogo<Icone nome="seta" tamanho={16} /></span>
 </a>
 
 <style>
   .linha-jogo {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     gap: 14px;
     min-height: 56px;
@@ -36,9 +51,6 @@ const { hora, casa, fora, href, destaque = false } = Astro.props;
   .linha-jogo:hover {
     border-color: var(--bordo);
   }
-  .linha-jogo :global(svg) {
-    color: var(--bordo);
-  }
   .hora {
     min-width: 50px;
     font-family: var(--font-display);
@@ -46,7 +58,10 @@ const { hora, casa, fora, href, destaque = false } = Astro.props;
     font-size: 19px;
   }
   .equipas {
-    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 6px;
     min-width: 0;
     font-size: 16px;
     font-weight: 500;
@@ -59,14 +74,34 @@ const { hora, casa, fora, href, destaque = false } = Astro.props;
     font-weight: 400;
   }
   .ver {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px; /* igual à versão anterior no telemóvel */
     font-size: 12px;
     font-weight: 700;
     color: var(--bordo);
     white-space: nowrap;
   }
   @media (min-width: 1024px) {
+    .linha-jogo {
+      grid-template-columns: 60px minmax(0, 1fr) auto;
+      min-height: 64px;
+      padding: 0 14px 0 18px;
+    }
     .hora {
-      font-size: 20px;
+      min-width: 0;
+      font-size: 22px;
+    }
+    .equipas {
+      gap: 4px 10px;
+      font-weight: 600;
+    }
+    .destaque .equipas {
+      font-weight: 800;
+    }
+    .ver {
+      gap: 2px;
+      font-size: 13px;
     }
   }
 </style>

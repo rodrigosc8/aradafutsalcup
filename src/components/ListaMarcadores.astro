@@ -1,0 +1,123 @@
+---
+// "Melhores marcadores": top 5 com cromo de 56px, nome, equipa e número, e golos.
+import CabecalhoSeccao from './CabecalhoSeccao.astro';
+import Cromo from './Cromo.astro';
+import Icone from './Icone.astro';
+import PilulaLink from './PilulaLink.astro';
+
+interface Marcador {
+  id: string;
+  nome: string;
+  numero: number;
+  golos: number;
+  equipa: string;
+  cor: string;
+}
+interface Props {
+  marcadores: Marcador[];
+  frase?: string;
+}
+const { marcadores, frase = 'Quem mais marcou até agora.' } = Astro.props;
+---
+
+<section class="marcadores" aria-labelledby="titulo-marcadores">
+  <CabecalhoSeccao titulo="Melhores marcadores" frase={frase} id="titulo-marcadores">
+    <PilulaLink slot="acao" href="/cromos">Todos os cromos</PilulaLink>
+  </CabecalhoSeccao>
+  <ol class="lista">
+    {
+      marcadores.map((m, i) => (
+        <li>
+          <a
+            class:list={['linha', { primeiro: i === 0 }]}
+            href={`/cromos#${m.id}`}
+            aria-label={`${i + 1}.º ${m.nome}, ${m.equipa}, n.º ${m.numero}: ${m.golos} ${m.golos === 1 ? 'golo' : 'golos'}. Ver cromo`}
+          >
+            <span class="pos" aria-hidden="true">{i + 1}</span>
+            <span aria-hidden="true"><Cromo nome={m.nome} numero={m.numero} cor={m.cor} largura={56} /></span>
+            <span class="quem" aria-hidden="true">
+              <span class="nome">{m.nome}</span>
+              <span class="equipa">{m.equipa} · n.º {m.numero}</span>
+            </span>
+            <span class="golos" aria-hidden="true">
+              {m.golos}<span class="unidade"> {m.golos === 1 ? 'golo' : 'golos'}</span>
+            </span>
+            <Icone nome="seta" tamanho={16} />
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .marcadores {
+    padding: 24px;
+    border: 1px solid var(--linha);
+    border-radius: 22px;
+    background: var(--branco);
+  }
+  .lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .linha {
+    display: grid;
+    grid-template-columns: 28px 56px minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--linha);
+    border-radius: var(--raio-linha);
+    color: var(--texto);
+    text-decoration: none;
+  }
+  .linha:hover {
+    border-color: var(--bordo);
+  }
+  .linha :global(svg) {
+    color: var(--bordo);
+  }
+  .primeiro {
+    background: var(--papel);
+  }
+  .pos {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 24px;
+    color: var(--texto-2);
+  }
+  .primeiro .pos {
+    color: var(--bordo);
+  }
+  .quem {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .nome {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .equipa {
+    font-size: 13px;
+    color: var(--texto-2);
+  }
+  .golos {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .unidade {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--texto-2);
+  }
+</style>

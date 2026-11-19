@@ -1,6 +1,7 @@
 ---
 // Cromo do jogador: o componente mais importante.
 // Proporção 1:1,4. Todas as medidas derivam da largura (--wa), para funcionar de 68px a 240px.
+// Também aceita 56px como miniatura (listas), sem subtítulo.
 // Medidas tiradas dos ecrãs aprovados (68, 84, 104, 116, 150 e 240px).
 interface Props {
   nome: string;
@@ -8,7 +9,7 @@ interface Props {
   /** Posição, equipa ou golos. */
   subtitulo?: string;
   cor: string;
-  /** Largura em px (68–240). */
+  /** Largura em px (68–240; 56 para miniaturas sem subtítulo). */
   largura?: number;
   /** Largura no computador (≥ 1024px), se for diferente. */
   larguraComputador?: number;
@@ -17,13 +18,13 @@ interface Props {
 }
 
 const { nome, numero, subtitulo, cor, foto } = Astro.props;
-const limitar = (n: number) => Math.min(240, Math.max(68, n));
+const limitar = (n: number) => Math.min(240, Math.max(56, n));
 const largura = limitar(Astro.props.largura ?? 116);
 const larguraPc = Astro.props.larguraComputador ? limitar(Astro.props.larguraComputador) : undefined;
 const estilo = `--cor: ${cor}; --w: ${largura}px;${larguraPc ? ` --w-pc: ${larguraPc}px;` : ''}`;
 ---
 
-<figure class="cromo" style={estilo}>
+<figure class:list={['cromo', { 'sem-sub': !subtitulo }]} style={estilo}>
   <div class="interior">
     <div class="bloco" aria-hidden="true">
       {
@@ -67,6 +68,9 @@ const estilo = `--cor: ${cor}; --w: ${largura}px;${larguraPc ? ` --w-pc: ${largu
     background: var(--branco);
     border-radius: max(8px, calc(var(--wa) * 0.067));
     box-shadow: var(--sombra-cromo);
+  }
+  .sem-sub {
+    --corte: 0px;
   }
   @media (min-width: 1024px) {
     .cromo {
@@ -137,7 +141,7 @@ const estilo = `--cor: ${cor}; --w: ${largura}px;${larguraPc ? ` --w-pc: ${largu
     color: var(--cor);
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: calc(var(--num) * 0.51);
+    font-size: max(8px, calc(var(--num) * 0.51));
     line-height: 1;
   }
 

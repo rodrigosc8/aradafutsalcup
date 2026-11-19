@@ -1,0 +1,132 @@
+---
+// Secção "Jogos": separadores com os dias (botões com aria-pressed) e os jogos do dia escolhido
+// em duas colunas. Sem JavaScript, fica visível o dia predefinido.
+import CabecalhoSeccao from './CabecalhoSeccao.astro';
+import LinhaJogo from './LinhaJogo.astro';
+import type { Jogo } from '../data/exemplo';
+import { equipaDoLado, nomeDoLado } from '../data/exemplo';
+import { torneio } from '../data/torneio';
+import { horaLisboa } from '../scripts/datas';
+
+interface Props {
+  jogos: Jogo[];
+  /** Dia mostrado por omissão (AAAA-MM-DD); o script troca para hoje durante o torneio. */
+  diaPredefinido: string;
+  /** Jogo realçado (por exemplo, o jogo em destaque). */
+  idDestaque?: string;
+  frase?: string;
+}
+const { jogos, diaPredefinido, idDestaque, frase = '8 jogos por dia na fase de grupos. Escolhe o dia.' } = Astro.props;
+
+const SEMANA = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const dias = torneio.dias.map((iso, i) => ({
+  iso,
+  semana: SEMANA[new Date(`${iso}T12:00:00Z`).getUTCDay()],
+  numero: Number(iso.slice(8, 10)),
+  fase: torneio.fases[i],
+  jogos: jogos.filter((j) => j.inicio.startsWith(iso)),
+}));
+const emblema = (lado: Jogo['casa']) => {
+  const e = equipaDoLado(lado);
+  return e ? { sigla: e.sigla, cor: e.cor } : undefined;
+};
+---
+
+<section class="jogos-dia" aria-labelledby="titulo-jogos" data-jogos-dia>
+  <CabecalhoSeccao titulo="Jogos" frase={frase} id="titulo-jogos">
+    <div slot="acao" class="separadores" role="group" aria-label="Dia">
+      {
+        dias.map((d) => (
+          <button
+            type="button"
+            class="separador"
+            aria-pressed={d.iso === diaPredefinido ? 'true' : 'false'}
+            aria-controls={`jogos-${d.iso}`}
+            data-separador={d.iso}
+          >
+            {d.semana} <span class="numero">{d.numero}</span>
+            <span class="visually-hidden">de dezembro, {d.fase}</span>
+          </button>
+        ))
+      }
+    </div>
+  </CabecalhoSeccao>
+
+  {
+    dias.map((d) => (
+      <ul class="lista" id={`jogos-${d.iso}`} data-painel={d.iso} hidden={d.iso !== diaPredefinido}>
+        {d.jogos.map((j) => (
+          <li>
+            <LinhaJogo
+              hora={horaLisboa(j.inicio)}
+              casa={nomeDoLado(j.casa)}
+              fora={nomeDoLado(j.fora)}
+              emblemaCasa={emblema(j.casa)}
+              emblemaFora={emblema(j.fora)}
+              href={`/jogos#${j.id}`}
+              destaque={j.id === idDestaque}
+            />
+          </li>
+        ))}
+      </ul>
+    ))
+  }
+</section>
+
+<script>
+  import { diaLisboa } from '../scripts/datas';
+
+  document.querySelectorAll<HTMLElement>('[data-jogos-dia]').forEach((raiz) => {
+    const botoes = [...raiz.querySelectorAll<HTMLButtonElement>('[data-separador]')];
+    const paineis = [...raiz.querySelectorAll<HTMLElement>('[data-painel]')];
+    const escolher = (dia: string) => {
+      botoes.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.separador === dia)));
+      paineis.forEach((p) => (p.hidden = p.dataset.painel !== dia));
+    };
+    botoes.forEach((b) => b.addEventListener('click', () => escolher(b.dataset.separador!)));
+    // Durante o torneio, abre no dia de hoje.
+    const hoje = diaLisboa(new Date());
+    if (botoes.some((b) => b.dataset.separador === hoje)) escolher(hoje);
+  });
+</script>
+
+<style>
+  .separadores {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .separador {
+    min-height: 52px;
+    min-width: 86px;
+    padding: 0 16px;
+    border: 1.5px solid var(--linha);
+    border-radius: var(--raio-botao);
+    background: var(--branco);
+    color: var(--texto);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .separador:hover {
+    border-color: var(--bordo);
+  }
+  .separador[aria-pressed='true'] {
+    border-color: var(--bordo);
+    background: var(--bordo);
+    color: var(--branco);
+  }
+  .numero {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+  }
+  .lista {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+    margin: 22px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+</style>
