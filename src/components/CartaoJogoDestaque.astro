@@ -10,7 +10,7 @@ import Cromo from './Cromo.astro';
 import EmblemaEquipa from './EmblemaEquipa.astro';
 import type { Equipa, Jogador, Jogo } from '../data/fonte';
 import { torneio } from '../data/torneio';
-import { dataLonga, horaLisboa, partesContagem } from '../scripts/datas';
+import { dataLonga, dataMedia, horaLisboa, mosaicosContagem, partesContagem } from '../scripts/datas';
 import { agora as agoraSite } from '../scripts/agora';
 
 interface Props {
@@ -40,7 +40,9 @@ const nota = porSortear ? 'As equipas e os horários são conhecidos depois do s
 // Texto do build; o script atualiza no browser.
 const agora = agoraSite();
 const diaLongo = dataLonga(inicio, agora);
+const diaMedio = dataMedia(inicio, agora);
 const partes = partesContagem(inicio, agora);
+const mosaicos = mosaicosContagem(partes);
 
 const ics = porSortear
   ? {
@@ -71,12 +73,10 @@ const lados: LadoCartaz[] = porSortear
       { nome: casa.nome, sigla: casa.sigla, cor: casa.cor, jogadores: jogadoresCasa.slice(0, 2) },
       { nome: fora.nome, sigla: fora.sigla, cor: fora.cor, jogadores: jogadoresFora.slice(0, 2) },
     ];
-// Telemóvel: com nomes curtos, a hora fica entre as equipas; com nomes longos, passa para cima.
-const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || hora.length > 5;
 ---
 
 <section
-  class:list={['destaque', { 'por-sortear': porSortear, 'nomes-longos': nomesLongos }]}
+  class:list={['destaque', { 'por-sortear': porSortear }]}
   aria-label={`${rotulo}: ${porSortear ? etiqueta : titulo}`}
 >
   <div class="cartaz">
@@ -84,7 +84,8 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
       <div class="cartaz-topo">
         <p class="cartaz-rotulo"><span data-rotulo-destaque>{rotulo}</span> · {etiqueta}</p>
         <p class="cartaz-data">
-          <span data-quando="dia-longo" data-inicio={inicio}>{diaLongo}</span> · {torneio.local}
+          <span class="data-pc"><span data-quando="dia-longo" data-inicio={inicio}>{diaLongo}</span> · {torneio.local}</span>
+          <span class="data-movel"><span data-quando="dia-medio" data-inicio={inicio}>{diaMedio}</span> · {torneio.localCurto}</span>
         </p>
       </div>
       <div class="cartaz-grelha">
@@ -120,20 +121,16 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
         <div class="cartaz-centro">
           <p class="cartaz-hora"><span class="visually-hidden">{porSortear ? 'Começa a ' : `${titulo}, às `}</span>{hora}</p>
           <div class="contagem-partes" data-quando="partes" data-inicio={inicio}>
-            <ul class="mosaicos" data-mosaicos hidden={partes.estado !== 'antes'} aria-label="Tempo até ao apito inicial">
+            <ul class="mosaicos" data-mosaicos hidden={mosaicos.length === 0} aria-label="Tempo até ao apito inicial">
               {
-                (
-                  [
-                    ['dias', 'dias'],
-                    ['horas', 'horas'],
-                    ['minutos', 'min'],
-                  ] as const
-                ).map(([k, legenda]) => (
-                  <li>
-                    <span class="mosaico-num" data-parte={k}>
-                      {partes.estado === 'antes' ? String(partes[k]).padStart(k === 'dias' ? 1 : 2, '0') : ''}
+                [0, 1, 2].map((i) => (
+                  <li data-mosaico hidden={!mosaicos[i]}>
+                    <span class="mosaico-num" data-valor>
+                      {mosaicos[i]?.valor ?? ''}
                     </span>
-                    <span class="mosaico-legenda">{legenda}</span>
+                    <span class="mosaico-legenda" data-rotulo>
+                      {mosaicos[i]?.rotulo ?? ''}
+                    </span>
                   </li>
                 ))
               }
@@ -159,7 +156,8 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
 
   ligarBotoesCalendario();
   atualizarQuando();
-  setInterval(() => atualizarQuando(), 30_000);
+  // A cada segundo: a menos de 1 dia a contagem mostra os segundos.
+  setInterval(() => atualizarQuando(), 1000);
 </script>
 
 <style>
@@ -267,7 +265,8 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
     color: var(--bordo-claro);
   }
   .leg-movel,
-  .cartaz-seguir {
+  .cartaz-seguir,
+  .data-movel {
     display: none;
   }
   .cartaz-centro {
@@ -297,7 +296,8 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
     padding: 0;
     list-style: none;
   }
-  .mosaicos[hidden] {
+  .mosaicos[hidden],
+  .mosaicos li[hidden] {
     display: none;
   }
   .mosaicos li {
@@ -335,107 +335,108 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
     border-radius: var(--raio-linha);
   }
 
-  /* Telemóvel e tablet: a mesma marcação numa coluna. A faixa começa no topo
-     (o cabeçalho da navegação fica por cima, sobre o bordô: ver NavFlutuante sobreDestaque). */
+  /* Telemóvel e tablet: a mesma marcação numa coluna, com ritmo vertical de 8 / 16 / 24px.
+     A faixa começa no topo (o cabeçalho da navegação fica por cima, sobre o bordô: NavFlutuante sobreDestaque). */
   @media (max-width: 1023.98px) {
     .cartaz {
       margin-top: 0;
-      padding: 14px 0 24px;
+      padding: 24px 0;
     }
     .cartaz-conteudo {
       padding-inline: 20px;
     }
+
+    /* Título e data, centrados; a data numa só linha (com reticências se não couber). */
     .cartaz-topo {
       flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-      padding-bottom: 12px;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 16px;
+      text-align: center;
     }
     .cartaz-rotulo {
       font-size: 18px;
       line-height: 1.1;
     }
     .cartaz-data {
+      max-width: 100%;
+      overflow: hidden;
       font-size: 13px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
-    /* Os blocos do computador desfazem-se e as peças arrumam-se numa grelha de 2 colunas. */
+    .data-pc {
+      display: none;
+    }
+    .data-movel {
+      display: inline;
+    }
+
+    /* 4 colunas: casa | hora (2 colunas do meio) | fora. Assim a hora fica ao centro exato e,
+       por baixo, cada equipa ocupa metade da largura (colunas 1-2 e 3-4). */
     .cartaz-grelha {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      container-type: inline-size;
+      grid-template-columns: minmax(0, 1fr) 76px 76px minmax(0, 1fr);
       grid-template-areas:
-        'equipas equipas'
-        'mosaicos mosaicos'
-        'seguir seguir'
-        'par-casa par-fora'
-        'leg-casa leg-fora'
-        'nota nota'
-        'acoes acoes';
+        'casa hora hora fora'
+        'mosaicos mosaicos mosaicos mosaicos'
+        'seguir seguir seguir seguir'
+        'par-casa par-casa par-fora par-fora'
+        'leg-casa leg-casa leg-fora leg-fora'
+        'nota nota nota nota'
+        'acoes acoes acoes acoes';
       align-items: center;
       gap: 0;
-      margin-top: 18px;
-    }
-    .nomes-longos .cartaz-grelha {
-      grid-template-areas:
-        'hora hora'
-        'casa fora'
-        'mosaicos mosaicos'
-        'seguir seguir'
-        'par-casa par-fora'
-        'leg-casa leg-fora'
-        'nota nota'
-        'acoes acoes';
+      margin-top: 24px;
     }
     .cartaz-lado,
     .cartaz-centro {
       display: contents;
     }
-    /* Nomes curtos: casa, hora e fora na mesma linha (a hora sobrepõe-se ao centro da linha). */
-    .esquerda .cartaz-equipa {
-      grid-area: equipas;
-      justify-self: start;
-    }
-    .direita .cartaz-equipa {
-      grid-area: equipas;
-      justify-self: end;
-    }
-    .cartaz-hora {
-      grid-area: equipas;
-      justify-self: center;
-      font-size: clamp(52px, 16vw, 64px);
-    }
-    .nomes-longos .esquerda .cartaz-equipa {
-      grid-area: casa;
-    }
-    .nomes-longos .direita .cartaz-equipa {
-      grid-area: fora;
-    }
-    .nomes-longos .cartaz-hora {
-      grid-area: hora;
-      margin-bottom: 14px;
-    }
+
+    /* Equipas: emblema centrado por cima do nome, centradas na sua coluna. */
     .cartaz-equipa,
     .direita .cartaz-equipa {
       flex-direction: column;
+      align-items: center;
+      justify-self: center;
       gap: 8px;
-      max-width: 110px;
+      min-width: 0;
+      max-width: 100%;
       text-align: center;
     }
-    .nomes-longos .cartaz-equipa {
-      max-width: none;
+    .esquerda .cartaz-equipa {
+      grid-area: casa;
+    }
+    .direita .cartaz-equipa {
+      grid-area: fora;
     }
     .cartaz-equipa :global(.emblema) {
       --tamanho: 52px !important;
     }
     .cartaz-nome {
-      font-size: 24px;
-      line-height: 0.95;
-      overflow-wrap: anywhere;
+      max-width: 100%;
+      font-size: 22px;
+      line-height: 1;
+      text-align: center;
+      overflow-wrap: break-word;
     }
     .por-sortear .cartaz-nome.vago {
       font-size: 18px;
     }
+    .cartaz-hora {
+      grid-area: hora;
+      justify-self: center;
+      font-size: clamp(48px, 14vw, 60px);
+      white-space: nowrap;
+    }
+
+    /* Contagem: legenda a 8px dos mosaicos; 24px até "Jogadores a seguir". */
     .contagem-partes {
       grid-area: mosaicos;
-      margin-top: 18px;
+      gap: 8px;
+      margin-top: 24px;
     }
     .mosaicos li {
       min-width: 72px;
@@ -444,22 +445,28 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
     .mosaico-num {
       font-size: 34px;
     }
-    .cartaz-seguir {
+    /* ".cartaz p { margin: 0 }" tem prioridade: daí o ".cartaz" à frente nestes parágrafos. */
+    .cartaz .cartaz-seguir {
       display: block;
       grid-area: seguir;
-      margin-top: 18px;
-      padding-top: 14px;
+      margin-top: 24px;
+      padding-top: 16px;
       border-top: 1px solid rgb(255 255 255 / 0.2);
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 1.2px;
+      text-align: center;
       text-transform: uppercase;
       color: var(--dourado-claro);
     }
+
+    /* Jogadores a seguir: cada equipa ocupa metade, com a linha vertical ao centro e 8px de cada lado;
+       os 2 cromos enchem a sua metade (2 colunas iguais, gap de 8px). */
     .par {
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
-      padding-top: 10px;
+      padding-top: 8px;
     }
     .esquerda .par {
       grid-area: par-casa;
@@ -470,6 +477,14 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
       padding-left: 8px;
       border-left: 1px solid rgb(255 255 255 / 0.2);
     }
+    /* Largura do cromo = (largura da grelha / 2 − 8px da linha − 8px do gap) / 2. */
+    .par :global(.cromo) {
+      --wa: calc(25cqw - 8px);
+    }
+    /* Nomes compridos ("GONÇALO") cabem: letra um pouco menor só nestes cromos. */
+    .par :global(.nome) {
+      font-size: clamp(12px, calc((25cqw - 8px) * 0.155), 15px);
+    }
     .cartaz-legenda {
       padding-top: 8px;
       font-size: 12px;
@@ -477,9 +492,11 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
     }
     .esquerda .cartaz-legenda {
       grid-area: leg-casa;
+      padding-right: 8px;
     }
     .direita .cartaz-legenda {
       grid-area: leg-fora;
+      padding-left: 8px;
       border-left: 1px solid rgb(255 255 255 / 0.2);
     }
     .leg-pc {
@@ -488,15 +505,18 @@ const nomesLongos = lados.some((l) => (l.nome ?? 'Por sortear').length > 9) || h
     .leg-movel {
       display: inline;
     }
-    .cartaz-nota {
+
+    /* Nota e botões: 24px antes; botões empilhados com 8px entre eles. */
+    .cartaz .cartaz-nota {
       grid-area: nota;
       max-width: none;
-      margin-top: 16px;
+      margin-top: 24px;
       font-size: 14px;
     }
     .cartaz-acoes {
       grid-area: acoes;
-      margin-top: 18px;
+      gap: 8px;
+      margin-top: 24px;
     }
     .cartaz-acoes :global(.botao) {
       width: 100%;
