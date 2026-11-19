@@ -26,14 +26,17 @@ export interface Jogador {
   foto?: string;
 }
 
+/** Id de uma equipa, ou um lugar ainda por decidir na fase final (ex.: "1.º Grupo A"). */
+export type Lado = string | { texto: string };
+
 export interface Jogo {
   id: string;
   /** ISO 8601 com fuso (Lisboa em dezembro = UTC+00:00). */
   inicio: string;
-  casa: string; // id da equipa
-  fora: string; // id da equipa
+  casa: Lado;
+  fora: Lado;
   grupo?: Equipa['grupo'];
-  fase: 'grupos' | 'quartos' | 'meias' | 'final';
+  fase: 'grupos' | 'quartos' | 'meias' | 'terceiro' | 'final';
   resultado?: [number, number];
 }
 
@@ -65,7 +68,14 @@ const nomes = [
 ];
 const numeros = [7, 10, 9, 4, 11, 8, 5, 3];
 const posicoes = ['Ala', 'Pivô', 'Fixo', 'Guarda-redes'];
-const golos = [3, 1, 0, 1, 2, 0, 1, 0];
+// Golos de exemplo (os restantes jogadores têm 0).
+const golos: Record<string, number> = {
+  'javalis-1': 3,
+  'bairro-fc-1': 2,
+  'leoes-1': 2,
+  'javalis-2': 1,
+  'ponte-1': 1,
+};
 
 export const jogadores: Jogador[] = equipas.flatMap((equipa, i) =>
   [0, 1].map((j) => ({
@@ -74,32 +84,75 @@ export const jogadores: Jogador[] = equipas.flatMap((equipa, i) =>
     numero: numeros[(i * 2 + j) % numeros.length],
     equipa: equipa.id,
     posicao: posicoes[(i + j) % posicoes.length],
-    golos: golos[(i * 2 + j) % golos.length],
+    golos: golos[`${equipa.id}-${j + 1}`] ?? 0,
   })),
 );
 
-export const jogos: Jogo[] = [
-  // 21 de dezembro (Grupos A e B)
-  { id: 'j01', inicio: '2026-12-21T19:30:00+00:00', casa: 'leoes', fora: 'ponte', grupo: 'A', fase: 'grupos' },
-  { id: 'j02', inicio: '2026-12-21T20:10:00+00:00', casa: 'javalis', fora: 'bairro-fc', grupo: 'A', fase: 'grupos' },
-  { id: 'j03', inicio: '2026-12-21T20:50:00+00:00', casa: 'unidos', fora: 'vila', grupo: 'B', fase: 'grupos' },
-  { id: 'j04', inicio: '2026-12-21T21:30:00+00:00', casa: 'mar', fora: 'serra', grupo: 'B', fase: 'grupos' },
-  // 22 de dezembro (Grupos C e D)
-  { id: 'j05', inicio: '2026-12-22T19:30:00+00:00', casa: 'moinho', fora: 'rio', grupo: 'C', fase: 'grupos' },
-  { id: 'j06', inicio: '2026-12-22T20:10:00+00:00', casa: 'castelo', fora: 'lagoa', grupo: 'C', fase: 'grupos' },
-  { id: 'j07', inicio: '2026-12-22T20:50:00+00:00', casa: 'pinhal', fora: 'praia', grupo: 'D', fase: 'grupos' },
-  { id: 'j08', inicio: '2026-12-22T21:30:00+00:00', casa: 'quinta', fora: 'areal', grupo: 'D', fase: 'grupos' },
+// Calendário de exemplo: 32 jogos.
+// Fase de grupos: 4 grupos de 4, todos contra todos, 8 jogos por dia (21, 22 e 23).
+// Fase final: quartos a 26; meias, 3.º lugar e final a 27.
+const HORAS_GRUPOS = ['17:30', '18:10', '18:50', '19:30', '20:10', '20:50', '21:30', '22:10'];
+// Jornadas de um grupo [a, b, c, d]: 1.ª a×b e c×d; 2.ª a×c e b×d; 3.ª a×d e b×c.
+const JORNADAS: [number, number][][] = [
+  [[0, 1], [2, 3]],
+  [[0, 2], [1, 3]],
+  [[0, 3], [1, 2]],
+];
+// Ordem dos jogos no dia (grupo e jogo da jornada), pelas horas acima.
+const ORDEM: [Equipa['grupo'], number][] = [
+  ['C', 0], ['D', 0], ['C', 1], ['A', 1], ['A', 0], ['B', 0], ['B', 1], ['D', 1],
+];
+const DIAS_GRUPOS = ['2026-12-21', '2026-12-22', '2026-12-23'];
+
+const iso = (dia: string, hora: string) => `${dia}T${hora}:00+00:00`;
+const doGrupo = (g: Equipa['grupo']) => equipas.filter((e) => e.grupo === g).map((e) => e.id);
+
+const jogosGrupos: Jogo[] = DIAS_GRUPOS.flatMap((dia, d) =>
+  ORDEM.map(([g, n], slot) => {
+    const [x, y] = JORNADAS[d][n];
+    const ids = doGrupo(g);
+    return {
+      id: `d${d + 1}-${g.toLowerCase()}${n + 1}`,
+      inicio: iso(dia, HORAS_GRUPOS[slot]),
+      casa: ids[x],
+      fora: ids[y],
+      grupo: g,
+      fase: 'grupos' as const,
+    };
+  }),
+);
+
+const lugar = (texto: string) => ({ texto });
+const jogosFinais: Jogo[] = [
+  { id: 'q1', inicio: iso('2026-12-26', '18:50'), casa: lugar('1.º Grupo A'), fora: lugar('2.º Grupo B'), fase: 'quartos' },
+  { id: 'q2', inicio: iso('2026-12-26', '19:50'), casa: lugar('1.º Grupo C'), fora: lugar('2.º Grupo D'), fase: 'quartos' },
+  { id: 'q3', inicio: iso('2026-12-26', '20:50'), casa: lugar('1.º Grupo B'), fora: lugar('2.º Grupo A'), fase: 'quartos' },
+  { id: 'q4', inicio: iso('2026-12-26', '21:50'), casa: lugar('1.º Grupo D'), fora: lugar('2.º Grupo C'), fase: 'quartos' },
+  { id: 'm1', inicio: iso('2026-12-27', '18:00'), casa: lugar('Vencedor Q1'), fora: lugar('Vencedor Q2'), fase: 'meias' },
+  { id: 'm2', inicio: iso('2026-12-27', '19:10'), casa: lugar('Vencedor Q3'), fora: lugar('Vencedor Q4'), fase: 'meias' },
+  { id: 't1', inicio: iso('2026-12-27', '20:20'), casa: lugar('Vencido M1'), fora: lugar('Vencido M2'), fase: 'terceiro' },
+  { id: 'f1', inicio: iso('2026-12-27', '21:30'), casa: lugar('Vencedor M1'), fora: lugar('Vencedor M2'), fase: 'final' },
 ];
 
-/** Jogo mostrado no Início quando o visitante não segue nenhuma equipa. */
-export const idJogoEmDestaque = 'j02';
+export const jogos: Jogo[] = [...jogosGrupos, ...jogosFinais];
 
-/** Classificação de exemplo do Grupo A. */
+/** Jogo mostrado no Início quando o visitante não segue nenhuma equipa (Javalis × Bairro FC, 21/12 20:10). */
+export const idJogoEmDestaque = 'd1-a1';
+
+/** Classificação de exemplo do Grupo A (Início no telemóvel). */
 export const classificacaoGrupoA = [
   { equipa: 'javalis', dg: 2, pontos: 4 },
   { equipa: 'bairro-fc', dg: 1, pontos: 3 },
   { equipa: 'ponte', dg: -1, pontos: 1 },
   { equipa: 'leoes', dg: -2, pontos: 0 },
+];
+
+/** Classificações de exemplo dos 4 grupos (Início no computador). */
+export const classificacoes: { grupo: Equipa['grupo']; linhas: { equipa: string; jogos: number; pontos: number }[] }[] = [
+  { grupo: 'A', linhas: [{ equipa: 'javalis', jogos: 2, pontos: 4 }, { equipa: 'bairro-fc', jogos: 2, pontos: 3 }, { equipa: 'ponte', jogos: 2, pontos: 1 }, { equipa: 'leoes', jogos: 2, pontos: 0 }] },
+  { grupo: 'B', linhas: [{ equipa: 'unidos', jogos: 2, pontos: 6 }, { equipa: 'mar', jogos: 2, pontos: 3 }, { equipa: 'vila', jogos: 2, pontos: 1 }, { equipa: 'serra', jogos: 2, pontos: 1 }] },
+  { grupo: 'C', linhas: [{ equipa: 'castelo', jogos: 2, pontos: 4 }, { equipa: 'moinho', jogos: 2, pontos: 4 }, { equipa: 'rio', jogos: 2, pontos: 3 }, { equipa: 'lagoa', jogos: 2, pontos: 0 }] },
+  { grupo: 'D', linhas: [{ equipa: 'praia', jogos: 2, pontos: 6 }, { equipa: 'quinta', jogos: 2, pontos: 2 }, { equipa: 'pinhal', jogos: 2, pontos: 2 }, { equipa: 'areal', jogos: 2, pontos: 1 }] },
 ];
 
 /** Resultados de exemplo dos Javalis (mosaicos de resultado). */
@@ -127,4 +180,21 @@ export function jogador(id: string): Jogador {
 
 export function jogadoresDe(idEquipa: string): Jogador[] {
   return jogadores.filter((j) => j.equipa === idEquipa);
+}
+
+/** A equipa de um lado do jogo, ou undefined se o lugar ainda está por decidir. */
+export function equipaDoLado(lado: Lado): Equipa | undefined {
+  return typeof lado === 'string' ? equipa(lado) : undefined;
+}
+
+export function nomeDoLado(lado: Lado): string {
+  return typeof lado === 'string' ? equipa(lado).nome : lado.texto;
+}
+
+/** Os 5 melhores marcadores (por golos e depois por nome). */
+export function melhoresMarcadores(n = 5): Jogador[] {
+  return jogadores
+    .filter((j) => j.golos > 0)
+    .sort((a, b) => b.golos - a.golos || a.nome.localeCompare(b.nome, 'pt'))
+    .slice(0, n);
 }

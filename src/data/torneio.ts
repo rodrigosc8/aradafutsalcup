@@ -30,6 +30,43 @@ export const torneio = {
   // Duração usada no evento de calendário (.ics). Estimativa: confirmar com a organização.
   duracaoJogoMinutos: 50,
 
+  // 1.ª edição (Natal de 2025): números reais, da carta da Junta.
+  primeiraEdicao: {
+    rotulo: 'Natal de 2025',
+    texto:
+      'Três dias de pavilhão cheio, centenas de visitantes e uma freguesia inteira à volta do futsal. Este ano há mais equipas e mais dias.',
+    numeros: [
+      { valor: '12', rotulo: 'equipas' },
+      { valor: '120', rotulo: 'atletas' },
+      { valor: '3', rotulo: 'dias de pavilhão cheio' },
+    ],
+    // Preencher com o link do vídeo de 2025 quando estiver publicado.
+    video: '',
+  },
+
+  // Patamares de patrocínio da 2.ª edição.
+  patamares: [
+    { nome: 'Anual', valor: 500 },
+    { nome: 'Destaque', valor: 250 },
+    { nome: 'Cartaz', valor: 100 },
+    { nome: 'Parceiro', valor: 50 },
+    { nome: 'Apoiante', valor: 25 },
+  ],
+
+  // Patrocinadores confirmados (além do principal), pela ordem da barra "Quem apoia".
+  // Cada um ocupa um dos `espacosPatrocinio`; os que sobram ficam "O seu logótipo aqui".
+  // Ex.: { nome: 'Café Central', logo: '/patrocinadores/cafe-central.svg' }
+  patrocinadores: [] as { nome: string; logo: string }[],
+  espacosPatrocinio: 5,
+
+  // Destinos ainda por criar/confirmar.
+  links: {
+    patamares: '/patrocinar',
+    regulamento: '/regulamento',
+    contactos: '/contactos',
+    comoChegar: 'https://www.google.com/maps/search/?api=1&query=Pavilh%C3%A3o+Gimnodesportivo+de+Arada',
+  },
+
   // Preencher quando houver: link do formulário de inscrição e contacto da Junta.
   linkInscricao: '',
   contactoEmail: '',

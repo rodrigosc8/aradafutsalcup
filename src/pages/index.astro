@@ -26,6 +26,8 @@ import { dataCurta, horaLisboa } from '../scripts/datas';
 const destaque = jogos.find((j) => j.id === idJogoEmDestaque)!;
 const diaDestaque = destaque.inicio.slice(0, 10);
 const jogosDoDia = jogos.filter((j) => j.inicio.startsWith(diaDestaque));
+// Um cartão por jogo do 1.º dia: todas as equipas jogam nesse dia.
+const jogosCartao = jogos.filter((j) => j.inicio.startsWith(torneio.dias[0]));
 
 const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
 const cincoDias = torneio.dias.map((d, i) => ({
@@ -49,7 +51,7 @@ const cincoDias = torneio.dias.map((d, i) => ({
     -->
     <div class="faixa-destaque">
       {
-        jogos.map((j) => (
+        jogosCartao.map((j) => (
           <div
             class="cartao"
             data-cartao-jogo={j.id}
